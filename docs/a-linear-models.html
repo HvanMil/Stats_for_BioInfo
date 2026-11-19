@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Appendix A — Linear models: a worked reference – Statistics for Machine Learning</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./references.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-143c0eed703e8b865dd62e6df5846b82.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating slimcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./a-linear-models.html">Appendices</a></li><li class="breadcrumb-item"><a href="./a-linear-models.html"><span class="chapter-title">Linear models: a worked reference</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Statistics for Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 1. Why statistics?</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-why-statistics.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Why statistics?</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 2. Design and data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-design.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Experimental Design</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-confounding.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Correlation, Confounding, and Causation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./p02-data-quality.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Practical: data quality</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 3. Linear algebra</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-linear-algebra.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear algebra refresher</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 4. Directions</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-pca.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Principal component analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 5. Groups</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-clustering.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Cluster analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 6. Likelihood</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-likelihood-aic.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Likelihood, information and AIC</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 7. Resampling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-resampling.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Resampling: The Bootstrap and Cross-Validation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 8. Classifiers</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-classifiers-knn-svm.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Evaluating classifiers, KNN and SVM</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 9. Regularisation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-regularisation.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Regularisation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 10. Trees</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-trees-forests.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Trees, bagging and random forests</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 11. Boosting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-boosting-comparison.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Boosting and an honest comparison</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./a-linear-models.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Linear models: a worked reference</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#where-this-chapter-fits-sec-fit" id="toc-where-this-chapter-fits-sec-fit" class="nav-link active" data-scroll-target="#where-this-chapter-fits-sec-fit">Where this chapter fits {#sec-fit}</a></li>
+  <li><a href="#sec-types" id="toc-sec-types" class="nav-link" data-scroll-target="#sec-types">Data types and the model formula</a></li>
+  <li><a href="#sec-gallery" id="toc-sec-gallery" class="nav-link" data-scroll-target="#sec-gallery">Reading model shapes: a visual gallery</a>
+  <ul class="collapse">
+  <li><a href="#sec-gallery-ancova" id="toc-sec-gallery-ancova" class="nav-link" data-scroll-target="#sec-gallery-ancova">ANCOVA shapes</a></li>
+  <li><a href="#sec-gallery-factorial" id="toc-sec-gallery-factorial" class="nav-link" data-scroll-target="#sec-gallery-factorial">Factorial ANOVA shapes</a></li>
+  </ul></li>
+  <li><a href="#sec-ancova" id="toc-sec-ancova" class="nav-link" data-scroll-target="#sec-ancova">Case 1 — ANCOVA: a gradient and a grouping</a>
+  <ul class="collapse">
+  <li><a href="#sec-anc-data" id="toc-sec-anc-data" class="nav-link" data-scroll-target="#sec-anc-data">The question and the data</a></li>
+  <li><a href="#sec-anc-summary" id="toc-sec-anc-summary" class="nav-link" data-scroll-target="#sec-anc-summary">Numeric and visual summary</a></li>
+  <li><a href="#sec-anc-fit" id="toc-sec-anc-fit" class="nav-link" data-scroll-target="#sec-anc-fit">Fitting the maximal model</a></li>
+  <li><a href="#sec-anc-diag" id="toc-sec-anc-diag" class="nav-link" data-scroll-target="#sec-anc-diag">Model diagnostics</a></li>
+  <li><a href="#sec-anc-select" id="toc-sec-anc-select" class="nav-link" data-scroll-target="#sec-anc-select">Model selection</a></li>
+  <li><a href="#sec-anc-table" id="toc-sec-anc-table" class="nav-link" data-scroll-target="#sec-anc-table">Reading the statistics table</a></li>
+  <li><a href="#sec-anc-emm" id="toc-sec-anc-emm" class="nav-link" data-scroll-target="#sec-anc-emm">Post-hoc analysis with <code>emmeans</code></a></li>
+  <li><a href="#sec-anc-interp" id="toc-sec-anc-interp" class="nav-link" data-scroll-target="#sec-anc-interp">Interpretation and final plot</a></li>
+  </ul></li>
+  <li><a href="#sec-factorial" id="toc-sec-factorial" class="nav-link" data-scroll-target="#sec-factorial">Case 2 — Factorial ANOVA: two factors and an interaction</a>
+  <ul class="collapse">
+  <li><a href="#sec-fac-data" id="toc-sec-fac-data" class="nav-link" data-scroll-target="#sec-fac-data">The question and the data</a></li>
+  <li><a href="#sec-fac-plot" id="toc-sec-fac-plot" class="nav-link" data-scroll-target="#sec-fac-plot">Visualising the design</a></li>
+  <li><a href="#sec-fac-diag" id="toc-sec-fac-diag" class="nav-link" data-scroll-target="#sec-fac-diag">Fit and diagnostics</a></li>
+  <li><a href="#integration-the-diagnostic-verdict-1" id="toc-integration-the-diagnostic-verdict-1" class="nav-link" data-scroll-target="#integration-the-diagnostic-verdict-1">Integration: the diagnostic verdict</a></li>
+  <li><a href="#sec-fac-anova" id="toc-sec-fac-anova" class="nav-link" data-scroll-target="#sec-fac-anova">The ANOVA table and model selection</a></li>
+  <li><a href="#sec-fac-emm" id="toc-sec-fac-emm" class="nav-link" data-scroll-target="#sec-fac-emm">Post-hoc analysis with <code>emmeans</code>: simple effects and contrasts</a></li>
+  <li><a href="#sec-fac-interp" id="toc-sec-fac-interp" class="nav-link" data-scroll-target="#sec-fac-interp">Interpretation</a></li>
+  </ul></li>
+  <li><a href="#sec-bridge" id="toc-sec-bridge" class="nav-link" data-scroll-target="#sec-bridge">Summary and bridge</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./a-linear-models.html">Appendices</a></li><li class="breadcrumb-item"><a href="./a-linear-models.html"><span class="chapter-title">Linear models: a worked reference</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Appendix A — Linear models: a worked reference</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+
+<div class="no-row-height column-margin column-container"><div class="margin-legend">
+<p><strong>Margin legend</strong></p>
+<p><strong>DEF</strong> — definition <strong>KEY</strong> — key idea to remember <strong>↪</strong> — bridge to another lecture <strong>⚠</strong> — common pitfall</p>
+</div></div><section id="where-this-chapter-fits-sec-fit" class="level2 unnumbered page-columns page-full">
+<h2 class="unnumbered anchored" data-anchor-id="where-this-chapter-fits-sec-fit">Where this chapter fits {#sec-fit}</h2>
+<p>This appendix is a reference, not a lecture. The recurring idea of this course is that <em>statistics arises when a simple model approximates a complex data-generating process</em>. The response is split into a <strong>deterministic component</strong> and a <strong>residual</strong> drawn from an assumed distribution, and the <strong>degrees of freedom</strong> control how sharply the data can resolve that split. Day 1 introduced these ideas; this appendix works through the full <code>lm</code> workflow for readers who want to see it in detail.</p>
+<p>The <strong>linear model</strong> (<code>lm</code>) is the reference realisation of that idea. It makes one especially convenient assumption about the residual: it is <strong>Gaussian</strong>, with a <strong>single constant variance</strong> <span class="math inline">\(\sigma^2\)</span> that is the same for every observation. Regression, ANOVA, ANCOVA and factorial ANOVA are all the same linear model with different predictors; the workflow to fit and interpret them is identical.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — Regression, ANOVA, ANCOVA and factorial ANOVA are <strong>not four different tools</strong>. They are one linear model with different mixes of continuous and categorical predictors. The workflow, learned once, transfers.</p>
+</div></div><p>This chapter walks through that workflow twice, in full, so that it becomes a reusable template:</p>
+<ol type="1">
+<li>an <strong>ANCOVA</strong> — one continuous predictor (a nutrient gradient) and one categorical predictor (light regime), and</li>
+<li>a <strong>factorial ANOVA</strong> — two categorical predictors (nutrient level and grazing pressure) with an <strong>interaction</strong>.</li>
+</ol>
+<p>For each, the same seven steps are followed: inspect and visualise the data, fit the maximal model, run the diagnostics, select among nested models, read the statistics tables, perform the post-hoc analysis with <code>emmeans</code>, and interpret. The emphasis is on <strong>reading the output carefully</strong> — what each diagnostic plot and each table column actually reports.</p>
+</section>
+<section id="sec-types" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="sec-types">Data types and the model formula</h2>
+<p>Which linear model is being run is decided entirely by the <em>types</em> of the predictors:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Predictors</th>
+<th>Common name</th>
+<th>R formula</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>one continuous</td>
+<td>simple regression</td>
+<td><code>y ~ x</code></td>
+</tr>
+<tr class="even">
+<td>several continuous</td>
+<td>multiple regression</td>
+<td><code>y ~ x1 + x2</code></td>
+</tr>
+<tr class="odd">
+<td>one categorical</td>
+<td>one-way ANOVA</td>
+<td><code>y ~ A</code></td>
+</tr>
+<tr class="even">
+<td>two+ categorical</td>
+<td>factorial ANOVA</td>
+<td><code>y ~ A * B</code></td>
+</tr>
+<tr class="odd">
+<td>continuous + categorical</td>
+<td>ANCOVA</td>
+<td><code>y ~ x + A</code></td>
+</tr>
+</tbody>
+</table>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — In an R formula, <code>A * B</code> expands to <code>A + B + A:B</code>: the two <strong>main effects</strong> plus their <strong>interaction</strong> <code>A:B</code>. Writing <code>A + B</code> fits an <em>additive</em> model that constrains the interaction to zero.</p>
+</div></div><p>The response is always continuous here. The residual assumption — Gaussian, constant variance, independent, no outliers — is what makes it a <em>linear</em> model, and it is the first thing the diagnostics check.</p>
+</section>
+<section id="sec-gallery" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="sec-gallery">Reading model shapes: a visual gallery</h2>
+<p>Before fitting anything, it is useful to know what the <em>possible answers</em> look like. The plots in this section carry <strong>no data</strong>; they are drawn directly from chosen coefficients, purely to train the eye. When a real fitted model is later examined, its picture is matched against these canonical shapes to read off which terms matter.</p>
+<section id="sec-gallery-ancova" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="sec-gallery-ancova">ANCOVA shapes</h3>
+<p>An ANCOVA fits a line for each level of the factor. Only two things can differ between those lines: their <strong>height</strong> (the factor or intercept effect) and their <strong>slope</strong> (the factor × covariate interaction). That gives four canonical outcomes.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="at">length.out =</span> <span class="dv">50</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>anc_line <span class="ot">&lt;-</span> <span class="cf">function</span>(int_s, slope_s, int_off, slope_off, panel) {</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rbind</span>(</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(x, <span class="at">y =</span> int_s <span class="sc">+</span> slope_s <span class="sc">*</span> x,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">group =</span> <span class="st">"shade"</span>, <span class="at">panel =</span> panel),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(x, <span class="at">y =</span> (int_s <span class="sc">+</span> int_off) <span class="sc">+</span> (slope_s <span class="sc">+</span> slope_off) <span class="sc">*</span> x,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>               <span class="at">group =</span> <span class="st">"sun"</span>,   <span class="at">panel =</span> panel)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>anc_gallery <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anc_line</span>(<span class="dv">2</span>, <span class="fl">0.30</span>, <span class="fl">1.5</span>, <span class="fl">0.35</span>, <span class="st">"Interaction: slopes differ"</span>),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anc_line</span>(<span class="dv">2</span>, <span class="fl">0.30</span>, <span class="fl">1.5</span>, <span class="fl">0.00</span>, <span class="st">"Main effects only: parallel, offset"</span>),</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anc_line</span>(<span class="dv">2</span>, <span class="fl">0.30</span>, <span class="fl">0.0</span>, <span class="fl">0.00</span>, <span class="st">"No factor effect: lines coincide"</span>),</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anc_line</span>(<span class="dv">2</span>, <span class="fl">0.00</span>, <span class="fl">1.5</span>, <span class="fl">0.00</span>, <span class="st">"No covariate effect: flat, offset"</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>anc_gallery<span class="sc">$</span>panel <span class="ot">&lt;-</span> <span class="fu">factor</span>(anc_gallery<span class="sc">$</span>panel,</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>                            <span class="at">levels =</span> <span class="fu">unique</span>(anc_gallery<span class="sc">$</span>panel))</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(anc_gallery, <span class="fu">aes</span>(x, y, <span class="at">colour =</span> group)) <span class="sc">+</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">1.1</span>) <span class="sc">+</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> panel) <span class="sc">+</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Covariate (e.g. nutrient)"</span>, <span class="at">y =</span> <span class="st">"Response"</span>, <span class="at">colour =</span> <span class="st">"Factor"</span>) <span class="sc">+</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="a-linear-models_files/figure-html/gallery-ancova-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Four canonical ANCOVA outcomes, drawn from fixed coefficients (no data). Top-left: slopes differ (interaction). Top-right: parallel lines offset by the factor (main effects, no interaction). Bottom-left: lines coincide (no factor effect). Bottom-right: flat lines offset by the factor (no covariate effect).</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The four panels exhaust the possibilities for two lines. In the top-left panel the lines diverge: the covariate effect depends on the group, and the interaction term is required. In the top-right panel the lines are parallel but offset: both main effects are present, the interaction is absent. In the bottom-left panel the lines coincide, so the factor has no effect; in the bottom-right panel the lines are flat, so the covariate has none.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — In an ANCOVA, two questions are posed to the picture in order. <strong>Different slopes?</strong> → retain the interaction; the covariate effect <em>depends on</em> the group. <strong>Same slope but different height?</strong> → drop the interaction, retain both main effects. <strong>Same line?</strong> → the factor has no effect. <strong>Flat?</strong> → the covariate has no effect.</p>
+</div><div class="">
+<p><strong>⚠</strong> When the interaction is present (top-left), the covariate <strong>cannot</strong> be summarised by a single slope, nor the factor by a single gap — each depends on the other. Only the parallel case (top-right) admits a “one slope, one offset” description.</p>
+</div></div>
+</section>
+<section id="sec-gallery-factorial" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="sec-gallery-factorial">Factorial ANOVA shapes</h3>
+<p>A factorial design has no covariate — only cell means — so the natural picture is the <strong>interaction plot</strong>: cell means joined across one factor, one line per level of the other. Parallel lines mean the factors act additively; non-parallel lines mean they interact.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fac_cells <span class="ot">&lt;-</span> <span class="cf">function</span>(cells, panel) {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">FactorB =</span> <span class="fu">c</span>(<span class="st">"none"</span>, <span class="st">"low"</span>, <span class="st">"high"</span>),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                   <span class="at">FactorA =</span> <span class="fu">c</span>(<span class="st">"A: low"</span>, <span class="st">"A: high"</span>))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  g<span class="sc">$</span>FactorB <span class="ot">&lt;-</span> <span class="fu">factor</span>(g<span class="sc">$</span>FactorB, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"none"</span>, <span class="st">"low"</span>, <span class="st">"high"</span>))</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  g<span class="sc">$</span>mean    <span class="ot">&lt;-</span> cells</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  g<span class="sc">$</span>panel   <span class="ot">&lt;-</span> panel</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  g</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>fac_gallery <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fac_cells</span>(<span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">5</span>, <span class="dv">5</span>,  <span class="dv">5</span>, <span class="dv">5</span>, <span class="dv">5</span>), <span class="st">"No effects"</span>),</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fac_cells</span>(<span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">4</span>,  <span class="dv">7</span>, <span class="dv">7</span>, <span class="dv">7</span>), <span class="st">"One main effect (A)"</span>),</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fac_cells</span>(<span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">5</span>, <span class="dv">4</span>,  <span class="dv">9</span>, <span class="dv">8</span>, <span class="dv">7</span>), <span class="st">"Two main effects (additive)"</span>),</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fac_cells</span>(<span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">5</span>, <span class="dv">4</span>,  <span class="dv">9</span>, <span class="dv">7</span>, <span class="dv">2</span>), <span class="st">"Interaction (non-parallel)"</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>fac_gallery<span class="sc">$</span>panel <span class="ot">&lt;-</span> <span class="fu">factor</span>(fac_gallery<span class="sc">$</span>panel,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>                            <span class="at">levels =</span> <span class="fu">unique</span>(fac_gallery<span class="sc">$</span>panel))</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(fac_gallery, <span class="fu">aes</span>(FactorB, mean, <span class="at">colour =</span> FactorA, <span class="at">group =</span> FactorA)) <span class="sc">+</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">1.1</span>) <span class="sc">+</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">2.5</span>) <span class="sc">+</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> panel) <span class="sc">+</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Factor B"</span>, <span class="at">y =</span> <span class="st">"Mean response"</span>, <span class="at">colour =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="a-linear-models_files/figure-html/gallery-factorial-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Four canonical factorial outcomes as interaction plots (no data). Parallel lines (top row and bottom-left) indicate additive effects; only the bottom-right panel, with non-parallel lines, shows an interaction.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>In the first three panels the two lines are parallel: the vertical gap between the levels of A is the same at every level of B, so the effects are additive and each can be described separately. Only the bottom-right panel shows non-parallel lines, the signature of an interaction.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — The single most useful habit in factorial ANOVA is to <strong>look for parallelism</strong>. Parallel lines → additive main effects, interpretable separately. Non-parallel → an interaction, and the main effects can no longer be read on their own. Everything in the worked factorial case below returns to this one visual check.</p>
+</div><div class="">
+<p><strong>DEF</strong> — <em>Additive</em> (top-right): the vertical gap between the two <code>A</code> lines is the <strong>same</strong> at every level of <code>B</code>; the effect of <code>A</code> does not depend on <code>B</code>. <em>Interaction</em> (bottom-right): that gap <strong>changes</strong> across <code>B</code>.</p>
+</div></div>
+<p>With these shapes in mind, two simulated cases are fitted and their output matched back to this gallery.</p>
+<hr>
+</section>
+</section>
+<section id="sec-ancova" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="sec-ancova">Case 1 — ANCOVA: a gradient and a grouping</h2>
+<section id="sec-anc-data" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="sec-anc-data">The question and the data</h3>
+<p><strong>Leaf nitrogen content (%)</strong> is measured on plants along a <strong>soil nutrient gradient</strong>, in two <strong>light regimes</strong> (sun versus shade). Three biological questions arise:</p>
+<ul>
+<li>Does leaf nitrogen rise with soil nutrients (a <em>slope</em> question)?</li>
+<li>Does light regime shift leaf nitrogen up or down (an <em>intercept</em> question)?</li>
+<li>And — the question that decides the model — does the nutrient <em>slope</em> itself <strong>differ</strong> between sun and shade (an <em>interaction</em> question)?</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>n        <span class="ot">&lt;-</span> <span class="dv">160</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>nutrient <span class="ot">&lt;-</span> <span class="fu">runif</span>(n, <span class="dv">0</span>, <span class="dv">10</span>)                       <span class="co"># soil nutrient index</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>light    <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">sample</span>(<span class="fu">c</span>(<span class="st">"shade"</span>, <span class="st">"sun"</span>), n, <span class="at">replace =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                   <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"shade"</span>, <span class="st">"sun"</span>))     <span class="co"># shade = reference level</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># True process: parallel lines. Sun raises the intercept by ~0.9; the slope</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.35 % nitrogen per nutrient unit) is the SAME in both light regimes.</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>Slope <span class="ot">&lt;-</span> <span class="fl">0.35</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>Intercept <span class="ot">&lt;-</span> (<span class="fl">1.2</span> <span class="sc">+</span> <span class="fl">0.9</span> <span class="sc">*</span> (light <span class="sc">==</span> <span class="st">"sun"</span>))</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>mu     <span class="ot">&lt;-</span> Intercept <span class="sc">+</span> Slope <span class="sc">*</span> nutrient</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>leaf_N <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> mu, <span class="at">sd =</span> <span class="fl">0.9</span>)           <span class="co"># constant SD =&gt; homoscedastic</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>datA   <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(leaf_N, nutrient, light, Intercept)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(datA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;     leaf_N nutrient light Intercept
+#&gt; 1 4.243848 9.148060 shade       1.2
+#&gt; 2 4.415160 9.370754   sun       2.1
+#&gt; 3 3.248375 2.861395   sun       2.1
+#&gt; 4 3.780102 8.304476 shade       1.2
+#&gt; 5 4.877122 6.417455   sun       2.1
+#&gt; 6 5.206016 5.190959   sun       2.1</code></pre>
+</div>
+</div>
+<p>The first rows show the four columns of the simulated data frame: the response <code>leaf_N</code>, the covariate <code>nutrient</code>, the factor <code>light</code>, and the true intercept for each observation, retained for reference. The data were generated with parallel lines and a constant residual standard deviation of 0.9; the analysis below should recover both facts.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> The <strong>reference</strong> level of every factor must be checked, since every categorical coefficient is a contrast <em>against it</em>. Here <code>shade</code> is the reference, so <code>lightsun</code> denotes “sun relative to shade”. It is set deliberately with <code>factor(..., levels = )</code> or <code>relevel()</code>.</p>
+</div></div></section>
+<section id="sec-anc-summary" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="sec-anc-summary">Numeric and visual summary</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(datA[,<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;      leaf_N          nutrient          light   
+#&gt;  Min.   :0.1155   Min.   :0.002389   shade:77  
+#&gt;  1st Qu.:2.5723   1st Qu.:2.824263   sun  :83  
+#&gt;  Median :3.6073   Median :5.766484             
+#&gt;  Mean   :3.5258   Mean   :5.333326             
+#&gt;  3rd Qu.:4.4215   3rd Qu.:7.673367             
+#&gt;  Max.   :7.3610   Max.   :9.888917</code></pre>
+</div>
+</div>
+<p>The response ranges over roughly one order of magnitude, the nutrient index spans its full 0–10 range, and the two light groups are close to balanced. The data are plotted before modelling, because the picture indicates what model to expect.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(datA, <span class="fu">aes</span>(nutrient, leaf_N, <span class="at">colour =</span> light)) <span class="sc">+</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Soil nutrient index"</span>, <span class="at">y =</span> <span class="st">"Leaf nitrogen (%)"</span>, <span class="at">colour =</span> <span class="st">"Light"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="a-linear-models_files/figure-html/anc-plot-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Leaf nitrogen against the nutrient gradient, coloured by light regime. The two fitted lines appear close to parallel — a visual indication that the interaction is unnecessary.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The two lines are offset — sun above shade — but close to parallel. Matched against the gallery, this is the top-right panel: a light effect on the intercept and a negligible interaction are expected.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — In an ANCOVA plot, <strong>two questions are visible directly</strong>: do the lines have <em>different heights</em> (a light effect) and <em>different slopes</em> (an interaction)? Here the lines are offset but close to parallel.</p>
+</div></div></section>
+<section id="sec-anc-fit" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="sec-anc-fit">Fitting the maximal model</h3>
+<p>The analysis starts with the most complex model the design justifies — here, one that allows the slopes to differ — and simplifies <em>downward</em> from it.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>mA_full <span class="ot">&lt;-</span> <span class="fu">lm</span>(leaf_N <span class="sc">~</span> light <span class="sc">+</span> nutrient <span class="sc">+</span> light<span class="sc">:</span>nutrient , <span class="at">data =</span> datA)   <span class="co"># light*nutrient as shorthand</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — <em>Maximal model</em>: the largest model justified by the design, fitted first. Model selection then removes terms that do not earn their degrees of freedom in explanatory power, yielding a <em>minimal adequate model</em>.</p>
+</div></div></section>
+<section id="sec-anc-diag" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="sec-anc-diag">Model diagnostics</h3>
+<p>The linear model rests on the residual being Gaussian with constant variance, and on no single point dominating the fit. All three conditions are checked.</p>
+<section id="sec-anc-homo" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="sec-anc-homo">Homoscedasticity</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">residualPlots</span>(mA_full, <span class="at">tests =</span> <span class="cn">FALSE</span>, <span class="at">layout =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="a-linear-models_files/figure-html/anc-resid-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Residuals against each predictor and against the fitted values. A flat, patternless band supports constant variance.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — Residual plots are read for <strong>two</strong> features: a <em>trend</em> in the mean (the fitted curve departing from horizontal → the mean structure is wrong, e.g.&nbsp;a missing quadratic term) and a <em>change in spread</em> (a funnel → heteroscedasticity). <strong>Neither</strong> should be present.</p>
+</div></div><p>The first panel, against light, shows homogeneity of variance: the two boxplots have the same height and their medians sit close to zero. The second panel, against nutrient, shows a blue curve (a quadratic fit) deviating slightly from the dashed straight line; the deviation is small relative to the spread of the residuals, and the spread itself remains even along the gradient — again homoscedastic. The third panel, against the fitted values, combines the first two and carries the same interpretation as the nutrient panel.</p>
+<p>The absence of a spread trend can be confirmed numerically through the correlation between the absolute residuals and the fitted values.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(<span class="fu">abs</span>(<span class="fu">resid</span>(mA_full)), <span class="fu">fitted</span>(mA_full))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 0.02235455</code></pre>
+</div>
+</div>
+<p>The correlation is essentially zero: the magnitude of the residuals does not change with the fitted value, which is the numerical statement of constant variance.</p>
+</section>
+<section id="sec-anc-norm" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="sec-anc-norm">Normality of residuals</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qqPlot</span>(<span class="fu">residuals</span>(mA_full), <span class="at">id =</span> <span class="fu">list</span>(<span class="at">n=</span><span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="a-linear-models_files/figure-html/anc-qq-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>QQ-plot of studentized residuals against the reference distribution (car::qqPlot). Points on the line indicate approximate normality; the dashed envelope is a pointwise confidence band. Note that residuals(Model_name) must be passed to obtain the residuals; the id argument labels the row numbers of the most extreme observations.</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 109 127  44 129</code></pre>
+</div>
+</div>
+<p>The points track the diagonal and remain within the envelope, with no heavy tails or systematic curvature. The four labelled points are merely the most extreme residuals and lie inside the band. A formal test is applied as support.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">shapiro.test</span>(<span class="fu">resid</span>(mA_full))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt;  Shapiro-Wilk normality test
+#&gt; 
+#&gt; data:  resid(mA_full)
+#&gt; W = 0.99459, p-value = 0.8229</code></pre>
+</div>
+</div>
+<p>The Shapiro–Wilk statistic is <span class="math inline">\(W = 0.995\)</span> with <span class="math inline">\(p = 0.82\)</span>: there is no evidence against normality.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> A non-significant Shapiro–Wilk test does <strong>not prove</strong> normality; it means no evidence <em>against</em> it was found. With small samples the test has little power; with very large samples it flags biologically trivial departures. The <strong>QQ-plot is primary</strong> and the test is support.</p>
+</div></div></section>
+<section id="sec-anc-infl" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="sec-anc-infl">Influential observations</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">influenceIndexPlot</span>(mA_full, <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">"Cook"</span>, <span class="st">"Studentized"</span>, <span class="st">"hat"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="a-linear-models_files/figure-html/anc-influence-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Influence diagnostics: Cook’s distance, studentized residuals (with Bonferroni outlier p-values), and hat-values (leverage).</figcaption>
+</figure>
+</div>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — <em>Leverage</em> (hat-value) measures how unusual a point is in the <em>predictor</em> space; <em>Cook’s distance</em> combines leverage and residual size to measure how much a point actually <em>moves the fit</em>. A point can have high leverage yet low influence if it lies on the trend.</p>
+</div></div><p>No Cook’s distance approaches the usual thresholds of concern (all are well below 0.5, let alone 1) in the first panel, and no studentized residual is a Bonferroni outlier in the second. The third panel shows the leverage values, none of which stands apart from the rest. The <code>outlierTest</code> formalises the second panel.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">outlierTest</span>(mA_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; No Studentized residuals with Bonferroni p &lt; 0.05
+#&gt; Largest |rstudent|:
+#&gt;     rstudent unadjusted p-value Bonferroni p
+#&gt; 109 -2.82079          0.0054176      0.86682</code></pre>
+</div>
+</div>
+<p>The largest studentized residual has a Bonferroni-adjusted <span class="math inline">\(p &gt; 0.05\)</span>, so there is <strong>no evidence for any outlier</strong>.</p>
+<p>A rule of thumb exists for flagging unusually high leverage, analogous to that for Cook’s distance: a hat value greater than 2.5 times the mean hat value.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>h    <span class="ot">&lt;-</span> <span class="fu">hatvalues</span>(mA_full)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>cutoff <span class="ot">&lt;-</span> <span class="fl">2.5</span> <span class="sc">*</span> <span class="fu">mean</span>(h)          <span class="co"># cutoff for leverage value</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">which</span>(h <span class="sc">&gt;</span> cutoff)                <span class="co"># indices of high-leverage points</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; named integer(0)</code></pre>
+</div>
+</div>
+<p>The output <code>named integer(0)</code> indicates that no observation exceeds the cut-off, which is the desired result.</p>
+</section>
+<section id="integration-the-diagnostic-verdict" class="level4">
+<h4 class="anchored" data-anchor-id="integration-the-diagnostic-verdict">Integration: the diagnostic verdict</h4>
+<p>The three diagnostic families agree. The residual plots and the near-zero correlation between absolute residuals and fitted values establish constant variance; the QQ-plot and the Shapiro–Wilk test establish approximate normality; the influence plot, the outlier test and the leverage cut-off establish that no single observation drives the fit. All three assumptions of the linear model therefore hold for the maximal model, and model selection and interpretation may proceed on it.</p>
+</section>
+</section>
+<section id="sec-anc-select" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="sec-anc-select">Model selection</h3>
+<p>Is the interaction needed? The maximal model is compared with the additive model that constrains the slopes to be parallel. Because the models are <strong>nested</strong>, a partial <span class="math inline">\(F\)</span>-test is exact.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>mA_add <span class="ot">&lt;-</span> <span class="fu">lm</span>(leaf_N <span class="sc">~</span> light <span class="sc">+</span> nutrient, <span class="at">data =</span> datA)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(mA_add, mA_full)   <span class="co"># H0: interaction coefficient = 0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; Analysis of Variance Table
+#&gt; 
+#&gt; Model 1: leaf_N ~ light + nutrient
+#&gt; Model 2: leaf_N ~ light + nutrient + light:nutrient
+#&gt;   Res.Df    RSS Df Sum of Sq      F Pr(&gt;F)
+#&gt; 1    157 114.33                           
+#&gt; 2    156 114.31  1    0.0247 0.0337 0.8546</code></pre>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — <code>anova(small, big)</code> on two nested <code>lm</code> objects is a <strong>partial</strong> <span class="math inline">\(F\)</span>-test: it asks whether the extra term in the larger model explains significantly more variance than its extra degrees of freedom would by chance. A large <span class="math inline">\(p\)</span> means “the simpler model is adequate”.</p>
+</div></div><p>The interaction adds essentially nothing (<span class="math inline">\(F_{1,156} = 0.03\)</span>, <span class="math inline">\(p = 0.85\)</span>): the extra term reduces the residual sum of squares by only 0.02. It is <strong>dropped</strong>, as the near-parallel lines in the plot anticipated. AIC provides a second, non-nested criterion.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(mA_full, mA_add,</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lm</span>(leaf_N <span class="sc">~</span> nutrient, <span class="at">data =</span> datA),</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lm</span>(leaf_N <span class="sc">~</span> light,    <span class="at">data =</span> datA))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;                                    df      AIC
+#&gt; mA_full                             5 410.2585
+#&gt; mA_add                              4 408.2931
+#&gt; lm(leaf_N ~ nutrient, data = datA)  3 434.8135
+#&gt; lm(leaf_N ~ light, data = datA)     3 546.7514</code></pre>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — <span class="math inline">\(\mathrm{AIC} = 2k - 2\ln\hat{L}\)</span>, with <span class="math inline">\(k\)</span> the number of parameters and <span class="math inline">\(\hat L\)</span> the maximised likelihood. It rewards fit and penalises complexity, and unlike the <span class="math inline">\(F\)</span>-test it can compare <strong>non-nested</strong> models. A difference of <span class="math inline">\(\gtrsim 2\)</span> is usually taken as meaningful. Day 6 returns to this.</p>
+</div></div><p>The additive model has the lowest AIC (408.3 against 410.3 for the interaction model): dropping the interaction <em>improved</em> the penalised fit. Both models far outperform either predictor alone. The additive model is therefore the minimal adequate model, and the <span class="math inline">\(F\)</span>-test and AIC agree on this conclusion.</p>
+</section>
+<section id="sec-anc-table" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="sec-anc-table">Reading the statistics table</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mA_add)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = leaf_N ~ light + nutrient, data = datA)
+#&gt; 
+#&gt; Residuals:
+#&gt;      Min       1Q   Median       3Q      Max 
+#&gt; -2.34871 -0.62571  0.02705  0.52758  2.16964 
+#&gt; 
+#&gt; Coefficients:
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)  1.30890    0.15860   8.253 5.92e-14 ***
+#&gt; lightsun     0.74771    0.13509   5.535 1.28e-07 ***
+#&gt; nutrient     0.34294    0.02308  14.856  &lt; 2e-16 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 0.8534 on 157 degrees of freedom
+#&gt; Multiple R-squared:  0.6109, Adjusted R-squared:  0.6059 
+#&gt; F-statistic: 123.2 on 2 and 157 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>This table is the core of the analysis and is read column by column.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — Every coefficient is interpreted <strong>holding the other predictors fixed</strong>. <code>nutrient</code> is the slope <em>within a light level</em>; <code>lightsun</code> is the gap <em>between light levels at the same nutrient value</em>. That is the purpose of placing them in one model.</p>
+</div></div><ul>
+<li><strong><code>(Intercept)</code> = 1.31.</strong> The predicted leaf nitrogen for the <em>reference</em> combination: a shade plant at <code>nutrient = 0</code>. It anchors everything else.</li>
+<li><strong><code>lightsun</code> = 0.748</strong> (<span class="math inline">\(p = 1.3\times10^{-7}\)</span>). At any given nutrient level, a <strong>sun</strong> plant has about <strong>0.75 % more</strong> leaf nitrogen than a shade plant. The positive sign and small <span class="math inline">\(p\)</span> confirm a clear light effect on the intercept.</li>
+<li><strong><code>nutrient</code> = 0.343</strong> (<span class="math inline">\(p &lt; 2\times10^{-16}\)</span>). For every one-unit rise in the soil nutrient index, leaf nitrogen rises by about <strong>0.34 %</strong>, in <em>both</em> light regimes (the slope is shared because the interaction was dropped). This is the gradient effect, and it is strong.</li>
+<li><strong><code>Std. Error</code>, <code>t value</code>, <code>Pr(&gt;|t|)</code>.</strong> Each <span class="math inline">\(t\)</span> is the estimate divided by its standard error; the <span class="math inline">\(p\)</span>-value tests whether that coefficient differs from zero. Small SEs relative to the estimates give large <span class="math inline">\(t\)</span> values and small <span class="math inline">\(p\)</span>-values.</li>
+<li><strong>Residual standard error = 0.853 on 157 df.</strong> The typical size of a residual, the estimate of <span class="math inline">\(\sigma\)</span> (close to the 0.9 used in the simulation). Despite R’s label this is a standard deviation of residuals, not a sampling standard error. The 157 df are <span class="math inline">\(n - 3\)</span>: 160 observations minus three estimated parameters (two light-level means and one nutrient slope).</li>
+<li><strong>Multiple <span class="math inline">\(R^2\)</span> = 0.611.</strong> The model explains about <strong>61 %</strong> of the variance in leaf nitrogen. <strong>Adjusted <span class="math inline">\(R^2\)</span> = 0.606</strong> applies a small-sample penalty and is the appropriate figure to report.</li>
+<li><strong><span class="math inline">\(F\)</span>-statistic = 123 on 2 and 157 df</strong> (<span class="math inline">\(p &lt; 2.2\times10^{-16}\)</span>). The <em>omnibus</em> test: the model as a whole explains far more than nothing.</li>
+</ul>
+<p>The <code>anova()</code> table presents the same fit from the variance-partition side — how the total sum of squares splits across terms.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(mA_add)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; Analysis of Variance Table
+#&gt; 
+#&gt; Response: leaf_N
+#&gt;            Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+#&gt; light       1  18.771  18.771  25.775 1.074e-06 ***
+#&gt; nutrient    1 160.727 160.727 220.704 &lt; 2.2e-16 ***
+#&gt; Residuals 157 114.335   0.728                      
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> <code>anova()</code> on one model gives <strong>sequential (Type-I)</strong> sums of squares — each term is added <em>in order</em>, adjusting only for the terms above it. For an additive model with near-orthogonal predictors this is unproblematic, but with correlated predictors the order matters. For unbalanced or interaction models, marginal (Type-II/III) tests such as <code>car::Anova()</code> are preferred.</p>
+</div></div><p>Nutrient enters first and captures the largest sum of squares (157.2); light adds a further significant portion (22.3, <span class="math inline">\(p = 1.3\times10^{-7}\)</span>), matching its coefficient test. The residual mean square, 0.728, is the estimate of <span class="math inline">\(\sigma^2\)</span>, the square of the residual standard error above.</p>
+</section>
+<section id="sec-anc-emm" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="sec-anc-emm">Post-hoc analysis with <code>emmeans</code></h3>
+<p>The coefficient table already answers the questions, but <code>emmeans</code> places the answers on the <strong>response scale</strong> as <em>estimated marginal means</em> — model-based predictions at representative predictor values — which are easier to report and to plot, and which generalise to more complex designs.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — <em>Estimated marginal mean</em> (EMM): the model’s predicted mean for a group, with any continuous covariate held at its <strong>average</strong> value (here <code>nutrient</code> at its mean, ≈ 5.3). It is the “all else equal” group mean.</p>
+</div></div><div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimated marginal means for the two light regimes, at the mean nutrient level</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>emm_light <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(mA_add, <span class="sc">~</span> light)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>emm_light</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;  light emmean     SE  df lower.CL upper.CL
+#&gt;  shade   3.14 0.0973 157     2.95     3.33
+#&gt;  sun     3.89 0.0937 157     3.70     4.07
+#&gt; 
+#&gt; Confidence level used: 0.95</code></pre>
+</div>
+</div>
+<p>The two EMMs are about 3.14 % for shade and 3.89 % for sun, each at the average nutrient level, with their standard errors and confidence intervals. These are the group means the model predicts once the covariate has been held constant.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pairwise contrast between the light regimes</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pairs</span>(emm_light)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;  contrast    estimate    SE  df t.ratio p.value
+#&gt;  shade - sun   -0.748 0.135 157  -5.535  &lt;.0001</code></pre>
+</div>
+</div>
+<p>The contrast is <strong>0.75 %</strong> — identical, as it must be, to the <code>lightsun</code> coefficient, because in an additive model the light gap is the same at every nutrient value. It is highly significant (<span class="math inline">\(t = 5.5\)</span>, <span class="math inline">\(p \approx 1.3\times10^{-7}\)</span>).</p>
+<p>For the continuous predictor, the analogous tool is <code>emtrends</code>, which reports the <strong>slope</strong> and can compare slopes across groups.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">emtrends</span>(mA_add, <span class="sc">~</span> light, <span class="at">var =</span> <span class="st">"nutrient"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;  light nutrient.trend     SE  df lower.CL upper.CL
+#&gt;  shade          0.343 0.0231 157    0.297    0.389
+#&gt;  sun            0.343 0.0231 157    0.297    0.389
+#&gt; 
+#&gt; Confidence level used: 0.95</code></pre>
+</div>
+</div>
+<p>The two nutrient slopes are 0.343 in each light regime, with identical confidence intervals.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — In the additive model the two nutrient slopes are <strong>equal by construction</strong>, so their confidence intervals coincide. This is exactly the parallel-lines assumption that was tested and accepted. Had the interaction been retained, <code>emtrends</code> would show two <em>different</em> slopes and allow a test of their difference.</p>
+</div></div></section>
+<section id="sec-anc-interp" class="level3">
+<h3 class="anchored" data-anchor-id="sec-anc-interp">Interpretation and final plot</h3>
+<p>Taken together: leaf nitrogen rises with soil nutrients at about 0.34 % per unit, identically in sun and shade, and sun plants sit about 0.75 % higher than shade plants at every point along the gradient. There is no evidence that light changes the <em>slope</em> of the relationship, only its <em>height</em>. These are the parameters that were simulated (slope 0.35, offset 0.9, <span class="math inline">\(\sigma\)</span> 0.9), recovered within their standard errors.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(datA, <span class="fu">aes</span>(nutrient, leaf_N, <span class="at">colour =</span> light)) <span class="sc">+</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">predict</span>(mA_add)), <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Soil nutrient index"</span>, <span class="at">y =</span> <span class="st">"Leaf nitrogen (%)"</span>, <span class="at">colour =</span> <span class="st">"Light"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="a-linear-models_files/figure-html/anc-final-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Final additive ANCOVA model: parallel regression lines separated by a constant light effect.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The fitted lines are exactly parallel, since the model contains no interaction; the vertical distance between them is the <code>lightsun</code> coefficient.</p>
+<hr>
+</section>
+</section>
+<section id="sec-factorial" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="sec-factorial">Case 2 — Factorial ANOVA: two factors and an interaction</h2>
+<section id="sec-fac-data" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="sec-fac-data">The question and the data</h3>
+<p>The second case has two <em>categorical</em> predictors. Algae are grown and their <strong>biomass (mg)</strong> measured under two crossed treatments: <strong>nutrient level</strong> (low, high) and <strong>grazing pressure</strong> (none, low, high) — a <span class="math inline">\(2 \times 3\)</span> factorial design with 12 replicates per cell. The biological expectation is an <strong>interaction</strong>: grazers suppress algal biomass, but the suppression should be much stronger when nutrients are high and there is more algae to consume.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7</span>)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>design <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">rep      =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>,</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">nutrient =</span> <span class="fu">c</span>(<span class="st">"low"</span>, <span class="st">"high"</span>),</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">grazer   =</span> <span class="fu">c</span>(<span class="st">"none"</span>, <span class="st">"low"</span>, <span class="st">"high"</span>))</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>design<span class="sc">$</span>nutrient <span class="ot">&lt;-</span> <span class="fu">factor</span>(design<span class="sc">$</span>nutrient, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"low"</span>, <span class="st">"high"</span>))</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>design<span class="sc">$</span>grazer   <span class="ot">&lt;-</span> <span class="fu">factor</span>(design<span class="sc">$</span>grazer,   <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"none"</span>, <span class="st">"low"</span>, <span class="st">"high"</span>))</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a><span class="co"># True cell means with an interaction: at LOW nutrient grazers barely matter;</span></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="co"># at HIGH nutrient grazers cut biomass sharply.</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>cell_mean <span class="ot">&lt;-</span> <span class="cf">function</span>(nut, grz) {</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>  base  <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>  n_eff <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(nut <span class="sc">==</span> <span class="st">"high"</span>, <span class="dv">8</span>, <span class="dv">0</span>)</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>  g_eff <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">none =</span> <span class="dv">0</span>, <span class="at">low =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">high =</span> <span class="sc">-</span><span class="dv">2</span>)[<span class="fu">as.character</span>(grz)]</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>  i_eff <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(nut <span class="sc">==</span> <span class="st">"high"</span>,</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">c</span>(<span class="at">none =</span> <span class="dv">0</span>, <span class="at">low =</span> <span class="sc">-</span><span class="dv">3</span>, <span class="at">high =</span> <span class="sc">-</span><span class="dv">6</span>)[<span class="fu">as.character</span>(grz)], <span class="dv">0</span>)</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>  base <span class="sc">+</span> n_eff <span class="sc">+</span> g_eff <span class="sc">+</span> i_eff</span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>mu      <span class="ot">&lt;-</span> <span class="fu">mapply</span>(cell_mean, design<span class="sc">$</span>nutrient, design<span class="sc">$</span>grazer)</span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>biomass <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="fu">nrow</span>(design), <span class="at">mean =</span> mu, <span class="at">sd =</span> <span class="fl">1.6</span>)</span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>datF    <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(biomass, <span class="at">nutrient =</span> design<span class="sc">$</span>nutrient, <span class="at">grazer =</span> design<span class="sc">$</span>grazer)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — A <em>factorial design</em> crosses every level of one factor with every level of another. <em>Balanced</em> means equal replication in every cell (here 12), which makes the sums of squares independent and the interpretation cleanest.</p>
+</div></div></section>
+<section id="sec-fac-plot" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="sec-fac-plot">Visualising the design</h3>
+<p>For factorial data the key picture is the <strong>interaction plot</strong>: group means joined across one factor, one line per level of the other. <strong>Non-parallel lines signal an interaction.</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(datF, <span class="fu">aes</span>(grazer, biomass, <span class="at">colour =</span> nutrient, <span class="at">group =</span> nutrient)) <span class="sc">+</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_summary</span>(<span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"line"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_summary</span>(<span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"point"</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_summary</span>(<span class="at">fun.data =</span> mean_se, <span class="at">geom =</span> <span class="st">"errorbar"</span>, <span class="at">width =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Grazing pressure"</span>, <span class="at">y =</span> <span class="st">"Algal biomass (mg)"</span>, <span class="at">colour =</span> <span class="st">"Nutrient"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="a-linear-models_files/figure-html/fac-interaction-plot-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Interaction plot. Grazing barely lowers biomass at low nutrients but sharply lowers it at high nutrients — the lines are far from parallel, the visual signature of an interaction.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The high-nutrient line falls steeply across the grazing levels while the low-nutrient line is nearly flat. Matched against the factorial gallery, this is the bottom-right panel: a significant <code>nutrient:grazer</code> term is expected.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — Parallel lines → the two factors act <em>additively</em> (their effects sum). Converging, diverging or crossing lines → an <em>interaction</em>: the effect of one factor <strong>depends on the level</strong> of the other.</p>
+</div></div></section>
+<section id="sec-fac-diag" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="sec-fac-diag">Fit and diagnostics</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>mF_full <span class="ot">&lt;-</span> <span class="fu">lm</span>(biomass <span class="sc">~</span> nutrient <span class="sc">*</span> grazer, <span class="at">data =</span> datF)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The diagnostics are read in the same way as for the ANCOVA.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">residualPlots</span>(mF_full, <span class="at">tests =</span> <span class="cn">FALSE</span>, <span class="at">layout =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="a-linear-models_files/figure-html/fac-resid-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Residuals against fitted values for the factorial model. With categorical predictors the residuals cluster at the six fitted cell means; the check is that the spread is similar across clusters.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The residuals form vertical stripes, one per cell, of comparable height: the spread is similar across the six cells, so the constant-variance assumption is supported.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> With only categorical predictors the residual-versus-fitted plot shows <strong>vertical stripes</strong>, one per cell; this is expected, not a defect. The check is that the stripes have <strong>similar height</strong> (equal spread across cells, i.e.&nbsp;homoscedasticity), not that they form a cloud.</p>
+</div></div><div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qqPlot</span>(<span class="fu">residuals</span>(mF_full), <span class="at">id =</span> <span class="fu">list</span>(<span class="at">n =</span> <span class="dv">6</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="a-linear-models_files/figure-html/fac-qq-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Normal QQ-plot of the factorial-model residuals.</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 12  1 24 10 13 57</code></pre>
+</div>
+</div>
+<p>The QQ-plot is straight and all points, including the six labelled extremes, lie within the envelope.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">shapiro.test</span>(<span class="fu">resid</span>(mF_full))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt;  Shapiro-Wilk normality test
+#&gt; 
+#&gt; data:  resid(mF_full)
+#&gt; W = 0.98757, p-value = 0.703</code></pre>
+</div>
+</div>
+<p>Shapiro–Wilk is comfortably non-significant (<span class="math inline">\(W = 0.99\)</span>, <span class="math inline">\(p = 0.70\)</span>), agreeing with the QQ-plot.</p>
+</section>
+<section id="integration-the-diagnostic-verdict-1" class="level3">
+<h3 class="anchored" data-anchor-id="integration-the-diagnostic-verdict-1">Integration: the diagnostic verdict</h3>
+<p>The stripes in the residual plot are of comparable height, the QQ-plot is straight, and the formal test finds no evidence against normality. The equal replication (12 per cell) also means that the sum-of-squares subtleties of unbalanced designs do not arise. The assumptions hold, and the ANOVA table can be interpreted.</p>
+</section>
+<section id="sec-fac-anova" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="sec-fac-anova">The ANOVA table and model selection</h3>
+<p>For a factorial model the <code>anova()</code> table is the primary result: it partitions the variance among the two main effects and their interaction.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(mF_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; Analysis of Variance Table
+#&gt; 
+#&gt; Response: biomass
+#&gt;                 Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+#&gt; nutrient         1 499.68  499.68 218.665 &lt; 2.2e-16 ***
+#&gt; grazer           2 321.40  160.70  70.323 &lt; 2.2e-16 ***
+#&gt; nutrient:grazer  2  98.79   49.40  21.617 6.015e-08 ***
+#&gt; Residuals       66 150.82    2.29                      
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — A factorial ANOVA table is read <strong>from the bottom up</strong>. If the <em>interaction</em> is significant, the main-effect rows above it are not directly interpretable on their own; the effect of each factor must be described <em>within</em> levels of the other (the simple effects), because by definition each depends on the other.</p>
+</div></div><p>Every row is significant, but the one that governs interpretation is the <strong>interaction</strong>: <code>nutrient:grazer</code>, <span class="math inline">\(F_{2,66} = 21.6\)</span>, <span class="math inline">\(p = 6.0\times10^{-8}\)</span>. Because it is significant, the full model is <strong>retained</strong> — the reverse of the ANCOVA decision. The nested test confirms that the interaction earns its two degrees of freedom.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>mF_add <span class="ot">&lt;-</span> <span class="fu">lm</span>(biomass <span class="sc">~</span> nutrient <span class="sc">+</span> grazer, <span class="at">data =</span> datF)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(mF_add, mF_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; Analysis of Variance Table
+#&gt; 
+#&gt; Model 1: biomass ~ nutrient + grazer
+#&gt; Model 2: biomass ~ nutrient * grazer
+#&gt;   Res.Df    RSS Df Sum of Sq      F    Pr(&gt;F)    
+#&gt; 1     68 249.61                                  
+#&gt; 2     66 150.82  2    98.794 21.617 6.015e-08 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>Dropping the interaction costs 98.8 in residual sum of squares for two degrees of freedom (<span class="math inline">\(p = 6\times10^{-8}\)</span>). AIC is examined for confirmation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(mF_full, mF_add)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;         df      AIC
+#&gt; mF_full  7 271.5650
+#&gt; mF_add   5 303.8408</code></pre>
+</div>
+</div>
+<p>Removing the interaction raises AIC by 32 (272 → 304). Both criteria agree: the interaction stays.</p>
+<p>The coefficient table presents the same result in contrast form.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mF_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = biomass ~ nutrient * grazer, data = datF)
+#&gt; 
+#&gt; Residuals:
+#&gt;     Min      1Q  Median      3Q     Max 
+#&gt; -3.0494 -0.7608 -0.0445  0.8981  3.7983 
+#&gt; 
+#&gt; Coefficients:
+#&gt;                         Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)               5.5485     0.4364  12.715  &lt; 2e-16 ***
+#&gt; nutrienthigh              8.2801     0.6171  13.417  &lt; 2e-16 ***
+#&gt; grazerlow                -1.4899     0.6171  -2.414 0.018552 *  
+#&gt; grazerhigh               -2.2742     0.6171  -3.685 0.000463 ***
+#&gt; nutrienthigh:grazerlow   -3.3205     0.8728  -3.805 0.000313 ***
+#&gt; nutrienthigh:grazerhigh  -5.7135     0.8728  -6.547 1.03e-08 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 1.512 on 66 degrees of freedom
+#&gt; Multiple R-squared:  0.8591, Adjusted R-squared:  0.8485 
+#&gt; F-statistic: 80.51 on 5 and 66 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> In a model <em>with</em> an interaction, <code>grazerlow</code> = −1.49 is <strong>not</strong> “the effect of low grazing”. It is that effect <strong>only at the reference nutrient level (low)</strong>. The <code>nutrienthigh:grazerlow</code> term (−3.32) states that the grazing effect is a further 3.3 mg <em>more negative</em> when nutrients are high. Main-effect coefficients in an interaction model are always “the effect at the other factor’s reference level”.</p>
+</div></div><p>Reading the interaction coefficients directly: <code>nutrienthigh:grazerhigh</code> = −5.71 (<span class="math inline">\(p = 10^{-8}\)</span>) means that moving from no grazing to high grazing costs 5.7 mg <em>more</em> under high nutrients than under low nutrients. The model explains 86 % of the variance (adjusted <span class="math inline">\(R^2 = 0.85\)</span>). Coefficients relative to a shifting reference are, however, awkward to report — which is exactly what <code>emmeans</code> resolves.</p>
+</section>
+<section id="sec-fac-emm" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="sec-fac-emm">Post-hoc analysis with <code>emmeans</code>: simple effects and contrasts</h3>
+<p>With a significant interaction, the appropriate post-hoc question is <strong>not</strong> “what is the overall grazing effect?” but “what is the grazing effect <em>within each nutrient level</em>?” — the <strong>simple effects</strong>. <code>emmeans</code> expresses this with the <code>|</code> (“by”) operator.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimated marginal mean biomass for every cell of the design</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>emm_cells <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(mF_full, <span class="sc">~</span> grazer <span class="sc">|</span> nutrient)</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>emm_cells</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; nutrient = low:
+#&gt;  grazer emmean    SE df lower.CL upper.CL
+#&gt;  none     5.55 0.436 66     4.68     6.42
+#&gt;  low      4.06 0.436 66     3.19     4.93
+#&gt;  high     3.27 0.436 66     2.40     4.15
+#&gt; 
+#&gt; nutrient = high:
+#&gt;  grazer emmean    SE df lower.CL upper.CL
+#&gt;  none    13.83 0.436 66    12.96    14.70
+#&gt;  low      9.02 0.436 66     8.15     9.89
+#&gt;  high     5.84 0.436 66     4.97     6.71
+#&gt; 
+#&gt; Confidence level used: 0.95</code></pre>
+</div>
+</div>
+<p>The output lists six cell means, grouped by nutrient level, with their standard errors and confidence intervals. Within the low-nutrient group the three means are close together; within the high-nutrient group they fall sharply with grazing.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — <code>~ grazer | nutrient</code> reads as “grazer means, <em>separately within</em> each nutrient level”. This is the natural way to unpack an interaction: six cell means, grouped so that grazing is compared <em>within</em> low- and within high-nutrient conditions.</p>
+</div></div><p>The pairwise grazing contrasts are computed <em>within</em> each nutrient level and FDR-adjusted for multiple comparisons.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pairs</span>(emm_cells, <span class="at">adjust =</span> <span class="st">"fdr"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; nutrient = low:
+#&gt;  contrast    estimate    SE df t.ratio p.value
+#&gt;  none - low     1.490 0.617 66   2.414  0.0278
+#&gt;  none - high    2.274 0.617 66   3.685  0.0014
+#&gt;  low - high     0.784 0.617 66   1.271  0.2082
+#&gt; 
+#&gt; nutrient = high:
+#&gt;  contrast    estimate    SE df t.ratio p.value
+#&gt;  none - low     4.810 0.617 66   7.795  &lt;.0001
+#&gt;  none - high    7.988 0.617 66  12.943  &lt;.0001
+#&gt;  low - high     3.177 0.617 66   5.149  &lt;.0001
+#&gt; 
+#&gt; P value adjustment: fdr method for 3 tests</code></pre>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — <em>Simple effect</em>: the effect of one factor at a <strong>fixed level</strong> of another. A significant interaction means the simple effects differ across levels — here, the grazing contrasts are small at low nutrients and large at high nutrients.</p>
+</div></div><p>The contrast that captures the biology is <strong>none versus high grazing</strong>: about <strong>2.3 mg</strong> at low nutrients but about <strong>8.0 mg</strong> at high nutrients. Grazing barely reduces biomass when there is little algae to begin with, but removes a large fraction when nutrients drive high production — the interaction, now stated as two concrete, reportable numbers rather than as a coefficient against a moving reference.</p>
+<p>The design can equally be sliced the other way — the nutrient effect <em>within</em> each grazing level.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Nutrient effect within each grazing level</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pairs</span>(<span class="fu">emmeans</span>(mF_full, <span class="sc">~</span> nutrient <span class="sc">|</span> grazer), <span class="at">adjust =</span> <span class="st">"fdr"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; grazer = none:
+#&gt;  contrast   estimate    SE df t.ratio p.value
+#&gt;  low - high    -8.28 0.617 66 -13.417  &lt;.0001
+#&gt; 
+#&gt; grazer = low:
+#&gt;  contrast   estimate    SE df t.ratio p.value
+#&gt;  low - high    -4.96 0.617 66  -8.036  &lt;.0001
+#&gt; 
+#&gt; grazer = high:
+#&gt;  contrast   estimate    SE df t.ratio p.value
+#&gt;  low - high    -2.57 0.617 66  -4.159  0.0001</code></pre>
+</div>
+</div>
+<p>The nutrient effect is large under no grazing and diminishes as grazing intensifies; it is the same interaction viewed from the other factor. <code>emmeans</code> would also provide marginal main effects averaged over the other factor, but with a strong interaction such averages can mislead.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> <code>emmeans</code> will report main-effect means averaged over the other factor even when the interaction is significant. Those <em>marginal</em> means average over a relationship that changes; they should be reported only with the interaction explicitly described alongside, or they impose a single number on two different stories.</p>
+</div></div></section>
+<section id="sec-fac-interp" class="level3">
+<h3 class="anchored" data-anchor-id="sec-fac-interp">Interpretation</h3>
+<p>The two factors do not act independently. High nutrients raise algal biomass substantially; grazing lowers it; but the size of the grazing effect <strong>depends on nutrient level</strong> — it is minor under low nutrients and large under high nutrients. The correct summary is the set of simple effects, not a single “grazing effect”, because no single grazing effect exists to report.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(datF, <span class="fu">aes</span>(grazer, biomass, <span class="at">fill =</span> nutrient)) <span class="sc">+</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_summary</span>(<span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"col"</span>, <span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="fl">0.8</span>), <span class="at">width =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_summary</span>(<span class="at">fun.data =</span> mean_se, <span class="at">geom =</span> <span class="st">"errorbar"</span>,</span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="fl">0.8</span>), <span class="at">width =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Grazing pressure"</span>, <span class="at">y =</span> <span class="st">"Algal biomass (mg)"</span>, <span class="at">fill =</span> <span class="st">"Nutrient"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="a-linear-models_files/figure-html/fac-final-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Cell means with standard errors. The widening gap between nutrient levels as grazing increases is the interaction made visible.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The bars show the six cell means; the gap between the nutrient levels narrows from left to right, which is the interaction in its final, reportable form.</p>
+<hr>
+</section>
+</section>
+<section id="sec-bridge" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="sec-bridge">Summary and bridge</h2>
+<p>Both analyses used one workflow: inspect and plot, fit the maximal model, check the residual assumptions, select among nested models, read the tables, and interpret through <code>emmeans</code>. The two cases differed in <strong>one decision</strong> — whether the interaction survived model selection:</p>
+<ul>
+<li>The <strong>ANCOVA</strong> dropped its interaction (<span class="math inline">\(p = 0.85\)</span>): parallel lines, a single shared nutrient slope, and a constant light offset. Interpretation consists of the two main-effect coefficients directly.</li>
+<li>The <strong>factorial ANOVA</strong> retained its interaction (<span class="math inline">\(p = 6\times10^{-8}\)</span>): the grazing effect depends on nutrient level, so interpretation consists of the <strong>simple effects</strong> within each level, not a single main effect.</li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — The whole of “which model?” reduces to: <em>fit the maximal model, then ask whether each term earns its degrees of freedom.</em> The interaction test is not a formality; it decides whether main effects or simple effects are reported.</p>
+</div></div><p>Everything here rested on the residual being <strong>Gaussian with constant variance</strong>. That pair of assumptions is convenient, and for these two data sets it held. But much biological data violates it: counts are skewed and bounded at zero, proportions are bounded in <span class="math inline">\([0,1]\)</span>, and variance very often grows with the mean. Day 6 shows how a model can use another distribution, through maximum likelihood, with logistic regression as the main example.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./references.html" class="pagination-link" aria-label="References">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">References</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

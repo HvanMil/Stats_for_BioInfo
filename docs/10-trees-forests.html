@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Trees, bagging and random forests – Statistics for Machine Learning</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./11-boosting-comparison.html" rel="next">
+<link href="./09-regularisation.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-143c0eed703e8b865dd62e6df5846b82.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating slimcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./10-trees-forests.html">Day 10. Trees</a></li><li class="breadcrumb-item"><a href="./10-trees-forests.html"><span class="chapter-title">Trees, bagging and random forests</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Statistics for Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 1. Why statistics?</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-why-statistics.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Why statistics?</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 2. Design and data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-design.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Experimental Design</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-confounding.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Correlation, Confounding, and Causation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./p02-data-quality.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Practical: data quality</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 3. Linear algebra</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-linear-algebra.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear algebra refresher</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 4. Directions</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-pca.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Principal component analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 5. Groups</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-clustering.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Cluster analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 6. Likelihood</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-likelihood-aic.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Likelihood, information and AIC</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 7. Resampling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-resampling.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Resampling: The Bootstrap and Cross-Validation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 8. Classifiers</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-classifiers-knn-svm.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Evaluating classifiers, KNN and SVM</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 9. Regularisation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-regularisation.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Regularisation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 10. Trees</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-trees-forests.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Trees, bagging and random forests</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 11. Boosting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-boosting-comparison.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Boosting and an honest comparison</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./a-linear-models.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear models: a worked reference</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#where-this-chapter-fits" id="toc-where-this-chapter-fits" class="nav-link active" data-scroll-target="#where-this-chapter-fits">Where this chapter fits</a></li>
+  <li><a href="#explaining-variance-by-splitting" id="toc-explaining-variance-by-splitting" class="nav-link" data-scroll-target="#explaining-variance-by-splitting">Explaining variance by splitting</a>
+  <ul class="collapse">
+  <li><a href="#the-idea" id="toc-the-idea" class="nav-link" data-scroll-target="#the-idea">The idea</a></li>
+  <li><a href="#a-simulated-forest-floor-survey" id="toc-a-simulated-forest-floor-survey" class="nav-link" data-scroll-target="#a-simulated-forest-floor-survey">A simulated forest-floor survey</a></li>
+  <li><a href="#what-the-linear-model-can-and-cannot-say" id="toc-what-the-linear-model-can-and-cannot-say" class="nav-link" data-scroll-target="#what-the-linear-model-can-and-cannot-say">What the linear model can and cannot say</a></li>
+  <li><a href="#recursive-binary-splitting" id="toc-recursive-binary-splitting" class="nav-link" data-scroll-target="#recursive-binary-splitting">Recursive binary splitting</a></li>
+  <li><a href="#fitting-and-reading-a-tree" id="toc-fitting-and-reading-a-tree" class="nav-link" data-scroll-target="#fitting-and-reading-a-tree">Fitting and reading a tree</a></li>
+  <li><a href="#the-split-search-from-scratch" id="toc-the-split-search-from-scratch" class="nav-link" data-scroll-target="#the-split-search-from-scratch">The split search, from scratch</a></li>
+  </ul></li>
+  <li><a href="#growing-and-pruning" id="toc-growing-and-pruning" class="nav-link" data-scroll-target="#growing-and-pruning">Growing and pruning</a>
+  <ul class="collapse">
+  <li><a href="#why-the-unpruned-tree-is-a-saturated-model" id="toc-why-the-unpruned-tree-is-a-saturated-model" class="nav-link" data-scroll-target="#why-the-unpruned-tree-is-a-saturated-model">Why the unpruned tree is a saturated model</a></li>
+  <li><a href="#cost-complexity-pruning" id="toc-cost-complexity-pruning" class="nav-link" data-scroll-target="#cost-complexity-pruning">Cost-complexity pruning</a></li>
+  <li><a href="#choosing-the-complexity-parameter-by-cross-validation" id="toc-choosing-the-complexity-parameter-by-cross-validation" class="nav-link" data-scroll-target="#choosing-the-complexity-parameter-by-cross-validation">Choosing the complexity parameter by cross-validation</a></li>
+  </ul></li>
+  <li><a href="#classification-trees" id="toc-classification-trees" class="nav-link" data-scroll-target="#classification-trees">Classification trees</a>
+  <ul class="collapse">
+  <li><a href="#the-same-algorithm-a-different-criterion" id="toc-the-same-algorithm-a-different-criterion" class="nav-link" data-scroll-target="#the-same-algorithm-a-different-criterion">The same algorithm, a different criterion</a></li>
+  <li><a href="#fitting" id="toc-fitting" class="nav-link" data-scroll-target="#fitting">Fitting</a></li>
+  </ul></li>
+  <li><a href="#a-single-tree-is-a-weak-learner" id="toc-a-single-tree-is-a-weak-learner" class="nav-link" data-scroll-target="#a-single-tree-is-a-weak-learner">A single tree is a weak learner</a>
+  <ul class="collapse">
+  <li><a href="#instability" id="toc-instability" class="nav-link" data-scroll-target="#instability">Instability</a></li>
+  <li><a href="#the-variance-problem-stated" id="toc-the-variance-problem-stated" class="nav-link" data-scroll-target="#the-variance-problem-stated">The variance problem, stated</a></li>
+  </ul></li>
+  <li><a href="#bagging" id="toc-bagging" class="nav-link" data-scroll-target="#bagging">Bagging</a>
+  <ul class="collapse">
+  <li><a href="#bootstrap-aggregating" id="toc-bootstrap-aggregating" class="nav-link" data-scroll-target="#bootstrap-aggregating">Bootstrap aggregating</a></li>
+  <li><a href="#why-the-trees-must-differ" id="toc-why-the-trees-must-differ" class="nav-link" data-scroll-target="#why-the-trees-must-differ">Why the trees must differ</a></li>
+  <li><a href="#out-of-bag-error" id="toc-out-of-bag-error" class="nav-link" data-scroll-target="#out-of-bag-error">Out-of-bag error</a></li>
+  <li><a href="#what-bagging-costs" id="toc-what-bagging-costs" class="nav-link" data-scroll-target="#what-bagging-costs">What bagging costs</a></li>
+  </ul></li>
+  <li><a href="#random-forests" id="toc-random-forests" class="nav-link" data-scroll-target="#random-forests">Random forests</a>
+  <ul class="collapse">
+  <li><a href="#decorrelating-the-trees" id="toc-decorrelating-the-trees" class="nav-link" data-scroll-target="#decorrelating-the-trees">Decorrelating the trees</a></li>
+  <li><a href="#variable-importance" id="toc-variable-importance" class="nav-link" data-scroll-target="#variable-importance">Variable importance</a></li>
+  </ul></li>
+  <li><a href="#where-this-leads" id="toc-where-this-leads" class="nav-link" data-scroll-target="#where-this-leads">Where this leads</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./10-trees-forests.html">Day 10. Trees</a></li><li class="breadcrumb-item"><a href="./10-trees-forests.html"><span class="chapter-title">Trees, bagging and random forests</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-title">Trees, bagging and random forests</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>Margin legend</strong></p>
+<p><strong>DEF</strong> — definition of a term.</p>
+<p><strong>KEY</strong> — a central idea to remember.</p>
+<p><strong>↪</strong> — link to another chapter or lecture.</p>
+<p><strong>⚠</strong> — common pitfall or point of caution.</p>
+</div></div><section id="where-this-chapter-fits" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="where-this-chapter-fits">Where this chapter fits</h2>
+<p>Day 7 delivered two tools and left them without an application that needed them. The bootstrap was demonstrated on a slope for which a formula already existed; cross-validation was demonstrated on a polynomial whose degree could almost have been chosen by eye. Both were introduced on models simple enough to check. This chapter is where they become load-bearing.</p>
+<p>A regression tree has no coefficient table, no residual degrees of freedom, and no parameter count that measures its flexibility. The question of how large to grow it therefore cannot be answered by an information criterion in the routine way; it is answered by cross-validation. A single tree is also strikingly unstable: refit it on a resampled data set and it changes shape. That instability, which would ordinarily be a fatal defect, turns out to be the raw material for the most successful family of predictive methods in applied statistics — because the bootstrap can average it away.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — Bagging is the bootstrap applied not to measure variance but to destroy it. Day 7 built the machine; this chapter puts it to work.</p>
+</div></div><p>The arc runs from a single tree, through its weaknesses, to three distinct repairs. Bagging averages many trees grown on bootstrap resamples. Random forests improve on bagging by making the trees less alike. Boosting abandons averaging altogether and grows trees in sequence, each one correcting its predecessors. The three differ in what part of the error they attack, and that difference is the organising idea of the second half.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>↪</strong> ISLR Chapter 8 covers the same ground. A reading guide with figure and page numbers is given at the end of Day 11.</p>
+</div></div></section>
+<section id="explaining-variance-by-splitting" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="explaining-variance-by-splitting">Explaining variance by splitting</h2>
+<section id="the-idea" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="the-idea">The idea</h3>
+<p>Every method in the course so far has explained variation in a response by writing it as a function of the predictors: a line, a curve, a link function applied to a linear predictor. A tree does something different and cruder. It partitions the predictor space into rectangular regions and predicts a single constant within each one.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — A <strong>regression tree</strong> partitions the predictor space into non-overlapping regions <span class="math inline">\(R_1, \dots, R_J\)</span> and predicts, for any observation falling in <span class="math inline">\(R_j\)</span>, the mean of the training responses in that region.</p>
+</div></div><p>The connection to the rest of the course is the variance partition of Day 1. A split is accepted when the combined within-group sum of squares of the two resulting subsets is smaller than that of the parent. This is the quantity that one-way ANOVA minimises when it assigns observations to known groups; the tree differs only in that it also chooses the groups.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>↪</strong> Day 1 partitioned total variance into a part explained by the model and a residual. A tree does the same, but searches for the partition rather than being handed it by the design.</p>
+</div></div></section>
+<section id="a-simulated-forest-floor-survey" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="a-simulated-forest-floor-survey">A simulated forest-floor survey</h3>
+<p>We simulate a survey of understorey vegetation in 400 forest plots. The predictors are canopy openness, soil moisture, soil pH and litter depth, plus two variables that carry no signal at all and are included so that we can see what each method does with them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">8</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">400</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>plots <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">light    =</span> <span class="fu">runif</span>(n, <span class="fl">0.02</span>, <span class="fl">0.80</span>),   <span class="co"># canopy openness (proportion)</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">moisture =</span> <span class="fu">runif</span>(n, <span class="dv">10</span>, <span class="dv">45</span>),       <span class="co"># soil moisture (%)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">pH       =</span> <span class="fu">runif</span>(n, <span class="fl">3.8</span>, <span class="fl">7.2</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">litter   =</span> <span class="fu">runif</span>(n, <span class="dv">0</span>, <span class="dv">8</span>),         <span class="co"># litter depth (cm)</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">noise1   =</span> <span class="fu">runif</span>(n, <span class="dv">0</span>, <span class="dv">1</span>),         <span class="co"># no effect</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">noise2   =</span> <span class="fu">rnorm</span>(n)                <span class="co"># no effect</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>wet <span class="ot">&lt;-</span> plots<span class="sc">$</span>moisture <span class="sc">&gt;=</span> <span class="dv">25</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="dv">18</span> <span class="sc">+</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>      <span class="dv">35</span> <span class="sc">*</span> plots<span class="sc">$</span>light <span class="sc">*</span> wet <span class="sc">+</span>       <span class="co"># light helps only where moisture allows</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>      <span class="dv">12</span> <span class="sc">*</span> (plots<span class="sc">$</span>pH <span class="sc">&gt;</span> <span class="fl">5.5</span>) <span class="sc">+</span>        <span class="co"># a step, not a gradient</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>      <span class="sc">-</span><span class="fl">1.5</span> <span class="sc">*</span> plots<span class="sc">$</span>litter            <span class="co"># a genuine linear effect</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>plots<span class="sc">$</span>cover <span class="ot">&lt;-</span> mu <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="dv">6</span>)   <span class="co"># herb cover (%)</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(plots<span class="sc">$</span>cover)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#&gt;  0.3449 16.2407 24.4531 25.6474 34.5900 64.0183</code></pre>
+</div>
+</div>
+<p>The generating process is deliberately awkward for a linear model and comfortable for a tree. Canopy openness raises herb cover, but only in plots with at least 25% soil moisture: in dry plots extra light does nothing. Soil pH acts as a step at 5.5 rather than as a gradient. Litter depth alone enters linearly. The residual distribution has mean 0 and variance <span class="math inline">\(6^2 = 36\)</span>, which is the irreducible error that no method can beat.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — Two of the three structures — an interaction and a threshold — are exactly what a rectangular partition represents naturally and an additive linear model represents badly.</p>
+</div></div><div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>eta <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">1.8</span> <span class="sc">+</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>       <span class="fl">4.0</span> <span class="sc">*</span> plots<span class="sc">$</span>light <span class="sc">*</span> wet <span class="sc">+</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>       <span class="fl">1.2</span> <span class="sc">*</span> (plots<span class="sc">$</span>pH <span class="sc">&gt;</span> <span class="fl">5.5</span>) <span class="sc">+</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>       <span class="sc">-</span><span class="fl">0.15</span> <span class="sc">*</span> plots<span class="sc">$</span>litter</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>plots<span class="sc">$</span>p_true <span class="ot">&lt;-</span> <span class="fu">plogis</span>(eta)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>plots<span class="sc">$</span>moss   <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">rbinom</span>(n, <span class="dv">1</span>, plots<span class="sc">$</span>p_true), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"absent"</span>, <span class="st">"present"</span>))</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(plots<span class="sc">$</span>moss)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt;  absent present 
+#&gt;     270     130</code></pre>
+</div>
+</div>
+<p>The same plots also carry a binary response: presence of an indicator moss, generated from a logistic model driven by the same threshold structure. Because the true probability of presence is stored in <code>p_true</code>, we will later be able to compute the best performance any classifier could possibly achieve.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> <code>p_true</code> is in the data frame, so a formula written as <code>moss ~ .</code> would include the true probability as a predictor and produce a flawless classifier that has learned nothing. Every model below uses an explicit formula. Leakage of this kind is rarely so obvious in real data — an identifier correlated with treatment, or a variable measured after the outcome, does the same damage quietly.</p>
+</div></div><div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>f_reg <span class="ot">&lt;-</span> cover <span class="sc">~</span> light <span class="sc">+</span> moisture <span class="sc">+</span> pH <span class="sc">+</span> litter <span class="sc">+</span> noise1 <span class="sc">+</span> noise2</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>f_cls <span class="ot">&lt;-</span> moss  <span class="sc">~</span> light <span class="sc">+</span> moisture <span class="sc">+</span> pH <span class="sc">+</span> litter <span class="sc">+</span> noise1 <span class="sc">+</span> noise2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="what-the-linear-model-can-and-cannot-say" class="level3">
+<h3 class="anchored" data-anchor-id="what-the-linear-model-can-and-cannot-say">What the linear model can and cannot say</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>lm_add <span class="ot">&lt;-</span> <span class="fu">lm</span>(f_reg, <span class="at">data =</span> plots)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm_add)<span class="sc">$</span>coefficients</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;                Estimate Std. Error    t value     Pr(&gt;|t|)
+#&gt; (Intercept) -20.6470809 3.06217070 -6.7426290 5.570210e-11
+#&gt; light        17.0149430 1.91895501  8.8667754 2.663693e-17
+#&gt; moisture      0.6036791 0.04391152 13.7476230 2.175868e-35
+#&gt; pH            5.2145676 0.45113489 11.5587772 8.421828e-27
+#&gt; litter       -1.4080600 0.19322689 -7.2870812 1.750851e-12
+#&gt; noise1        0.3927497 1.53730421  0.2554795 7.984864e-01
+#&gt; noise2        0.3417601 0.44895002  0.7612431 4.469684e-01</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">summary</span>(lm_add)<span class="sc">$</span>r.squared, <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 0.538</code></pre>
+</div>
+</div>
+<p>The additive linear model recovers a positive light effect, a positive moisture effect and a negative litter effect. None of these is wrong, and none of them is the structure that generated the data. An additive model has no way to represent “light matters only when moisture exceeds 25%”; it can only report an average light effect taken across wet and dry plots, which is too small in the wet plots and too large in the dry ones. Nor can it represent a step: a linear pH term spreads a discontinuity at 5.5 across the whole pH range.</p>
+<p>The remedy within the linear framework is to specify the interaction and the threshold explicitly. That requires knowing they are there. A tree searches for them.</p>
+</section>
+<section id="recursive-binary-splitting" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="recursive-binary-splitting">Recursive binary splitting</h3>
+<p>The algorithm is a greedy search. At each node, every predictor and every candidate split point is considered; the split chosen is the one that most reduces the residual sum of squares,</p>
+<p><span class="math display">\[
+\sum_{i \in R_{\text{left}}} (y_i - \bar y_{\text{left}})^2 +
+\sum_{i \in R_{\text{right}}} (y_i - \bar y_{\text{right}})^2 ,
+\]</span></p>
+<p>and the procedure then repeats within each of the two children until a stopping rule intervenes.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — The search is <strong>greedy</strong> because it takes the best split available now, without considering whether a worse split now would permit a better pair of splits later. The globally optimal tree is not found, and is not sought.</p>
+</div></div><p>Two properties follow immediately from the algorithm and are worth stating before any code is run. Predictors are never transformed and never scaled, because only the <em>order</em> of a numeric predictor matters to a split point: any monotone transformation of a predictor leaves the tree unchanged. And interactions are represented without being specified, because a split made below another split applies only within that branch.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> The converse of scale invariance is that a tree cannot extrapolate. Every prediction is an average of training observations, so predicted values are bounded by the range of the observed response. A tree fitted to plots with up to 60% cover will never predict 80%, whatever the predictors say.</p>
+</div></div><div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="do">## the partition</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">45</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.8</span>),</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Soil moisture (%)"</span>, <span class="at">ylab =</span> <span class="st">"Canopy openness"</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="dv">10</span>, <span class="dv">0</span>,   <span class="dv">25</span>, <span class="fl">0.8</span>, <span class="at">col =</span> <span class="st">"#e9eef2"</span>, <span class="at">border =</span> <span class="st">"grey30"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="dv">25</span>, <span class="dv">0</span>,   <span class="dv">45</span>, <span class="fl">0.35</span>, <span class="at">col =</span> <span class="st">"#cfdde6"</span>, <span class="at">border =</span> <span class="st">"grey30"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="dv">25</span>, <span class="fl">0.35</span>, <span class="dv">45</span>, <span class="fl">0.8</span>, <span class="at">col =</span> <span class="st">"#8fb3c7"</span>, <span class="at">border =</span> <span class="st">"grey30"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">17.5</span>, <span class="fl">0.40</span>, <span class="fu">expression</span>(R[<span class="dv">1</span>]), <span class="at">cex =</span> <span class="fl">1.2</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">35</span>,   <span class="fl">0.17</span>, <span class="fu">expression</span>(R[<span class="dv">2</span>]), <span class="at">cex =</span> <span class="fl">1.2</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">35</span>,   <span class="fl">0.58</span>, <span class="fu">expression</span>(R[<span class="dv">3</span>]), <span class="at">cex =</span> <span class="fl">1.2</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="do">## the same thing as a tree</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>), <span class="at">axes =</span> <span class="cn">FALSE</span>, <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(<span class="dv">5</span>, <span class="dv">9</span>, <span class="fl">2.5</span>, <span class="dv">7</span>); <span class="fu">segments</span>(<span class="dv">5</span>, <span class="dv">9</span>, <span class="fl">7.5</span>, <span class="dv">7</span>)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(<span class="fl">7.5</span>, <span class="fl">6.4</span>, <span class="fl">5.8</span>, <span class="fl">4.4</span>); <span class="fu">segments</span>(<span class="fl">7.5</span>, <span class="fl">6.4</span>, <span class="fl">9.2</span>, <span class="fl">4.4</span>)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">5</span>, <span class="fl">9.5</span>, <span class="st">"moisture &lt; 25"</span>, <span class="at">cex =</span> <span class="fl">0.95</span>)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">7.5</span>, <span class="fl">6.7</span>, <span class="st">"light &lt; 0.35"</span>, <span class="at">cex =</span> <span class="fl">0.95</span>)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">2.5</span>, <span class="fl">6.5</span>, <span class="fu">expression</span>(R[<span class="dv">1</span>]), <span class="at">cex =</span> <span class="fl">1.2</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">5.8</span>, <span class="fl">3.9</span>, <span class="fu">expression</span>(R[<span class="dv">2</span>]), <span class="at">cex =</span> <span class="fl">1.2</span>)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">9.2</span>, <span class="fl">3.9</span>, <span class="fu">expression</span>(R[<span class="dv">3</span>]), <span class="at">cex =</span> <span class="fl">1.2</span>)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">3.4</span>, <span class="fl">8.3</span>, <span class="st">"yes"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">col =</span> <span class="st">"grey40"</span>)</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">6.6</span>, <span class="fl">8.3</span>, <span class="st">"no"</span>,  <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">col =</span> <span class="st">"grey40"</span>)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-partition" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-partition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="10-trees-forests_files/figure-html/fig-partition-1.png" class="img-fluid figure-img" width="864">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-partition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.1: Left: a rectangular partition of two predictors, with the mean response predicted in each region. Right: the same partition written as a tree. Reading the tree from the root downwards reproduces the splits from the outside inwards.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The two panels are the same object. The tree is a compact notation for a partition, and the partition is what the model actually is. Regions are rectangles with sides parallel to the axes, which is both the strength of the method — the shape is found automatically — and its limitation, since a diagonal boundary must be approximated by a staircase.</p>
+</section>
+<section id="fitting-and-reading-a-tree" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="fitting-and-reading-a-tree">Fitting and reading a tree</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rpart)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>tree_full <span class="ot">&lt;-</span> <span class="fu">rpart</span>(f_reg, <span class="at">data =</span> plots, <span class="at">method =</span> <span class="st">"anova"</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                   <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="fl">0.002</span>, <span class="at">minsplit =</span> <span class="dv">10</span>, <span class="at">xval =</span> <span class="dv">10</span>))</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(tree_full, <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; n= 400 
+#&gt; 
+#&gt; node), split, n, deviance, yval
+#&gt;       * denotes terminal node
+#&gt; 
+#&gt;   1) root 400 66600.00 25.60  
+#&gt;     2) moisture&lt; 25 176 13300.00 17.40  
+#&gt;       4) pH&lt; 5.5 90  4030.00 12.20  
+#&gt;         8) litter&gt;=4.4 37  1120.00  8.58  
+#&gt;          16) pH&lt; 4.58 18   402.00  6.18 *
+#&gt;          17) pH&gt;=4.58 19   516.00 10.90  
+#&gt;            34) pH&gt;=4.92 10   226.00  7.91 *
+#&gt;            35) pH&lt; 4.92 9   108.00 14.10 *
+#&gt;         9) litter&lt; 4.4 53  2060.00 14.80  
+#&gt;          18) light&gt;=0.631 9   236.00  9.75 *
+#&gt;          19) light&lt; 0.631 44  1550.00 15.80  
+#&gt;            38) litter&gt;=1.31 32  1070.00 14.40  
+#&gt;              76) moisture&lt; 14.8 16   254.00 12.20 *
+#&gt;              77) moisture&gt;=14.8 16   666.00 16.50  
+#&gt;               154) pH&gt;=4.98 4     5.47 10.80 *
+#&gt;               155) pH&lt; 4.98 12   487.00 18.40 *
+#&gt;            39) litter&lt; 1.31 12   240.00 19.70 *
+#&gt;       5) pH&gt;=5.5 86  4370.00 22.80  
+#&gt;        10) litter&gt;=1.46 71  2820.00 21.30  
+#&gt;          20) noise2&lt; -0.144 33   867.00 18.80  
+#&gt;            40) moisture&gt;=16.8 22   597.00 17.30 *
+#&gt;            41) moisture&lt; 16.8 11   127.00 21.70 *
+#&gt;          21) noise2&gt;=-0.144 38  1560.00 23.50  
+#&gt;            42) litter&gt;=4.06 25   965.00 21.30  
+#&gt;              84) noise1&gt;=0.484 14   567.00 19.10  
+#&gt;               168) litter&gt;=6.26 3    97.90 11.10 *
+#&gt;               169) litter&lt; 6.26 11   223.00 21.30 *
+#&gt;              85) noise1&lt; 0.484 11   240.00 24.20 *
+#&gt;            43) litter&lt; 4.06 13   251.00 27.70 *
+#&gt;        11) litter&lt; 1.46 15   672.00 29.70  
+#&gt;          22) litter&gt;=0.716 9   428.00 27.10 *
+#&gt;          23) litter&lt; 0.716 6    84.20 33.70 *
+#&gt;     3) moisture&gt;=25 224 31900.00 32.10  
+#&gt;       6) light&lt; 0.349 101  8160.00 24.50  
+#&gt;        12) pH&lt; 5.47 54  3520.00 19.60  
+#&gt;          24) light&lt; 0.267 40  2180.00 17.30  
+#&gt;            48) litter&gt;=2.31 27  1030.00 14.20  
+#&gt;              96) light&lt; 0.0708 4    62.20  6.79 *
+#&gt;              97) light&gt;=0.0708 23   709.00 15.50 *
+#&gt;            49) litter&lt; 2.31 13   379.00 23.60 *
+#&gt;          25) light&gt;=0.267 14   534.00 26.10  
+#&gt;            50) litter&gt;=7.12 3    10.40 19.20 *
+#&gt;            51) litter&lt; 7.12 11   342.00 28.00 *
+#&gt;        13) pH&gt;=5.47 47  1860.00 30.10  
+#&gt;          26) litter&gt;=1.58 40  1180.00 28.70  
+#&gt;            52) light&lt; 0.222 22   627.00 26.40 *
+#&gt;            53) light&gt;=0.222 18   292.00 31.60 *
+#&gt;          27) litter&lt; 1.58 7   194.00 37.80 *
+#&gt;       7) light&gt;=0.349 123 12900.00 38.40  
+#&gt;        14) pH&lt; 5.5 60  3890.00 32.40  
+#&gt;          28) light&lt; 0.647 37  2050.00 29.00  
+#&gt;            56) litter&gt;=4.09 22   561.00 25.30  
+#&gt;             112) litter&gt;=7.26 5    89.00 19.90 *
+#&gt;             113) litter&lt; 7.26 17   284.00 26.80  
+#&gt;               226) light&lt; 0.519 6    61.90 23.00 *
+#&gt;               227) light&gt;=0.519 11    85.30 28.90 *
+#&gt;            57) litter&lt; 4.09 15   742.00 34.40  
+#&gt;             114) light&lt; 0.498 6   175.00 29.00 *
+#&gt;             115) light&gt;=0.498 9   272.00 38.00 *
+#&gt;          29) light&gt;=0.647 23   730.00 37.80  
+#&gt;            58) moisture&gt;=31 17   470.00 36.40 *
+#&gt;            59) moisture&lt; 31 6   122.00 42.00 *
+#&gt;        15) pH&gt;=5.5 63  4700.00 44.20  
+#&gt;          30) litter&gt;=4.67 34  1610.00 39.10  
+#&gt;            60) light&lt; 0.629 25   902.00 37.10  
+#&gt;             120) noise1&lt; 0.177 5    82.80 29.80 *
+#&gt;             121) noise1&gt;=0.177 20   486.00 38.90 *
+#&gt;            61) light&gt;=0.629 9   296.00 44.90 *
+#&gt;          31) litter&lt; 4.67 29  1200.00 50.20  
+#&gt;            62) light&lt; 0.736 20   385.00 47.10 *
+#&gt;            63) light&gt;=0.736 9   209.00 56.90 *</code></pre>
+</div>
+</div>
+<p>Each line of the printed output is a node. It gives the node number, the split that defines it, the number of observations reaching it, the deviance (the within-node sum of squares), and the predicted value, which for a regression tree is the node mean. An asterisk marks a terminal node, or leaf. The indentation records the hierarchy: node 2 and node 3 are the children of the root, nodes 4 and 5 the children of node 2.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>draw_tree <span class="ot">&lt;-</span> <span class="cf">function</span>(fit, ...) {</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"rpart.plot"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    rpart.plot<span class="sc">::</span><span class="fu">rpart.plot</span>(fit, ...)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(fit, <span class="at">margin =</span> <span class="fl">0.05</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">text</span>(fit, <span class="at">use.n =</span> <span class="cn">TRUE</span>, <span class="at">cex =</span> <span class="fl">0.7</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="fu">draw_tree</span>(tree_full, <span class="at">type =</span> <span class="dv">2</span>, <span class="at">extra =</span> <span class="dv">101</span>, <span class="at">tweak =</span> <span class="fl">0.9</span>,</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>           <span class="at">box.palette =</span> <span class="st">"Blues"</span>, <span class="at">main =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="10-trees-forests_files/figure-html/plot-tree-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Each box reports the predicted cover, the number of plots reaching the node and that number as a percentage of the total. The first split should be inspected closely: the variable chosen there is the one that most reduces the total sum of squares, and in a well-behaved data set it is the dominant predictor. The first split is not always trustworthy, however — a single extreme observation can motivate a split that isolates it.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> The tree grown here is deliberately too large: <code>cp = 0.002</code> permits splits that improve the fit only slightly. It is the starting point for pruning, not a model to interpret.</p>
+</div></div><p>The algorithm’s handling of the two noise predictors is worth checking in the printed tree. Because the search is greedy and exhaustive, a noise variable will occasionally produce the best split available in a small node purely by chance. This is not a malfunction; it is overfitting, and it is what pruning exists to remove.</p>
+</section>
+<section id="the-split-search-from-scratch" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="the-split-search-from-scratch">The split search, from scratch</h3>
+<p>The search for the best split looks expensive: for every candidate cut-point, two means and two sums of squares. It is cheap, because of an identity. Splitting a node of <span class="math inline">\(n\)</span> observations into a left part of <span class="math inline">\(n_L\)</span> and a right part of <span class="math inline">\(n_R\)</span> reduces the residual sum of squares by</p>
+<p><span class="math display">\[
+\text{RSS}_{\text{parent}} - \big(\text{RSS}_L + \text{RSS}_R\big) = \frac{n_L\,n_R}{n}\,\big(\bar y_L - \bar y_R\big)^2 .
+\]</span></p>
+<p>This is the between-group sum of squares of Day 1 for two groups. The gain is large when the two means differ strongly <em>and</em> both parts are reasonably large; the factor <span class="math inline">\(n_Ln_R/n\)</span> is what discourages splitting off a single extreme point. Only the two means are needed, and after sorting the predictor once they are available for every cut-point from a running sum.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>best_split <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y) {</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  o <span class="ot">&lt;-</span> <span class="fu">order</span>(x); x <span class="ot">&lt;-</span> x[o]; y <span class="ot">&lt;-</span> y[o]</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  n  <span class="ot">&lt;-</span> <span class="fu">length</span>(y)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  nL <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>(n <span class="sc">-</span> <span class="dv">1</span>); nR <span class="ot">&lt;-</span> n <span class="sc">-</span> nL                  <span class="co"># sizes for every possible cut</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  sL <span class="ot">&lt;-</span> <span class="fu">cumsum</span>(y)[nL]; sR <span class="ot">&lt;-</span> <span class="fu">sum</span>(y) <span class="sc">-</span> sL         <span class="co"># running sums give the two means</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  gain <span class="ot">&lt;-</span> nL <span class="sc">*</span> nR <span class="sc">/</span> n <span class="sc">*</span> (sL <span class="sc">/</span> nL <span class="sc">-</span> sR <span class="sc">/</span> nR)<span class="sc">^</span><span class="dv">2</span>    <span class="co"># reduction in RSS</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  gain[x[nL] <span class="sc">==</span> x[nL <span class="sc">+</span> <span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="sc">-</span><span class="cn">Inf</span>               <span class="co"># cannot cut between equal values</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  i <span class="ot">&lt;-</span> <span class="fu">which.max</span>(gain)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">cut =</span> (x[i] <span class="sc">+</span> x[i <span class="sc">+</span> <span class="dv">1</span>]) <span class="sc">/</span> <span class="dv">2</span>, <span class="at">gain =</span> gain[i])</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">all.vars</span>(f_reg)[<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">t</span>(<span class="fu">sapply</span>(plots[vars], best_split, <span class="at">y =</span> plots<span class="sc">$</span>cover)), <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;            cut     gain
+#&gt; light     0.54  5694.98
+#&gt; moisture 25.03 21407.56
+#&gt; pH        5.50 12841.96
+#&gt; litter    1.77  4911.82
+#&gt; noise1    0.83   938.47
+#&gt; noise2    3.01   603.26</code></pre>
+</div>
+</div>
+<p>Each row is the best cut for one predictor at the root. Moisture wins by a wide margin, at a cut-point next to the true threshold of 25, and the two noise variables offer the smallest gains. <code>rpart</code> made the same choice:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>tree_full<span class="sc">$</span>splits[<span class="dv">1</span>, <span class="fu">c</span>(<span class="st">"count"</span>, <span class="st">"index"</span>, <span class="st">"improve"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;       count       index     improve 
+#&gt; 400.0000000  25.0282449   0.3214055</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>total_ss <span class="ot">&lt;-</span> <span class="fu">sum</span>((plots<span class="sc">$</span>cover <span class="sc">-</span> <span class="fu">mean</span>(plots<span class="sc">$</span>cover))<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">gain_as_fraction_of_total =</span> <span class="fu">unname</span>(<span class="fu">best_split</span>(plots<span class="sc">$</span>moisture, plots<span class="sc">$</span>cover)[<span class="st">"gain"</span>]) <span class="sc">/</span> total_ss)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; gain_as_fraction_of_total 
+#&gt;                 0.3214055</code></pre>
+</div>
+</div>
+<p><code>rpart</code> reports the improvement as a fraction of the node’s sum of squares, which matches the gain computed by hand.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — One node costs a sort per predictor: of the order of <span class="math inline">\(p\,n\log n\)</span> operations. A whole tree costs roughly that times its depth. This is why trees, and forests of hundreds of trees, are feasible on large data.</p>
+</div></div></section>
+</section>
+<section id="growing-and-pruning" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="growing-and-pruning">Growing and pruning</h2>
+<section id="why-the-unpruned-tree-is-a-saturated-model" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="why-the-unpruned-tree-is-a-saturated-model">Why the unpruned tree is a saturated model</h3>
+<p>Left alone, recursive splitting continues until every leaf holds a single observation. At that point the training residual sum of squares is zero and the tree reproduces the data exactly. Day 1 named this situation: a model with as many parameters as observations has no residual degrees of freedom, fits perfectly, and reveals nothing about the population.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — A fully grown tree is the saturated model of Day 1 arrived at by a different route. The problem is the same and so is the diagnosis; only the remedy is new, because the flexibility of a tree cannot be counted in parameters.</p>
+</div></div><p>The difficulty is that the number of leaves is not a usable parameter count. A tree with eight leaves has consumed far more than eight degrees of freedom, because the split points and split variables were themselves chosen by searching the data. There is no simple correction, which is why AIC is not the tool here.</p>
+</section>
+<section id="cost-complexity-pruning" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="cost-complexity-pruning">Cost-complexity pruning</h3>
+<p>The standard approach grows a large tree deliberately and then removes branches, trading fit against size. For a tree <span class="math inline">\(T\)</span> with <span class="math inline">\(|T|\)</span> terminal nodes, define</p>
+<p><span class="math display">\[
+R_\alpha(T) = R(T) + \alpha \, |T|,
+\]</span></p>
+<p>where <span class="math inline">\(R(T)\)</span> is the training error — the residual sum of squares for a regression tree — and <span class="math inline">\(\alpha \ge 0\)</span> is the complexity parameter. For each value of <span class="math inline">\(\alpha\)</span> there is a unique smallest subtree minimising <span class="math inline">\(R_\alpha\)</span>, and as <span class="math inline">\(\alpha\)</span> increases the sequence of these subtrees is nested: branches are pruned away in a fixed order, never rearranged.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — <code>rpart</code> reports a scaled version of <span class="math inline">\(\alpha\)</span> called <strong><code>cp</code></strong>, expressed relative to the error of the root-only tree. A split is attempted only if it improves the relative error by at least <code>cp</code>.</p>
+</div></div><p>Pruning backwards rather than stopping early matters. A split that appears weak can enable a highly informative split beneath it. In our simulation the split on moisture is useful in itself, but much of its value lies in the light split it makes possible in the wet branch. A rule that judged every split only by its immediate gain would undervalue that structure.</p>
+</section>
+<section id="choosing-the-complexity-parameter-by-cross-validation" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="choosing-the-complexity-parameter-by-cross-validation">Choosing the complexity parameter by cross-validation</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">printcp</span>(tree_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Regression tree:
+#&gt; rpart(formula = f_reg, data = plots, method = "anova", control = rpart.control(cp = 0.002, 
+#&gt;     minsplit = 10, xval = 10))
+#&gt; 
+#&gt; Variables actually used in tree construction:
+#&gt; [1] light    litter   moisture noise1   noise2   pH      
+#&gt; 
+#&gt; Root node error: 66606/400 = 166.52
+#&gt; 
+#&gt; n= 400 
+#&gt; 
+#&gt;           CP nsplit rel error  xerror     xstd
+#&gt; 1  0.3214055      0   1.00000 1.00599 0.066152
+#&gt; 2  0.1624993      1   0.67859 0.69843 0.048457
+#&gt; 3  0.0736406      2   0.51610 0.54178 0.035212
+#&gt; 4  0.0648680      3   0.44245 0.48958 0.034719
+#&gt; 5  0.0417466      4   0.37759 0.41128 0.029982
+#&gt; 6  0.0284490      5   0.33584 0.37014 0.027398
+#&gt; 7  0.0167355      6   0.30739 0.36508 0.030556
+#&gt; 8  0.0131848      7   0.29066 0.37340 0.031630
+#&gt; 9  0.0126092      8   0.27747 0.38276 0.031616
+#&gt; 10 0.0121615      9   0.26486 0.38009 0.031476
+#&gt; 11 0.0114862     10   0.25270 0.38564 0.031670
+#&gt; 12 0.0111702     11   0.24121 0.38177 0.031665
+#&gt; 13 0.0090435     12   0.23004 0.37478 0.031309
+#&gt; 14 0.0072725     13   0.22100 0.36208 0.031123
+#&gt; 15 0.0061800     14   0.21373 0.34740 0.026835
+#&gt; 16 0.0058748     15   0.20755 0.34117 0.026905
+#&gt; 17 0.0052173     16   0.20167 0.35299 0.028910
+#&gt; 18 0.0050098     17   0.19646 0.35604 0.029102
+#&gt; 19 0.0044298     18   0.19145 0.35359 0.029118
+#&gt; 20 0.0041338     19   0.18702 0.36935 0.029154
+#&gt; 21 0.0039155     20   0.18288 0.36874 0.029153
+#&gt; 22 0.0039101     21   0.17897 0.36857 0.029173
+#&gt; 23 0.0036804     22   0.17506 0.37272 0.029183
+#&gt; 24 0.0030409     23   0.17138 0.38032 0.029622
+#&gt; 25 0.0030323     25   0.16529 0.37854 0.029180
+#&gt; 26 0.0028260     26   0.16226 0.38122 0.029182
+#&gt; 27 0.0027414     27   0.15944 0.37534 0.028756
+#&gt; 28 0.0027346     28   0.15669 0.37597 0.028749
+#&gt; 29 0.0024090     29   0.15396 0.38631 0.028860
+#&gt; 30 0.0023926     31   0.14914 0.39044 0.029046
+#&gt; 31 0.0021432     32   0.14675 0.39238 0.029576
+#&gt; 32 0.0020850     33   0.14461 0.39715 0.029568
+#&gt; 33 0.0020579     34   0.14252 0.39809 0.029702
+#&gt; 34 0.0020000     35   0.14046 0.40189 0.029740</code></pre>
+</div>
+</div>
+<p>The table has one row per value of <code>cp</code> in the pruning sequence. <code>rel error</code> is the training error, which falls monotonically; <code>xerror</code> is the ten-fold cross-validated error, computed internally by <code>rpart</code> because <code>xval = 10</code> was set; and <code>xstd</code> is its standard error across folds. The cross-validated column is the one to read. It falls and then rises, and the size of the tree at its minimum is the size supported by the data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotcp</span>(tree_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="10-trees-forests_files/figure-html/plotcp-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The plot shows the same information: cross-validated relative error against tree size, with vertical bars giving one standard error either side. The dotted horizontal line sits one standard error above the minimum.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>↪</strong> This is the cross-validation of Day 7, run inside <code>rpart</code> rather than written out by hand. The folds are drawn on the training data, and the selected <code>cp</code> is a tuning parameter chosen in an inner loop.</p>
+</div></div><div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>cp_tab <span class="ot">&lt;-</span> tree_full<span class="sc">$</span>cptable</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>i_min  <span class="ot">&lt;-</span> <span class="fu">which.min</span>(cp_tab[, <span class="st">"xerror"</span>])</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>cp_min <span class="ot">&lt;-</span> cp_tab[i_min, <span class="st">"CP"</span>]</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>thresh <span class="ot">&lt;-</span> cp_tab[i_min, <span class="st">"xerror"</span>] <span class="sc">+</span> cp_tab[i_min, <span class="st">"xstd"</span>]</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>i_1se  <span class="ot">&lt;-</span> <span class="fu">min</span>(<span class="fu">which</span>(cp_tab[, <span class="st">"xerror"</span>] <span class="sc">&lt;=</span> thresh))</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>cp_1se <span class="ot">&lt;-</span> cp_tab[i_1se, <span class="st">"CP"</span>]</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">minimum   =</span> <span class="fu">c</span>(<span class="at">cp =</span> cp_min, <span class="at">size =</span> cp_tab[i_min, <span class="st">"nsplit"</span>] <span class="sc">+</span> <span class="dv">1</span>),</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">one_se    =</span> <span class="fu">c</span>(<span class="at">cp =</span> cp_1se, <span class="at">size =</span> cp_tab[i_1se, <span class="st">"nsplit"</span>] <span class="sc">+</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;                  cp size
+#&gt; minimum 0.005874789   16
+#&gt; one_se  0.016735547    7</code></pre>
+</div>
+</div>
+<p>Two defensible choices are shown. The first takes the <code>cp</code> with the lowest cross-validated error. The second applies the <strong>one-standard-error rule</strong>: among all trees whose cross-validated error lies within one standard error of the minimum, take the smallest. The rule acknowledges that the cross-validated errors are themselves estimates, so a difference smaller than their own uncertainty is not evidence of a better model, and prefers the simpler tree when the evidence does not distinguish them.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — The one-standard-error rule is a general device, not a tree-specific one. It was introduced on Day 7 and also chose <span class="math inline">\(\lambda\)</span> on Day 9.</p>
+</div></div><div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>tree_pruned <span class="ot">&lt;-</span> <span class="fu">prune</span>(tree_full, <span class="at">cp =</span> cp_1se)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">draw_tree</span>(tree_pruned, <span class="at">type =</span> <span class="dv">2</span>, <span class="at">extra =</span> <span class="dv">101</span>, <span class="at">tweak =</span> <span class="fl">0.9</span>,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">box.palette =</span> <span class="st">"Blues"</span>, <span class="at">main =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="10-trees-forests_files/figure-html/pruned-tree-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The pruned tree should be compared against the generating process stated above. A split on moisture near 25, with a light split appearing only in the wet branch, is the interaction recovered without having been specified. A split on pH near 5.5 is the threshold recovered without having been specified. Litter, whose effect is linear and moderate, is approximated by whatever staircase the remaining splits can afford.</p>
+</section>
+</section>
+<section id="classification-trees" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="classification-trees">Classification trees</h2>
+<section id="the-same-algorithm-a-different-criterion" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="the-same-algorithm-a-different-criterion">The same algorithm, a different criterion</h3>
+<p>For a categorical response the partition is built in exactly the same way, and only the quantity minimised changes. A leaf predicts the majority class among its training observations, and reports the class proportions alongside it.</p>
+<p>Three measures of node impurity are in use. For a node <span class="math inline">\(m\)</span> with class proportions <span class="math inline">\(\hat p_{mk}\)</span>:</p>
+<p><span class="math display">\[
+\text{misclassification error} \quad E = 1 - \max_k \hat p_{mk},
+\]</span> <span class="math display">\[
+\text{Gini index} \quad G = \sum_{k=1}^{K} \hat p_{mk} (1 - \hat p_{mk}),
+\]</span> <span class="math display">\[
+\text{cross-entropy} \quad D = -\sum_{k=1}^{K} \hat p_{mk} \log \hat p_{mk}.
+\]</span></p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>↪</strong> Cross-entropy is the Shannon entropy of the class distribution within the node. Day 6 introduced it and connected it to deviance and AIC.</p>
+</div></div><div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fl">0.0005</span>, <span class="fl">0.9995</span>, <span class="at">length.out =</span> <span class="dv">600</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>gini <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>ent  <span class="ot">&lt;-</span> <span class="sc">-</span>(p <span class="sc">*</span> <span class="fu">log2</span>(p) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> p) <span class="sc">*</span> <span class="fu">log2</span>(<span class="dv">1</span> <span class="sc">-</span> p)) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>err  <span class="ot">&lt;-</span> <span class="fu">pmin</span>(p, <span class="dv">1</span> <span class="sc">-</span> p)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(p, ent, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"firebrick"</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.55</span>),</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="fu">expression</span>(<span class="fu">hat</span>(p)), <span class="at">ylab =</span> <span class="st">"impurity"</span>)</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(p, gini, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"steelblue"</span>)</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(p, err,  <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"grey35"</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">1</span>),</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"grey35"</span>, <span class="st">"steelblue"</span>, <span class="st">"firebrick"</span>),</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"misclassification error"</span>, <span class="st">"Gini index"</span>,</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"cross-entropy (halved)"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-impurity" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-impurity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="10-trees-forests_files/figure-html/fig-impurity-1.png" class="img-fluid figure-img" width="624">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-impurity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.2: The three node-impurity measures for a two-class node, as a function of the proportion of the first class. Cross-entropy is halved so that all three share the same maximum. The misclassification rate is piecewise linear and has zero gradient nowhere except at its peak.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The figure explains why trees are grown with Gini or entropy rather than with the error rate. All three are zero at a pure node and maximal at an even split, but the error rate is piecewise linear: splitting a node with proportions <span class="math inline">\((0.8, 0.2)\)</span> into two children with proportions <span class="math inline">\((0.9, 0.1)\)</span> and <span class="math inline">\((0.7, 0.3)\)</span> leaves the total error rate unchanged, so the split appears worthless. Gini and entropy are strictly concave and reward the increase in purity. The error rate is nevertheless the right criterion for <em>pruning</em>, where predictive accuracy is the target.</p>
+<p>The claim about the <span class="math inline">\((0.8, 0.2)\)</span> node is easily checked. The split produces two children of equal size.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>gini_2 <span class="ot">&lt;-</span> <span class="cf">function</span>(p) <span class="dv">2</span> <span class="sc">*</span> p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>err_2  <span class="ot">&lt;-</span> <span class="cf">function</span>(p) <span class="fu">pmin</span>(p, <span class="dv">1</span> <span class="sc">-</span> p)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">error_before =</span> <span class="fu">err_2</span>(<span class="fl">0.8</span>),  <span class="at">error_after =</span> <span class="fu">mean</span>(<span class="fu">err_2</span>(<span class="fu">c</span>(<span class="fl">0.9</span>, <span class="fl">0.7</span>))),</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">gini_before  =</span> <span class="fu">gini_2</span>(<span class="fl">0.8</span>), <span class="at">gini_after  =</span> <span class="fu">mean</span>(<span class="fu">gini_2</span>(<span class="fu">c</span>(<span class="fl">0.9</span>, <span class="fl">0.7</span>))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; error_before  error_after  gini_before   gini_after 
+#&gt;         0.20         0.20         0.32         0.30</code></pre>
+</div>
+</div>
+<p>The error rate does not move, while the Gini index falls: one child has become purer, and a later split can exploit that.</p>
+</section>
+<section id="fitting" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="fitting">Fitting</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>tree_cls <span class="ot">&lt;-</span> <span class="fu">rpart</span>(f_cls, <span class="at">data =</span> plots, <span class="at">method =</span> <span class="st">"class"</span>,</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">parms =</span> <span class="fu">list</span>(<span class="at">split =</span> <span class="st">"gini"</span>),</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="fl">0.005</span>, <span class="at">xval =</span> <span class="dv">10</span>))</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(tree_cls, <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; n= 400 
+#&gt; 
+#&gt; node), split, n, loss, yval, (yprob)
+#&gt;       * denotes terminal node
+#&gt; 
+#&gt;   1) root 400 130 absent (0.675 0.325)  
+#&gt;     2) moisture&lt; 24.8 171  26 absent (0.848 0.152) *
+#&gt;     3) moisture&gt;=24.8 229 104 absent (0.546 0.454)  
+#&gt;       6) light&lt; 0.396 111  29 absent (0.739 0.261)  
+#&gt;        12) pH&lt; 5.47 58   8 absent (0.862 0.138) *
+#&gt;        13) pH&gt;=5.47 53  21 absent (0.604 0.396)  
+#&gt;          26) noise2&lt; 0.932 43  14 absent (0.674 0.326)  
+#&gt;            52) noise2&gt;=0.0582 18   2 absent (0.889 0.111) *
+#&gt;            53) noise2&lt; 0.0582 25  12 absent (0.520 0.480)  
+#&gt;             106) light&gt;=0.149 16   5 absent (0.688 0.312) *
+#&gt;             107) light&lt; 0.149 9   2 present (0.222 0.778) *
+#&gt;          27) noise2&gt;=0.932 10   3 present (0.300 0.700) *
+#&gt;       7) light&gt;=0.396 118  43 present (0.364 0.636)  
+#&gt;        14) pH&lt; 4.72 28   9 absent (0.679 0.321) *
+#&gt;        15) pH&gt;=4.72 90  24 present (0.267 0.733)  
+#&gt;          30) noise2&lt; -0.496 23  11 present (0.478 0.522)  
+#&gt;            60) moisture&lt; 30.8 7   2 absent (0.714 0.286) *
+#&gt;            61) moisture&gt;=30.8 16   6 present (0.375 0.625) *
+#&gt;          31) noise2&gt;=-0.496 67  13 present (0.194 0.806) *</code></pre>
+</div>
+</div>
+<p>The printed output has one extra column compared with the regression case. After the node size comes the <strong>loss</strong> — the number of observations in the node not belonging to the predicted class — followed by the predicted class and the class probabilities in parentheses. A node reading <code>120 18 present (0.15 0.85)</code> contains 120 plots of which 18 are not moss-present, and predicts presence with probability 0.85.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">draw_tree</span>(tree_cls, <span class="at">type =</span> <span class="dv">2</span>, <span class="at">extra =</span> <span class="dv">104</span>, <span class="at">tweak =</span> <span class="fl">0.9</span>,</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">box.palette =</span> <span class="st">"BuGn"</span>, <span class="at">main =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="10-trees-forests_files/figure-html/plot-class-tree-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><code>extra = 104</code> displays the fitted class probabilities together with the percentage of observations at each node, which is the most informative layout for a classification tree: the predicted class alone conceals the difference between a leaf that is 51% present and one that is 98% present.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>cp_cls  <span class="ot">&lt;-</span> tree_cls<span class="sc">$</span>cptable</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>i_min_c <span class="ot">&lt;-</span> <span class="fu">which.min</span>(cp_cls[, <span class="st">"xerror"</span>])</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>tree_cls_p <span class="ot">&lt;-</span> <span class="fu">prune</span>(tree_cls, <span class="at">cp =</span> cp_cls[i_min_c, <span class="st">"CP"</span>])</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">leaves_before =</span> <span class="fu">sum</span>(tree_cls<span class="sc">$</span>frame<span class="sc">$</span>var <span class="sc">==</span> <span class="st">"&lt;leaf&gt;"</span>),</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">leaves_after  =</span> <span class="fu">sum</span>(tree_cls_p<span class="sc">$</span>frame<span class="sc">$</span>var <span class="sc">==</span> <span class="st">"&lt;leaf&gt;"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; leaves_before  leaves_after 
+#&gt;            10             4</code></pre>
+</div>
+</div>
+<p>Pruning proceeds exactly as for the regression tree, using the cross-validated error column of the <code>cptable</code>. The <code>frame</code> component of a fitted <code>rpart</code> object records one row per node, with the splitting variable or the marker <code>&lt;leaf&gt;</code>, so counting leaves is a matter of counting that marker.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>↪</strong> A classification tree outputs a probability at each leaf. Day 8 showed how such scores are evaluated with confusion matrices and ROC curves. A pruned tree can output only as many distinct probabilities as it has leaves, so its ROC curve has few corners; averaging many trees removes that limitation.</p>
+</div></div></section>
+</section>
+<section id="a-single-tree-is-a-weak-learner" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="a-single-tree-is-a-weak-learner">A single tree is a weak learner</h2>
+<section id="instability" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="instability">Instability</h3>
+<p>The defect that motivates everything in the rest of the chapter is easiest to see than to describe. We refit the tree on four bootstrap resamples of the same data.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — A <strong>weak learner</strong> performs only slightly better than a trivial baseline: better than chance for classification, better than the intercept-only model for regression. Weakness is not a disqualification; it is the input to an ensemble.</p>
+</div></div><div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">562</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (b <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>) {</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  boot_rows <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">nrow</span>(plots), <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  tree_b <span class="ot">&lt;-</span> <span class="fu">rpart</span>(f_reg, <span class="at">data =</span> plots[boot_rows, ], <span class="at">method =</span> <span class="st">"anova"</span>,</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>                  <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="fl">0.03</span>))</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">draw_tree</span>(tree_b, <span class="at">type =</span> <span class="dv">2</span>, <span class="at">extra =</span> <span class="dv">0</span>, <span class="at">tweak =</span> <span class="fl">1.1</span>,</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>             <span class="at">box.palette =</span> <span class="st">"Blues"</span>, <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"resample"</span>, b))</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="10-trees-forests_files/figure-html/instability-1.png" class="img-fluid figure-img" width="864"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The four trees are fitted to data sets that differ only through resampling, and yet they differ in which variable is split first, where the split points fall, and sometimes in which variables appear at all. The greedy search is the cause: once the root split changes, everything beneath it is fitted to different subsets, so a small perturbation near the top propagates into a completely different structure.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> The instability is a property of the fitted structure, not necessarily of the predictions. Two visibly different trees may predict similarly. The consequence is that the <em>interpretation</em> of a single tree — “pH is the most important variable, and the cutoff is 5.5” — is far less reliable than it looks.</p>
+</div></div></section>
+<section id="the-variance-problem-stated" class="level3">
+<h3 class="anchored" data-anchor-id="the-variance-problem-stated">The variance problem, stated</h3>
+<p>In the language of the bias–variance decomposition, a deep tree has low bias and high variance. It can approximate almost any structure given enough splits, so it is not systematically wrong; but the particular structure it produces depends heavily on the particular sample, so it is unreliable.</p>
+<p>High variance is the easier of the two problems to attack, because variance is reduced by averaging. If <span class="math inline">\(B\)</span> independent estimates each have variance <span class="math inline">\(\sigma^2\)</span>, their mean has variance <span class="math inline">\(\sigma^2 / B\)</span>. The obstacle is that we have only one data set and therefore only one tree. That obstacle was removed on Day 7.</p>
+</section>
+</section>
+<section id="bagging" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="bagging">Bagging</h2>
+<section id="bootstrap-aggregating" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="bootstrap-aggregating">Bootstrap aggregating</h3>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — <strong>Bagging</strong> draws <span class="math inline">\(B\)</span> bootstrap resamples of the training data, fits a deep unpruned tree to each, and averages their predictions (for regression) or takes a majority vote (for classification).</p>
+</div></div><p><span class="math display">\[
+\hat f_{\text{bag}}(x) = \frac{1}{B} \sum_{b=1}^{B} \hat f^{\,b}(x)
+\]</span></p>
+<p>Two details of the recipe deserve attention. The individual trees are grown <em>deep and unpruned</em>: pruning would reduce their variance, but variance is what the averaging is for, and pruning would raise their bias, which averaging cannot repair. And <span class="math inline">\(B\)</span> is not a tuning parameter. Increasing it can only reduce the variance of the ensemble, so it is set as large as the computing budget allows and never chosen by cross-validation.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>↪</strong> Day 7 established that a bootstrap resample omits about 37% of the rows. Those omitted rows are about to become useful.</p>
+</div></div></section>
+<section id="why-the-trees-must-differ" class="level3">
+<h3 class="anchored" data-anchor-id="why-the-trees-must-differ">Why the trees must differ</h3>
+<p>The averaging argument above assumed independence, which bootstrap resamples of one data set certainly are not: they share most of their rows. If the individual predictions have variance <span class="math inline">\(\sigma^2\)</span> and pairwise correlation <span class="math inline">\(\rho\)</span>, the variance of their average is</p>
+<p><span class="math display">\[
+\mathrm{Var}\!\left(\hat f_{\text{bag}}\right)
+  = \sigma^2 \left( \rho + \frac{1 - \rho}{B} \right).
+\]</span></p>
+<p>The formula follows from the three lines that gave the design effect on Day 7. The variance of a sum is the sum of all variances and covariances. There are <span class="math inline">\(B\)</span> variances <span class="math inline">\(\sigma^2\)</span> and <span class="math inline">\(B(B-1)\)</span> covariances <span class="math inline">\(\rho\sigma^2\)</span>, so</p>
+<p><span class="math display">\[
+\mathrm{Var}\!\left(\frac1B\sum_{b=1}^B \hat f^{\,b}\right)
+= \frac{1}{B^2}\Big[B\,\sigma^2 + B(B-1)\,\rho\,\sigma^2\Big]
+= \rho\,\sigma^2 + \frac{(1-\rho)\,\sigma^2}{B} .
+\]</span></p>
+<p>Correlated trees are the clustered observations of Day 7 in a new guise: a hundred trees that all make the same mistake carry the information of one.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>B_seq <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">200</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>rhos  <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>cols  <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"grey25"</span>, <span class="st">"steelblue"</span>, <span class="st">"darkorange3"</span>, <span class="st">"firebrick"</span>)</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">200</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">xlab =</span> <span class="st">"number of trees, B"</span>,</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="fu">expression</span>(<span class="fu">Var</span>(<span class="fu">bar</span>(f)) <span class="sc">/</span> sigma<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(rhos)) {</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(B_seq, rhos[i] <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> rhos[i]) <span class="sc">/</span> B_seq, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> cols[i])</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>(<span class="at">h =</span> rhos[i], <span class="at">lty =</span> <span class="dv">3</span>, <span class="at">col =</span> cols[i])</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> cols,</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">paste</span>(<span class="st">"rho ="</span>, rhos))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-bagvar" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bagvar-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="10-trees-forests_files/figure-html/fig-bagvar-1.png" class="img-fluid figure-img" width="624">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bagvar-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.3: Variance of an ensemble average, relative to the variance of a single member, as the number of members grows. Each curve is a different pairwise correlation between members. The second term vanishes with B; the first does not.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The figure contains the entire argument for random forests. The second term falls away as <span class="math inline">\(B\)</span> grows, but the first does not: the ensemble variance has a floor at <span class="math inline">\(\rho \sigma^2\)</span>, however many trees are grown. Adding trees beyond a few hundred is therefore pointless, and the only remaining way to improve the ensemble is to reduce the correlation between its members.</p>
+<p>Correlation between bagged trees is high whenever one predictor dominates, because every resample will choose it for the root split and the trees will all share their most consequential decision.</p>
+</section>
+<section id="out-of-bag-error" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="out-of-bag-error">Out-of-bag error</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">101</span>)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>bag_fit <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(f_reg, <span class="at">data =</span> plots, <span class="at">mtry =</span> <span class="dv">6</span>, <span class="at">ntree =</span> <span class="dv">500</span>,</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>                        <span class="at">importance =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>bag_fit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt;  randomForest(formula = f_reg, data = plots, mtry = 6, ntree = 500,      importance = TRUE) 
+#&gt;                Type of random forest: regression
+#&gt;                      Number of trees: 500
+#&gt; No. of variables tried at each split: 6
+#&gt; 
+#&gt;           Mean of squared residuals: 48.37316
+#&gt;                     % Var explained: 70.95</code></pre>
+</div>
+</div>
+<p>Setting <code>mtry</code> equal to the number of predictors — all six here — means every split considers every variable, which is exactly bagging. <code>randomForest</code> is therefore used for both methods, with one argument distinguishing them.</p>
+<p>The printed “Mean of squared residuals” is not a training error. It is the <strong>out-of-bag</strong> error: for each observation, the prediction is averaged over only those trees whose bootstrap sample excluded it, so every prediction is made by trees that never saw that observation. About a third of the ensemble contributes to each OOB prediction.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — Out-of-bag error is cross-validation that costs nothing. It comes free with the resampling that bagging performs anyway, and for large <span class="math inline">\(B\)</span> it is close to the leave-one-out cross-validated error.</p>
+</div></div><div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bag_fit, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">main =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="10-trees-forests_files/figure-html/oob-curve-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The out-of-bag error is plotted against the number of trees. It falls steeply and then flattens, exactly as <a href="#fig-bagvar" class="quarto-xref">Figure&nbsp;<span>12.3</span></a> predicts: once the <span class="math inline">\((1-\rho)/B\)</span> term has become negligible the curve reaches its floor, and further trees change nothing. The plot is the standard check that <span class="math inline">\(B\)</span> was set large enough, and it answers that question rather than the question of which model is best.</p>
+</section>
+<section id="what-bagging-costs" class="level3">
+<h3 class="anchored" data-anchor-id="what-bagging-costs">What bagging costs</h3>
+<p>The ensemble no longer has a picture. There is no single tree to plot, no set of decision rules to quote, and no cutoff to report. Bagging buys accuracy with interpretability, and this is the point at which tree-based methods stop being an exploratory tool and become a predictive one.</p>
+<p>Something interpretable can still be recovered, in the form of variable importance, which is developed in the next section because it matters equally for random forests.</p>
+</section>
+</section>
+<section id="random-forests" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="random-forests">Random forests</h2>
+<section id="decorrelating-the-trees" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="decorrelating-the-trees">Decorrelating the trees</h3>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — A <strong>random forest</strong> is bagging with one modification: at each split, only a random subset of <span class="math inline">\(m\)</span> of the <span class="math inline">\(p\)</span> predictors is considered as a candidate. A fresh subset is drawn at every split of every tree.</p>
+</div></div><p>The modification looks perverse — the algorithm is forbidden from using the best variable at most splits — and it works for the reason <a href="#fig-bagvar" class="quarto-xref">Figure&nbsp;<span>12.3</span></a> makes visible. If a dominant predictor is unavailable at a given split, the tree is forced to use something else, so trees stop making the same decisions. The correlation <span class="math inline">\(\rho\)</span> falls, the floor of the variance curve drops, and the ensemble improves even though every individual member has become slightly worse.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — Random forests trade a small increase in the bias of each tree for a large reduction in the correlation between them. This is the only place in the course where deliberately weakening the components improves the whole.</p>
+</div></div><p>Conventional defaults are <span class="math inline">\(m \approx \sqrt{p}\)</span> for classification and <span class="math inline">\(m \approx p/3\)</span> for regression. Unlike <span class="math inline">\(B\)</span>, <span class="math inline">\(m\)</span> is a genuine tuning parameter and is worth cross-validating: small <span class="math inline">\(m\)</span> gives maximal decorrelation and maximal individual bias, large <span class="math inline">\(m\)</span> returns to bagging.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">102</span>)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>rf_fit <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(f_reg, <span class="at">data =</span> plots, <span class="at">mtry =</span> <span class="dv">2</span>, <span class="at">ntree =</span> <span class="dv">500</span>,</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">importance =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">bagging_oob_mse =</span> <span class="fu">tail</span>(bag_fit<span class="sc">$</span>mse, <span class="dv">1</span>),</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">forest_oob_mse  =</span> <span class="fu">tail</span>(rf_fit<span class="sc">$</span>mse, <span class="dv">1</span>),</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">irreducible     =</span> <span class="dv">36</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; bagging_oob_mse  forest_oob_mse     irreducible 
+#&gt;        48.37316        48.73683        36.00000</code></pre>
+</div>
+</div>
+<p>The two out-of-bag errors are directly comparable, since both are computed on the same data by the same mechanism, and both should be read against the irreducible error of 36 that no method can go below. The <code>mse</code> component of a fitted object holds the out-of-bag error after each tree, so its last element is the error of the full ensemble.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">103</span>)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>mtry_grid <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>oob <span class="ot">&lt;-</span> <span class="fu">vapply</span>(mtry_grid, <span class="cf">function</span>(m) {</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(f_reg, <span class="at">data =</span> plots, <span class="at">mtry =</span> m, <span class="at">ntree =</span> <span class="dv">300</span>)</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tail</span>(fit<span class="sc">$</span>mse, <span class="dv">1</span>)</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>}, <span class="fu">numeric</span>(<span class="dv">1</span>))</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mtry_grid, oob, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">16</span>,</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"mtry (variables considered per split)"</span>,</span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"out-of-bag MSE"</span>)</span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">36</span>, <span class="at">lty =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="st">"firebrick"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="10-trees-forests_files/figure-html/rf-tune-mtry-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Sweeping <code>mtry</code> from 1 to 6 traces the trade-off directly, with <span class="math inline">\(m = 6\)</span> being bagging. The curve is usually shallow, which is the practical reason random forests have a reputation for working without tuning: the default is rarely far from optimal. The horizontal line marks the irreducible error.</p>
+</section>
+<section id="variable-importance" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="variable-importance">Variable importance</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">importance</span>(rf_fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;            %IncMSE IncNodePurity
+#&gt; light    54.149849     12234.659
+#&gt; moisture 82.154591     22383.931
+#&gt; pH       55.635348     13612.581
+#&gt; litter   24.007756      8333.360
+#&gt; noise1   -2.193725      3962.401
+#&gt; noise2   -0.677417      3787.377</code></pre>
+</div>
+</div>
+<p>Two measures are reported for regression forests. <strong><code>%IncMSE</code></strong> is a permutation measure: the values of one predictor are shuffled in the out-of-bag data, the increase in prediction error is recorded, and the result is averaged over trees. A variable that matters produces a large increase when scrambled. <strong><code>IncNodePurity</code></strong> accumulates the reduction in residual sum of squares attributable to splits on that variable, summed over the whole forest. For classification forests the second measure is the mean decrease in the Gini index instead.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">varImpPlot</span>(rf_fit, <span class="at">main =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="10-trees-forests_files/figure-html/rf-varimp-plot-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The two panels need not agree, and the noise predictors provide the calibration: whatever score they receive is the score of a variable that is known to be irrelevant, so any predictor scoring near them has not been shown to matter.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> Importance measures are unreliable under correlated predictors. Two nearly redundant variables split the credit between them and may both look unimportant, even when the pair is essential. Importance is a property of the variable <em>in this ensemble</em>, not a test of a biological effect.</p>
+</div><div class="">
+<p><strong>⚠</strong> The impurity-based measure is also biased towards variables with many possible split points: continuous predictors and factors with many levels score higher than binary predictors regardless of signal. The permutation measure is the safer of the two.</p>
+</div></div>
+</section>
+</section>
+<section id="where-this-leads" class="level2">
+<h2 class="anchored" data-anchor-id="where-this-leads">Where this leads</h2>
+<p>Bagging and random forests fit their trees independently and average them. On Day 11 the trees are instead fitted in sequence, each correcting what its predecessors got wrong, and all methods are then compared on equal terms.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./09-regularisation.html" class="pagination-link" aria-label="Regularisation">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Regularisation</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./11-boosting-comparison.html" class="pagination-link" aria-label="Boosting and an honest comparison">
+        <span class="nav-page-text"><span class="chapter-title">Boosting and an honest comparison</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

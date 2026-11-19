@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Experimental Design – Statistics for Machine Learning</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./02-confounding.html" rel="next">
+<link href="./01-why-statistics.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-143c0eed703e8b865dd62e6df5846b82.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating slimcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./02-design.html">Day 2. Design and data</a></li><li class="breadcrumb-item"><a href="./02-design.html"><span class="chapter-title">Experimental Design</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Statistics for Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 1. Why statistics?</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-why-statistics.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Why statistics?</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 2. Design and data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-design.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Experimental Design</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-confounding.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Correlation, Confounding, and Causation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./p02-data-quality.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Practical: data quality</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 3. Linear algebra</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-linear-algebra.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear algebra refresher</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 4. Directions</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-pca.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Principal component analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 5. Groups</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-clustering.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Cluster analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 6. Likelihood</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-likelihood-aic.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Likelihood, information and AIC</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 7. Resampling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-resampling.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Resampling: The Bootstrap and Cross-Validation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 8. Classifiers</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-classifiers-knn-svm.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Evaluating classifiers, KNN and SVM</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 9. Regularisation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-regularisation.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Regularisation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 10. Trees</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-trees-forests.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Trees, bagging and random forests</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 11. Boosting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-boosting-comparison.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Boosting and an honest comparison</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./a-linear-models.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear models: a worked reference</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#obtaining-good-data-and-anticipating-what-will-go-wrong-before-it-does" id="toc-obtaining-good-data-and-anticipating-what-will-go-wrong-before-it-does" class="nav-link active" data-scroll-target="#obtaining-good-data-and-anticipating-what-will-go-wrong-before-it-does">Obtaining good data, and anticipating what will go wrong before it does</a></li>
+  <li><a href="#where-this-chapter-fits" id="toc-where-this-chapter-fits" class="nav-link" data-scroll-target="#where-this-chapter-fits">Where this chapter fits</a></li>
+  <li><a href="#from-data-to-facts" id="toc-from-data-to-facts" class="nav-link" data-scroll-target="#from-data-to-facts">From data to facts</a></li>
+  <li><a href="#a-model-is-where-experimental-design-begins" id="toc-a-model-is-where-experimental-design-begins" class="nav-link" data-scroll-target="#a-model-is-where-experimental-design-begins">A model is where experimental design begins</a></li>
+  <li><a href="#where-does-the-variation-come-from" id="toc-where-does-the-variation-come-from" class="nav-link" data-scroll-target="#where-does-the-variation-come-from">Where does the variation come from?</a></li>
+  <li><a href="#what-must-be-considered-before-starting" id="toc-what-must-be-considered-before-starting" class="nav-link" data-scroll-target="#what-must-be-considered-before-starting">What must be considered before starting</a></li>
+  <li><a href="#the-four-levers-control-randomisation-replication-blocking" id="toc-the-four-levers-control-randomisation-replication-blocking" class="nav-link" data-scroll-target="#the-four-levers-control-randomisation-replication-blocking">The four levers: control, randomisation, replication, blocking</a>
+  <ul class="collapse">
+  <li><a href="#control" id="toc-control" class="nav-link" data-scroll-target="#control">Control</a></li>
+  <li><a href="#randomisation" id="toc-randomisation" class="nav-link" data-scroll-target="#randomisation">Randomisation</a></li>
+  <li><a href="#a-worked-picture-the-shaded-field" id="toc-a-worked-picture-the-shaded-field" class="nav-link" data-scroll-target="#a-worked-picture-the-shaded-field">A worked picture: the shaded field</a></li>
+  <li><a href="#unconscious-bias" id="toc-unconscious-bias" class="nav-link" data-scroll-target="#unconscious-bias">Unconscious bias</a></li>
+  <li><a href="#a-subtle-case-spatial-confounders" id="toc-a-subtle-case-spatial-confounders" class="nav-link" data-scroll-target="#a-subtle-case-spatial-confounders">A subtle case: spatial confounders</a></li>
+  <li><a href="#replication-and-the-experimental-unit" id="toc-replication-and-the-experimental-unit" class="nav-link" data-scroll-target="#replication-and-the-experimental-unit">Replication — and the experimental unit</a></li>
+  <li><a href="#blocking" id="toc-blocking" class="nav-link" data-scroll-target="#blocking">Blocking</a></li>
+  <li><a href="#integration-the-four-levers-as-one-strategy" id="toc-integration-the-four-levers-as-one-strategy" class="nav-link" data-scroll-target="#integration-the-four-levers-as-one-strategy">Integration: the four levers as one strategy</a></li>
+  </ul></li>
+  <li><a href="#type-i-and-type-ii-error-and-power" id="toc-type-i-and-type-ii-error-and-power" class="nav-link" data-scroll-target="#type-i-and-type-ii-error-and-power">Type I and type II error, and power</a>
+  <ul class="collapse">
+  <li><a href="#what-drives-power" id="toc-what-drives-power" class="nav-link" data-scroll-target="#what-drives-power">What drives power</a></li>
+  <li><a href="#power-as-overlapping-curves" id="toc-power-as-overlapping-curves" class="nav-link" data-scroll-target="#power-as-overlapping-curves">Power as overlapping curves</a></li>
+  <li><a href="#computing-power-in-r" id="toc-computing-power-in-r" class="nav-link" data-scroll-target="#computing-power-in-r">Computing power in R</a></li>
+  <li><a href="#where-the-required-sample-size-comes-from" id="toc-where-the-required-sample-size-comes-from" class="nav-link" data-scroll-target="#where-the-required-sample-size-comes-from">Where the required sample size comes from</a></li>
+  <li><a href="#power-without-a-formula-simulation" id="toc-power-without-a-formula-simulation" class="nav-link" data-scroll-target="#power-without-a-formula-simulation">Power without a formula: simulation</a></li>
+  <li><a href="#the-power-curve" id="toc-the-power-curve" class="nav-link" data-scroll-target="#the-power-curve">The power curve</a></li>
+  <li><a href="#integration-power-as-the-summary-of-design" id="toc-integration-power-as-the-summary-of-design" class="nav-link" data-scroll-target="#integration-power-as-the-summary-of-design">Integration: power as the summary of design</a></li>
+  </ul></li>
+  <li><a href="#key-takeaways" id="toc-key-takeaways" class="nav-link" data-scroll-target="#key-takeaways">Key takeaways</a></li>
+  <li><a href="#looking-ahead" id="toc-looking-ahead" class="nav-link" data-scroll-target="#looking-ahead">Looking ahead</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./02-design.html">Day 2. Design and data</a></li><li class="breadcrumb-item"><a href="./02-design.html"><span class="chapter-title">Experimental Design</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-title">Experimental Design</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="obtaining-good-data-and-anticipating-what-will-go-wrong-before-it-does" class="level2 unnumbered page-columns page-full">
+<h2 class="unnumbered anchored" data-anchor-id="obtaining-good-data-and-anticipating-what-will-go-wrong-before-it-does">Obtaining good data, and anticipating what will go wrong before it does</h2>
+
+<div class="no-row-height column-margin column-container"><div class="margin-legend">
+<p><strong>Margin legend</strong></p>
+<p><strong>DEF</strong> — definition <strong>KEY</strong> — key idea to remember <strong>↪</strong> — bridge to another lecture <strong>⚠</strong> — common pitfall</p>
+</div></div></section>
+<section id="where-this-chapter-fits" class="level2">
+<h2 class="anchored" data-anchor-id="where-this-chapter-fits">Where this chapter fits</h2>
+<p>This chapter comes straight after <em>Why statistics?</em>, and before any machine-learning method is introduced. It has been established that a statistical model is a crude approximation of a complicated process. Everything here is directed at one practical goal: arriving at data whose structure is understood, so that the subsequent analysis is sound rather than hopeful. A machine-learning method is at least as dependent on this as a classical test, and it is far less likely to warn you when the data were badly collected.</p>
+<p>The lecture is framed by a warning that should be kept in mind throughout:</p>
+<blockquote class="blockquote">
+<p>“To consult the statistician after an experiment is finished is often merely to ask him to conduct a post mortem examination. He can perhaps say what the experiment died of.”</p>
+<p>— Sir Ronald Aylmer Fisher</p>
+</blockquote>
+<p>Fisher’s point is that most of the leverage over a study is spent <em>before</em> a single measurement is taken. Once the data exist, their quality is fixed and constrains the model; the analysis can only reveal it, not repair it. This chapter therefore concerns the decisions made early, and a vocabulary — type I and type II error, power, the experimental unit — that allows those decisions to be reasoned about precisely.</p>
+<p>Some of what follows may appear almost too simple. That is intentional. These “obvious” ideas are exactly the ones whose quiet violation produces the subtle failures that the remainder of the course is devoted to detecting and correcting.</p>
+<p>Four principles underlie the whole lecture:</p>
+<ul>
+<li>A statistical method is motivated by the hypothesis, not the reverse (but also see machine learning chapters).</li>
+<li>A good method or model yields an <strong>unambiguous</strong> decision about the hypothesis.</li>
+<li>Any statement about a hypothesis is a statement about random variables — a statement in terms of <em>probability</em>, never certainty.</li>
+<li>Errors propagate forward. A poor research question cannot be repaired by good statistics, and poor data cannot be repaired by a clever model.</li>
+</ul>
+</section>
+<section id="from-data-to-facts" class="level2">
+<h2 class="anchored" data-anchor-id="from-data-to-facts">From data to facts</h2>
+<p>The purpose of an experiment is to turn measurements into a defensible claim about the world — to convert <strong>data into facts</strong>. That conversion succeeds only if a chain of earlier decisions was made well. The chain is set out explicitly, because each link is a place at which the whole argument can quietly fail:</p>
+<ul>
+<li><strong>Input.</strong> Everything begins with a research question. If it is vague, nothing downstream can sharpen it.</li>
+<li><strong>Population.</strong> The objects the question concerns must be identified — humans of a certain sex, age and location; a plant species under certain conditions. The population is a definition, and the researcher is responsible for it.</li>
+<li><strong>Data acquisition.</strong> The sample must represent the population’s properties faithfully. This is where representativeness is won or lost.</li>
+<li><strong>Sample size.</strong> The sample must be large enough to detect the effect of interest. Later in this chapter “large enough” becomes a computable quantity.</li>
+<li><strong>Confounders.</strong> Effects that were not intended for study but which nonetheless move the response must be compensated for.</li>
+<li><strong>Reproducibility.</strong> The acquisition process itself must be repeatable — by the same researcher later, and ideally by someone else entirely.</li>
+<li><strong>Quality, twice over.</strong> The quality of the data depends critically on the acquisition process; that quality in turn bounds the complexity and trustworthiness of every subsequent analysis.</li>
+</ul>
+<p>The last point is the through-line of the lecture. Data quality is not a property assessed at the end; it is designed in at the start, or it is absent.</p>
+</section>
+<section id="a-model-is-where-experimental-design-begins" class="level2">
+<h2 class="anchored" data-anchor-id="a-model-is-where-experimental-design-begins">A model is where experimental design begins</h2>
+<p>The idea that connects this lecture to the first one is the following: before any pipette or field is touched, the hypothesis of interest is translated into a model to be fitted. For a study of blood pressure, for example:</p>
+<p><span class="math display">\[\text{Bloodpressure} \sim \text{Gender} + \text{Concentration} + \text{Time of day}\]</span></p>
+<p>This single line is already a design document. Read carefully, it conveys a surprising amount:</p>
+<ul>
+<li><strong>It states what is to be measured.</strong> Every term is a column that must be recorded.</li>
+<li><strong>It states the data types</strong>, and therefore the measurement method for each. Gender is nominal, concentration numerical, time of day ordinal or numerical, and the response numerical. Knowing the type is knowing how the variable will be measured.</li>
+<li><strong>It states where variance will enter.</strong> Every measurement method has an accuracy, and every accuracy is a source of variance. That variance may be of no scientific interest, but if the factor driving it is <em>recorded</em>, it can later be compensated for. This is the sense in which statistics is about explaining variance — <em>all</em> of the variance, including the parts of no direct interest.</li>
+</ul>
+<p>The practical consequence is immediate: knowing the model, the data types and the design, the header row of the spreadsheet can be written before a single value is collected.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 13%">
+<col style="width: 22%">
+<col style="width: 32%">
+<col style="width: 8%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Bloodpressure</th>
+<th style="text-align: center;">Gender</th>
+<th style="text-align: right;">Concentration</th>
+<th style="text-align: right;">Time of day</th>
+<th style="text-align: right;">Note</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Numerical</td>
+<td style="text-align: center;">Nominal</td>
+<td style="text-align: right;">Numerical</td>
+<td style="text-align: right;">Ordinal or numerical</td>
+<td style="text-align: right;">Text</td>
+</tr>
+</tbody>
+</table>
+<p>That header row is not a formality. It is the model made concrete, and it is the first tidy-data decision of the study. Filled in row by row, <strong>one experimental unit</strong> at a time, the planned analysis is already half constructed.</p>
+</section>
+<section id="where-does-the-variation-come-from" class="level2">
+<h2 class="anchored" data-anchor-id="where-does-the-variation-come-from">Where does the variation come from?</h2>
+<p>If statistics is about explaining variance, then good design begins by asking, from the model’s point of view, <em>where the variance in the response actually originates</em>. It is useful to partition the total variation of the response into named sources:</p>
+<p><span class="math display">\[SST = SSH + SSR + \underbrace{(SSE + SSM + SSU)}_{\textbf{residual}}\]</span></p>
+<p>Each term is read as a physical source rather than an algebraic symbol:</p>
+<ul>
+<li><strong>SSH — the hypothesis.</strong> Variation due to the conditions the hypothesis actually concerns. This is the signal to be detected.</li>
+<li><strong>SSE — the experimental unit.</strong> Natural, irreducible variation between units: one rat is simply not another rat. This is legitimate biological noise.</li>
+<li><strong>SSR — repeated or longitudinal structure.</strong> Variation arising from measuring the same unit more than once. This is the term that resampling has to respect on Day 7, when whole patients or plates, rather than single rows, become the unit that is left out.</li>
+<li><strong>SSM — measurement.</strong> Variation and bias introduced by the act of measuring: instrument drift, calibration error, operator differences.</li>
+<li><strong>SSU — the unknown.</strong> Variation from factors never identified — confounders, lurking covariates, the effect nobody considered.</li>
+</ul>
+<p>The partition matters because the last three terms are dangerous in a way the first two are not. SSE is clean noise the model expects. But <strong>SSM and SSU can violate the assumptions on which the analysis rests</strong>: they can distort the residual distribution, destroy homoscedasticity, manufacture outliers or, worst of all, align with the treatment by accident and masquerade as signal. Much of experimental design is a set of tactics for keeping SSM and SSU out of the part of the variance that will later be attributed to the hypothesis.</p>
+</section>
+<section id="what-must-be-considered-before-starting" class="level2">
+<h2 class="anchored" data-anchor-id="what-must-be-considered-before-starting">What must be considered before starting</h2>
+<p>Concretely, two families of variance and bias deserve explicit thought before the experiment begins.</p>
+<p><em>Variance and bias inherent to the system.</em> Chiefly: what <strong>effect size</strong> is expected? A number is required, and it may come from the literature, from previous experiments or — clearly labelled as such — from an educated guess. Without it the study cannot be sized.</p>
+<p><em>Variance and bias introduced by the experiment itself.</em> What noise does <em>conducting</em> the experiment add? Considerations include the distribution of the experimental random noise; systematic error from sensor drift or confounders such as weather; the variance within an experimentally defined block (which will become a random effect); and differences between laboratories or analysts performing the measurements. Separately, the sources of <strong>bias</strong> must be considered. The obvious sources are the researcher and the research question themselves — hoping for a particular result subtly nudges the countless small choices a study requires, from which animals to include to when to stop collecting data.</p>
+</section>
+<section id="the-four-levers-control-randomisation-replication-blocking" class="level2">
+<h2 class="anchored" data-anchor-id="the-four-levers-control-randomisation-replication-blocking">The four levers: control, randomisation, replication, blocking</h2>
+<p>The aim of experimental design is to reduce, or explicitly account for, the impact of extraneous variables. Done well, it increases the power and precision of the eventual analysis at no cost — no extra data, only better-structured data. There are four classical levers, and the remainder of this chapter takes them in turn: <strong>control, randomisation, replication and blocking.</strong></p>
+<section id="control" class="level3">
+<h3 class="anchored" data-anchor-id="control">Control</h3>
+<p>A control is a comparison built into the design so that a result can be interpreted. Different problems call for different kinds:</p>
+<ul>
+<li><strong>Negative control (the <span class="math inline">\(H_0\)</span> comparison).</strong> The treatment stripped of its active ingredient — a placebo injection of the insulin solution <em>without</em> the insulin. Comparing a treatment against a negative control is the most direct possible test of the null hypothesis.</li>
+<li><strong>Positive control (the <span class="math inline">\(H_A\)</span> check).</strong> A condition that is confidently expected to produce an effect, used to confirm that the setup can detect one at all — a deliberately high concentration that must register if the assay functions.</li>
+<li><strong>Initial-conditions control.</strong> A baseline reading used to compensate for drift — recording a sensor’s signal before the manipulation so that the slow wander of, for example, a pH electrode or its amplifier can be subtracted.</li>
+</ul>
+<p>Each control targets a specific term in the variance partition. The negative control isolates SSH; the initial-conditions control attacks SSM.</p>
+</section>
+<section id="randomisation" class="level3">
+<h3 class="anchored" data-anchor-id="randomisation">Randomisation</h3>
+<p>Randomisation is the tool for the most insidious term, SSU — the confounders, known and unknown. Its purpose is to ensure that whatever was not controlled does not systematically align with the treatment. Done correctly, it “averages out” the confounders, converting a potential bias into ordinary noise. Three distinct problems it defends against deserve names:</p>
+<ul>
+<li><strong>Systematic design artefacts.</strong> A non-random offset built into the physical layout — a moisture gradient across a field, a temperature gradient across a 96-well plate, an edge effect.</li>
+<li><strong>Unconscious bias.</strong> Non-random structure that enters without deliberate design, through the many small choices an experimenter makes.</li>
+<li><strong>Undesirable subjectivity.</strong> The specific failure of humans asked to <em>be</em> random. Humans are extraordinarily poor at generating random sequences by hand, and the patterns they produce are predictable.</li>
+</ul>
+</section>
+<section id="a-worked-picture-the-shaded-field" class="level3">
+<h3 class="anchored" data-anchor-id="a-worked-picture-the-shaded-field">A worked picture: the shaded field</h3>
+<p>Consider a field of 16 plots (or a plate of 16 wells) laid out in an orderly design, with treatments 1–4 assigned in neat columns. Suppose one edge of the field lies in shade for part of the day. Those plots receive fewer sun-hours and grow less — and because the layout was systematic, the shade falls disproportionately on treatments 1 and 3. The shade, an SSU effect, has become confounded with treatment. The analysis will report a “treatment effect” that is partly sunlight.</p>
+<div id="fig-field" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-field-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Figs/field.png" class="img-fluid figure-img" style="width:70.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-field-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.1: A systematic layout: treatments assigned in neat columns. The grey area is shade, which falls disproportionately on treatments 1 and 3.
+</figcaption>
+</figure>
+</div>
+<p>Randomising the assignment of treatments to plots breaks that alignment. After randomisation the shade is distributed across all four treatments; no single treatment carries its full weight. One treatment may still be somewhat over-represented in the shade by chance, but — and this is the essential point — <strong>that imbalance shrinks as replicates are added.</strong> Randomisation together with replication is what turns a confounder into harmless noise.</p>
+<div id="fig-field-random" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-field-random-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Figs/fieldR.png" class="img-fluid figure-img" style="width:70.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-field-random-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.2: The same field after randomising treatments to plots. The shade is now shared across all four treatments rather than confounded with two of them.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="unconscious-bias" class="level3">
+<h3 class="anchored" data-anchor-id="unconscious-bias">Unconscious bias</h3>
+<p>Unconscious bias is harder to detect precisely because it appears reasonable at the time. Each of the following examples sounds acceptable until examined twice:</p>
+<ul>
+<li>Testing food preference “in humans” using a taste panel of women over 55.</li>
+<li>Studying adrenaline’s effect on skeletal muscle using only young mice.</li>
+<li>Assigning “the first ten larvae out of the box” to treatment 1 and the next ten to treatment 2 — as if the order in which they are caught carried no information (it does: the slow, the sick and the bold are not caught at random).</li>
+</ul>
+<p>Beyond the biology, other pressures bias designs in systematic directions: cost, ethics and time all push towards the convenient choice. There is no statistical remedy for these. The only defence is sustained criticism of one’s own reasoning and alertness to the forms these biases take.</p>
+</section>
+<section id="a-subtle-case-spatial-confounders" class="level3">
+<h3 class="anchored" data-anchor-id="a-subtle-case-spatial-confounders">A subtle case: spatial confounders</h3>
+<p>Suppose 10 trees must be selected “at random” from a forest to test a pest-control chemical. A tempting method is to close one’s eyes, place a finger on ten points of the map, and take the nearest tree to each.</p>
+<p>This is not a random sample. Trees are not uniformly spaced. Where trees cluster densely, each individual tree captures a small catchment of “nearest” points; where trees are sparse — near a clearing or a pond — a lone tree captures a large catchment and is far more likely to be chosen. The “random” points are uniform over <em>space</em>, but the selection probability is therefore biased towards <em>isolated</em> trees, which may differ systematically (more light, less competition) from trees within the stand. The spatial structure has become a confounder.</p>
+<p>The two panels below make the trap visible. The first shows the “random” points dropped on the map; the second overlays where trees actually grow (the shaded clusters).</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Code for plot below</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">234</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">50</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">50</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">1</span>))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, y, <span class="at">col =</span> <span class="st">"blue"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">main =</span> <span class="st">"Points dropped 'at random'"</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, y, <span class="at">type =</span> <span class="st">"n"</span>, <span class="at">main =</span> <span class="st">"...but trees are not uniform"</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.5</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>), <span class="fu">c</span>(<span class="dv">10</span>, <span class="fl">8.2</span>, <span class="dv">8</span>, <span class="fl">9.3</span>, <span class="dv">10</span>), <span class="at">col =</span> <span class="st">"lightblue"</span>, <span class="at">lwd =</span> <span class="dv">1</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(<span class="fl">5.4</span>, <span class="fl">6.0</span>, <span class="fl">6.1</span>, <span class="fl">5.8</span>), <span class="fu">c</span>(<span class="dv">3</span>, <span class="fl">3.3</span>, <span class="dv">4</span>, <span class="fl">3.8</span>), <span class="at">col =</span> <span class="st">"lightblue"</span>, <span class="at">lwd =</span> <span class="dv">1</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(x, y, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="02-design_files/figure-html/spatial-confounder-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code for plot below</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>In the right-hand panel, a point landing near an isolated tree in the sparse regions selects that lone tree, while a point landing in a dense cluster is shared among many candidates; the isolated trees are therefore systematically over-selected.</p>
+<p>The remedy is to remove space from the selection entirely: every tree is labelled and the labels are drawn at random, by computer or from an urn. Any spatial or temporal relationship among the trees is then averaged out by construction, rather than introduced by the geometry of “nearest”.</p>
+</section>
+<section id="replication-and-the-experimental-unit" class="level3">
+<h3 class="anchored" data-anchor-id="replication-and-the-experimental-unit">Replication — and the experimental unit</h3>
+<p>Before replicates can be counted, it must be established <em>what</em> is being replicated. This is the single most misunderstood idea in the lecture, and misunderstanding it is the classic route to an incorrect analysis, so it is stated carefully.</p>
+<blockquote class="blockquote">
+<p>The <strong>experimental unit</strong> is the smallest division of the experimental material such that any two units could receive different independent treatments.</p>
+</blockquote>
+<p>Equivalently: all sample units (individual measurements) <em>within</em> an experimental unit necessarily receive the same treatment. If six measurements share a confinement — a plot, a cage, a subject — and that confinement is what receives the treatment, then the confinement, not the individual measurement, is the experimental unit. The number of <em>independent</em> replicates is the number of experimental units, and it is that number — not the number of measurements — from which the degrees of freedom for the treatment are built.</p>
+<p>The abstraction is slippery, and four cases are worked through. In each, two questions should be posed before reading on: <em>what is the experimental unit, and how many independent replicates are there?</em></p>
+<div id="fig-rats1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-rats1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Figs/rats.png" class="img-fluid figure-img" style="width:70.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rats1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.3: Case 1: each rat is individually injected with placebo (A) or vitamin C (B).
+</figcaption>
+</figure>
+</div>
+<p><strong>Case 1 — individually injected rats.</strong> Six rats, each <em>individually injected</em> with either a placebo or vitamin C, three per group. Each animal receives its own treatment, with all the particularities of its own injection, independently of the others. The <strong>rat is the experimental unit</strong>, and there are six independent replicates — three per treatment.</p>
+<div id="fig-rats2" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-rats2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Figs/rats2.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rats2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.4: Case 2: rats share a box, and each box receives one diet — water or water with vitamin C.
+</figcaption>
+</figure>
+</div>
+<p><strong>Case 2 — rats sharing a cage diet.</strong> The vitamin C is now delivered through the drinking water, and rats are housed two to a box, each box on one diet. The two rats in a box share the same water, the same local temperature, and everything else particular to that box, but also competition for the water and possible diseases they will share; their measurements are not independent. The <strong>box is the experimental unit.</strong> With, say, two boxes per treatment there are four independent replicates, not eight, regardless of how many rats each box contains.</p>
+<div id="fig-rats3" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-rats3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Figs/rats3.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rats3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.5: Case 3: two rat strains with known different baseline adrenaline levels.
+</figcaption>
+</figure>
+</div>
+<p><strong>Case 3 — nested strains.</strong> The hypothesis is that aggression relates to resting blood adrenaline, tested using two rat strains known to differ in baseline adrenaline. Here the “adrenaline treatment” is not applied to rats; it is a property of the <em>strain</em>. The treatment is <strong>nested in strain</strong>, and the strain is the experimental unit. With only two strains there are effectively two experimental units for the contrast, however many rats each contains — a genuinely weak design for the question, and one worth recognising as such <em>before</em> it is run.</p>
+<div id="fig-rats4" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-rats4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Figs/rats4.png" class="img-fluid figure-img" style="width:70.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rats4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.6: Case 4: each rat’s liver is chopped into six pieces for fat-content analysis.
+</figcaption>
+</figure>
+</div>
+<p><strong>Case 4 — pieces of one liver.</strong> Rats A–C receive a standard vitamin C diet, D–F a high one; each rat’s liver is then divided into six pieces for fat-content analysis. It is tempting to claim 36 replicates. But the six pieces of one liver are genetically and historically the same animal; if that rat had liver disease, all six pieces carry it. The pieces are <strong>nested in rat</strong>; the <strong>rat is the experimental unit</strong>, giving three replicates per diet. Analysing the 36 pieces as if independent is <em>pseudoreplication</em>, and it makes the result appear far more certain than it is.</p>
+<p>The thread through all four cases is the one connecting this lecture to the next. Whenever measurements share a confinement, a subject or a lineage, they are <strong>correlated</strong>, and treating them as independent inflates the effective sample size and shrinks the standard errors illegitimately. Recognising these dependencies now is what allows them to be respected later: on Day 7, boxes, strains and rats become the units that are resampled and held out together.</p>
+</section>
+<section id="blocking" class="level3">
+<h3 class="anchored" data-anchor-id="blocking">Blocking</h3>
+<p>Blocking is the fourth lever, and the constructive counterpart to randomisation. Where randomisation <em>averages out</em> a nuisance factor, blocking <em>accounts for it explicitly.</em> The two are not rivals; they are the two available responses to structure that was not intended, and the choice between them turns on one question: <em>is the nuisance known to be present?</em> If not, randomise. If so, block.</p>
+<p>It is instructive to see all three responses to the same problem side by side, because they are literally the same field drawn three ways. In the <strong>systematic</strong> layout of the shaded field, treatments sat in neat columns and the shade fell squarely on treatments 1 and 3: the confounder was perfectly aligned with the treatment, and the analysis had no way to distinguish sunlight from effect. <strong>Randomising</strong> the assignment broke that alignment: the shade was scattered across all four treatments, and with sufficient replicates its influence averaged towards zero. But randomisation pays for that with variance — the shade remains <em>in</em> the residual, inflating <span class="math inline">\(\sigma\)</span> and costing power.</p>
+<p>Blocking does something more refined. If the shade is <em>known</em> to run across the field, the field is divided into blocks chosen to be internally homogeneous with respect to it — a shaded half and a sunny half — and <strong>every treatment appears once in every block</strong>, in randomised order within each. The sun-hour difference now lives entirely <em>between</em> the blocks, where the analysis can estimate it and set it aside. It never touches the treatment comparison, because every treatment experienced the shade equally. This is a randomised complete block design: the same field, divided along the gradient it was fighting.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Plot generating code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">T1 =</span> <span class="st">"#7F77DD"</span>, <span class="at">T2 =</span> <span class="st">"#D85A30"</span>, <span class="at">T3 =</span> <span class="st">"#1D9E75"</span>, <span class="at">T4 =</span> <span class="st">"#BA7517"</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">5.2</span>), <span class="at">axes =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Randomised complete block: the same field, split along the shade"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># shade gradient: darker (less sun) on the left, fading to the right</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>ng <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>ng) {</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rect</span>((i <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="dv">10</span> <span class="sc">/</span> ng, <span class="fl">0.4</span>, i <span class="sc">*</span> <span class="dv">10</span> <span class="sc">/</span> ng, <span class="fl">4.4</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.37</span>, <span class="fl">0.37</span>, <span class="fl">0.35</span>, <span class="fl">0.40</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> (i <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">/</span> ng)), <span class="at">border =</span> <span class="cn">NA</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">0.4</span>, <span class="fl">4.8</span>, <span class="st">"Less sun"</span>, <span class="at">adj =</span> <span class="dv">0</span>, <span class="at">cex =</span> <span class="fl">0.9</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">9.6</span>, <span class="fl">4.8</span>, <span class="st">"More sun"</span>, <span class="at">adj =</span> <span class="dv">1</span>, <span class="at">cex =</span> <span class="fl">0.9</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co"># the two blocks</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">4.8</span>, <span class="fl">4.3</span>, <span class="at">border =</span> <span class="st">"grey40"</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="fl">1.5</span>)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="fl">5.2</span>, <span class="fl">0.5</span>, <span class="fl">9.8</span>, <span class="fl">4.3</span>, <span class="at">border =</span> <span class="st">"grey40"</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="fl">1.5</span>)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">2.5</span>, <span class="fl">4.05</span>, <span class="st">"Block 1 (shaded)"</span>, <span class="at">font =</span> <span class="dv">2</span>, <span class="at">cex =</span> <span class="fl">0.95</span>)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">7.5</span>, <span class="fl">4.05</span>, <span class="st">"Block 2 (sunny)"</span>,  <span class="at">font =</span> <span class="dv">2</span>, <span class="at">cex =</span> <span class="fl">0.95</span>)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co"># helper: draw one plot cell</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>cell <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y, tr) {</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rect</span>(x, y, x <span class="sc">+</span> <span class="dv">2</span>, y <span class="sc">+</span> <span class="fl">1.4</span>, <span class="at">col =</span> cols[tr], <span class="at">border =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">text</span>(x <span class="sc">+</span> <span class="dv">1</span>, y <span class="sc">+</span> <span class="fl">0.7</span>, tr, <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">font =</span> <span class="dv">2</span>, <span class="at">cex =</span> <span class="fl">1.3</span>)</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co"># each block holds all four treatments, order randomised within the block</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="fu">cell</span>(<span class="fl">0.5</span>, <span class="fl">2.3</span>, <span class="st">"T3"</span>); <span class="fu">cell</span>(<span class="fl">2.7</span>, <span class="fl">2.3</span>, <span class="st">"T1"</span>)</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="fu">cell</span>(<span class="fl">0.5</span>, <span class="fl">0.7</span>, <span class="st">"T4"</span>); <span class="fu">cell</span>(<span class="fl">2.7</span>, <span class="fl">0.7</span>, <span class="st">"T2"</span>)</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="fu">cell</span>(<span class="fl">5.5</span>, <span class="fl">2.3</span>, <span class="st">"T2"</span>); <span class="fu">cell</span>(<span class="fl">7.7</span>, <span class="fl">2.3</span>, <span class="st">"T4"</span>)</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="fu">cell</span>(<span class="fl">5.5</span>, <span class="fl">0.7</span>, <span class="st">"T1"</span>); <span class="fu">cell</span>(<span class="fl">7.7</span>, <span class="fl">0.7</span>, <span class="st">"T3"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="02-design_files/figure-html/blocking-field-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The figure shows both blocks containing all four treatments, with the shade gradient running between rather than within blocks. The payoff is real and quantifiable: the between-block variation that randomisation left in the residual is now removed from it, <span class="math inline">\(\sigma\)</span> shrinks, and — by the power heuristic introduced below — power rises at no cost in sample size. The same logic applies to any nuisance that can be named in advance: the day of the week, the technician, the shelf in the incubator, the litter a mouse came from. What can be identified is blocked; what cannot is randomised against. A further connection runs beneath this: a block is a source of shared structure among its units, just like the box and the rat before it. In bioinformatics the most familiar block is the sequencing or hybridisation <strong>batch</strong>, and a batch that is confounded with the biological groups cannot be repaired afterwards.</p>
+</section>
+<section id="integration-the-four-levers-as-one-strategy" class="level3">
+<h3 class="anchored" data-anchor-id="integration-the-four-levers-as-one-strategy">Integration: the four levers as one strategy</h3>
+<p>The four levers address the variance partition from different directions. Control fixes the comparison so that SSH can be isolated and SSM corrected; randomisation converts unknown SSU from bias into noise; replication at the level of the experimental unit determines how many independent observations of that noise exist; and blocking removes known nuisance variation from the residual altogether. All four are decided before any data are collected, and all four determine the denominator — the residual variance and its degrees of freedom — against which the treatment effect will eventually be judged. The next section makes that judgement quantitative.</p>
+</section>
+</section>
+<section id="type-i-and-type-ii-error-and-power" class="level2">
+<h2 class="anchored" data-anchor-id="type-i-and-type-ii-error-and-power">Type I and type II error, and power</h2>
+<p>The vocabulary is now available to make “large enough” precise. Every hypothesis test can be wrong in two distinct ways, and it is essential to keep them separate.</p>
+<p>A <strong>type I error</strong> is rejecting a true null — declaring an effect that is not present. Its probability is <span class="math inline">\(\alpha\)</span>, the significance level chosen by the analyst:</p>
+<p><span class="math display">\[P(\text{reject } H_0 \mid H_0 \text{ true}) = \alpha\]</span></p>
+<p>A <strong>type II error</strong> is failing to reject a false null — missing an effect that is real. Its probability is <span class="math inline">\(\beta\)</span>:</p>
+<p><span class="math display">\[P(\text{not reject } H_0 \mid H_0 \text{ false}) = \beta\]</span></p>
+<p>The <strong>power</strong> of a test is the complement of <span class="math inline">\(\beta\)</span> — the probability of detecting an effect that is genuinely present:</p>
+<p><span class="math display">\[\text{Power} = P(\text{reject } H_0 \mid H_0 \text{ false}) = 1 - \beta\]</span></p>
+<p>The quantity <span class="math inline">\(\alpha\)</span> is the accepted risk of a false alarm; power is the probability of detecting a real effect. Good design fixes the first and maximises the second.</p>
+<section id="what-drives-power" class="level3">
+<h3 class="anchored" data-anchor-id="what-drives-power">What drives power</h3>
+<p>The exact formula is not needed to build correct intuition. A heuristic captures the direction of every lever:</p>
+<p><span class="math display">\[\text{Power} \;\propto\; \frac{\text{effect size} \times \alpha \times \sqrt{n}}{\sigma}\]</span></p>
+<p>The expression may be read as a set of dials. Three quantities in the numerator <em>raise</em> power: a larger true <strong>effect size</strong>, a more permissive <span class="math inline">\(\alpha\)</span>, and a larger <strong>sample size</strong> (through <span class="math inline">\(\sqrt{n}\)</span> — returns diminish, since quadrupling <span class="math inline">\(n\)</span> only doubles this term). One quantity in the denominator <em>lowers</em> power: the residual standard deviation <span class="math inline">\(\sigma\)</span>, the noise. This is why everything earlier in the chapter mattered — control, blocking and clean measurement all attack <span class="math inline">\(\sigma\)</span>, and every reduction in <span class="math inline">\(\sigma\)</span> purchases power without a single additional sample.</p>
+</section>
+<section id="power-as-overlapping-curves" class="level3">
+<h3 class="anchored" data-anchor-id="power-as-overlapping-curves">Power as overlapping curves</h3>
+<p>The most useful mental image is two sampling distributions of the mean — one under <span class="math inline">\(H_0\)</span>, one under <span class="math inline">\(H_A\)</span> — placed side by side on the same axis. The critical values (set by <span class="math inline">\(\alpha\)</span>) mark the cut-offs beyond which <span class="math inline">\(H_0\)</span> is rejected. The type I error is the tail of the <em>null</em> curve that extends past the critical value; the type II error, <span class="math inline">\(\beta\)</span>, is the portion of the <em>alternative</em> curve that falls <em>short</em> of it, in the non-rejection region. Power is the remainder of the alternative curve — the part that clears the cut-off.</p>
+<p>The effect of each dial on the picture follows directly. Increasing the effect size slides the two curves apart; less of the alternative curve overlaps the non-rejection region, so <span class="math inline">\(\beta\)</span> shrinks and power grows. Decreasing <span class="math inline">\(\sigma\)</span> narrows both curves; again the overlap falls. Increasing <span class="math inline">\(n\)</span> tightens the sampling distributions of the mean (their spread is <span class="math inline">\(\sigma/\sqrt{n}\)</span>), pulling the curves apart in standardised terms. Every route to more power is, in this picture, a route to <em>less overlap</em> between the null and alternative distributions.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Code plot below</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Length_M <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">8</span>, <span class="dv">26</span>, <span class="fl">0.01</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>Density  <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(Length_M, <span class="dv">18</span>, <span class="dv">2</span>)   <span class="co"># distribution under H0 (mean 18)</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>Density2 <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(Length_M, <span class="dv">15</span>, <span class="dv">2</span>)   <span class="co"># distribution under HA (mean 15)</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># critical value from the H0 curve</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>Critm <span class="ot">&lt;-</span> <span class="dv">18</span> <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fl">2.048</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Density2 <span class="sc">~</span> Length_M, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">lwd =</span> <span class="dv">3</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"Density"</span>, <span class="at">xlab =</span> <span class="st">"Sample mean"</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Two distributions of the mean: power as non-overlap"</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co"># beta: the part of the HA curve in the non-rejection region (right of critical value)</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>cord.x <span class="ot">&lt;-</span> <span class="fu">c</span>(Critm, <span class="fu">seq</span>(Critm, <span class="dv">25</span>, <span class="fl">0.01</span>), <span class="dv">25</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>cord.y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">dnorm</span>(<span class="fu">seq</span>(Critm, <span class="dv">25</span>, <span class="fl">0.01</span>), <span class="dv">15</span>, <span class="dv">2</span>), <span class="dv">0</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(cord.x, cord.y, <span class="at">col =</span> <span class="st">"red"</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co"># power: the part of the HA curve past the critical value (left tail here)</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>cord.x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">8</span>, <span class="fu">seq</span>(<span class="dv">8</span>, Critm, <span class="fl">0.01</span>), Critm)</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>cord.y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">dnorm</span>(<span class="fu">seq</span>(<span class="dv">8</span>, Critm, <span class="fl">0.01</span>), <span class="dv">15</span>, <span class="dv">2</span>), <span class="dv">0</span>)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(cord.x, cord.y, <span class="at">col =</span> <span class="st">"darkgreen"</span>)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="fu">arrows</span>(Critm, <span class="fl">0.06</span>, Critm, <span class="fl">0.02</span>, <span class="at">lwd =</span> <span class="dv">3</span>)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(Critm, <span class="fl">0.07</span>, <span class="st">"critical value"</span>)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">16</span>, <span class="fl">0.05</span>, <span class="fu">expression</span>(beta), <span class="at">cex =</span> <span class="dv">3</span>)</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(Density <span class="sc">~</span> Length_M, <span class="at">col =</span> <span class="st">"blue"</span>, <span class="at">lwd =</span> <span class="dv">3</span>)  <span class="co"># H0 for reference</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">0</span>); <span class="fu">segments</span>(<span class="dv">15</span>, <span class="dv">0</span>, <span class="dv">15</span>, <span class="fu">dnorm</span>(<span class="dv">15</span>, <span class="dv">15</span>, <span class="dv">2</span>), <span class="at">lty =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="02-design_files/figure-html/overlap-curves-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The blue curve is <strong>the sampling distribution of the mean</strong> under <span class="math inline">\(H_0\)</span> and the red curve that under <span class="math inline">\(H_A\)</span>. The red shaded area to the right of the critical value is <span class="math inline">\(\beta\)</span>: the alternative is true, yet the sample mean falls in the non-rejection region. The green area to the left is the power. Everything else in this section is that picture, moved by one dial at a time.</p>
+</section>
+<section id="computing-power-in-r" class="level3">
+<h3 class="anchored" data-anchor-id="computing-power-in-r">Computing power in R</h3>
+<p>R reduces all of this to a one-line calculation for the two-sample <span class="math inline">\(t\)</span>-test, and the same function answers two different questions depending on which argument is left unspecified.</p>
+<p><strong>Post-hoc: the study has been run — what power did it have?</strong> With <span class="math inline">\(n\)</span> and the effect size fixed, the power is requested. This is a check after the fact, and its legitimate use is to inform the next study, not to excuse a null result.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">power.t.test</span>(<span class="at">n =</span> <span class="dv">15</span>, <span class="at">delta =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">2</span>, <span class="at">sig.level =</span> <span class="fl">0.05</span>,</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">alternative =</span> <span class="st">"two.sided"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt;      Two-sample t test power calculation 
+#&gt; 
+#&gt;               n = 15
+#&gt;           delta = 1
+#&gt;              sd = 2
+#&gt;       sig.level = 0.05
+#&gt;           power = 0.2619313
+#&gt;     alternative = two.sided
+#&gt; 
+#&gt; NOTE: n is number in *each* group</code></pre>
+</div>
+</div>
+<p>With 15 observations per group, a true difference of 1 and a standard deviation of 2, the power is approximately 0.26: a real effect of this size would be detected in roughly one study in four. A null result from such a study is uninformative.</p>
+<p><strong>A priori: the study is being planned — how many replicates are needed?</strong> The desired power (0.8 is the usual minimum), the effect size and <span class="math inline">\(\sigma\)</span> are fixed, and <span class="math inline">\(n\)</span> is solved for. This is the calculation that should precede the experiment, and it is the whole point of Fisher’s warning.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">power.t.test</span>(<span class="at">power =</span> <span class="fl">0.8</span>, <span class="at">delta =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">2</span>, <span class="at">sig.level =</span> <span class="fl">0.05</span>,</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">alternative =</span> <span class="st">"two.sided"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt;      Two-sample t test power calculation 
+#&gt; 
+#&gt;               n = 63.76576
+#&gt;           delta = 1
+#&gt;              sd = 2
+#&gt;       sig.level = 0.05
+#&gt;           power = 0.8
+#&gt;     alternative = two.sided
+#&gt; 
+#&gt; NOTE: n is number in *each* group</code></pre>
+</div>
+</div>
+<p>The required sample size is approximately 64 per group — more than four times the 15 used in the post-hoc example. The difference between the two calculations is the cost of the noise: with <span class="math inline">\(\sigma\)</span> twice the effect size, many observations are needed to separate signal from residual variation.</p>
+<p>The procedure for using power well is therefore a fixed sequence of decisions:</p>
+<ol type="1">
+<li>Fix the type I risk to be accepted — set <span class="math inline">\(\alpha\)</span> (e.g.&nbsp;0.05).</li>
+<li>Decide the minimum power required — e.g.&nbsp;0.8.</li>
+<li>Decide the smallest <strong>biologically significant</strong> effect size — the smallest effect that would actually matter, not the smallest one detectable.</li>
+<li>Obtain a defensible estimate of <span class="math inline">\(\sigma\)</span> — from the literature, a similar experiment, or a pilot study.</li>
+</ol>
+<p>With those four numbers, an a priori analysis returns the required <span class="math inline">\(n\)</span>. After the study, a post-hoc analysis reports the power that was actually attained.</p>
+</section>
+<section id="where-the-required-sample-size-comes-from" class="level3">
+<h3 class="anchored" data-anchor-id="where-the-required-sample-size-comes-from">Where the required sample size comes from</h3>
+<p>The number 64 is not magic, and a short derivation shows where it comes from. Take two groups of <span class="math inline">\(n\)</span> observations with a true difference <span class="math inline">\(\delta\)</span> and a known standard deviation <span class="math inline">\(\sigma\)</span>. The difference of the two sample means is normally distributed,</p>
+<p><span class="math display">\[\bar x_1 - \bar x_2 \sim N\!\left(\delta,\ \frac{2\sigma^2}{n}\right),\]</span></p>
+<p>so the test statistic <span class="math inline">\(z = (\bar x_1 - \bar x_2)\big/\big(\sigma\sqrt{2/n}\big)\)</span> is standard normal under <span class="math inline">\(H_0\)</span> and is shifted by <span class="math inline">\(\delta\big/\big(\sigma\sqrt{2/n}\big)\)</span> under <span class="math inline">\(H_A\)</span>. The null hypothesis is rejected when <span class="math inline">\(|z| &gt; z_{1-\alpha/2}\)</span>. Ignoring the negligible chance of rejecting in the wrong direction,</p>
+<p><span class="math display">\[\text{Power} \approx P\!\left(Z &gt; z_{1-\alpha/2} - \frac{\delta}{\sigma\sqrt{2/n}}\right).\]</span></p>
+<p>Requiring this to equal <span class="math inline">\(1 - \beta\)</span> means that the shift must be <span class="math inline">\(z_{1-\alpha/2} + z_{1-\beta}\)</span>, and solving for <span class="math inline">\(n\)</span> gives</p>
+<p><span class="math display">\[n = \frac{2\,(z_{1-\alpha/2} + z_{1-\beta})^2\,\sigma^2}{\delta^2} \quad\text{per group.}\]</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>delta <span class="ot">&lt;-</span> <span class="dv">1</span>; sigma <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">normal_formula =</span> <span class="dv">2</span> <span class="sc">*</span> (<span class="fu">qnorm</span>(<span class="fl">0.975</span>) <span class="sc">+</span> <span class="fu">qnorm</span>(<span class="fl">0.80</span>))<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> sigma<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> delta<span class="sc">^</span><span class="dv">2</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">power.t.test   =</span> <span class="fu">power.t.test</span>(<span class="at">power =</span> <span class="fl">0.8</span>, <span class="at">delta =</span> delta, <span class="at">sd =</span> sigma)<span class="sc">$</span>n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; normal_formula   power.t.test 
+#&gt;       62.79104       63.76576</code></pre>
+</div>
+</div>
+<p>The formula gives 62.8, and <code>power.t.test</code> gives one more, because it uses the <span class="math inline">\(t\)</span> distribution: <span class="math inline">\(\sigma\)</span> has to be estimated, which costs a little power. The formula also makes the heuristic of the previous section exact. Power depends on the data only through <span class="math inline">\(\delta\sqrt{n}/\sigma\)</span>. Halving the effect size, or doubling the noise, therefore <em>quadruples</em> the number of units required.</p>
+</section>
+<section id="power-without-a-formula-simulation" class="level3">
+<h3 class="anchored" data-anchor-id="power-without-a-formula-simulation">Power without a formula: simulation</h3>
+<p><code>power.t.test</code> has a formula behind it, but there is a more transparent way to determine power that generalises to any design, however complex — <em>simulate the whole experiment many times and count how often it succeeds.</em> This is worth doing at least once explicitly, because it demystifies power completely and because the practicals rely on exactly this skill.</p>
+<p>A single simulated experiment comes first. Fifteen “males” are drawn from a normal distribution with mean length 18 and SD 2, fifteen “females” with mean 17 and SD 2, and one <span class="math inline">\(t\)</span>-test is run.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>Males   <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">15</span>, <span class="at">mean =</span> <span class="dv">18</span>, <span class="at">sd =</span> <span class="dv">2</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>Females <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">15</span>, <span class="at">mean =</span> <span class="dv">17</span>, <span class="at">sd =</span> <span class="dv">2</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(Males, Females)<span class="sc">$</span>p.value</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 0.1295293</code></pre>
+</div>
+</div>
+<p>That single p-value is one draw from a random process; it is not, on its own, informative about power. Power is a long-run frequency, so the whole experiment is repeated 10,000 times and the fraction of runs in which the effect was correctly detected (<span class="math inline">\(p &lt; 0.05\)</span>) is recorded. That fraction <em>is</em> the power.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>pval <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="dv">10000</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10000</span>) {</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  A <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">18</span>, <span class="dv">2</span>)   <span class="co"># true difference is 1, SD is 2</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  B <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">17</span>, <span class="dv">2</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  pval[i] <span class="ot">&lt;-</span> <span class="fu">t.test</span>(A, B)<span class="sc">$</span>p.value</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(pval <span class="sc">&lt;</span> <span class="fl">0.05</span>) <span class="sc">/</span> <span class="dv">10000</span>   <span class="co"># estimated power at n = 20</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 0.3409</code></pre>
+</div>
+</div>
+<p>The simulated power at <span class="math inline">\(n = 20\)</span> per group is approximately 0.34, consistent with the analytic value from <code>power.t.test</code> for the same parameters. The logic is entirely explicit: the effect is <em>known</em> to be real because it was built in, so every failure to reject is a genuine type II error, and their frequency is <span class="math inline">\(\beta\)</span>. Raising <span class="math inline">\(n\)</span> from 20 to 40 and re-running shows the power climb — the same lesson as the heuristic formula, obtained by direct bookkeeping rather than by trusting an equation.</p>
+</section>
+<section id="the-power-curve" class="level3">
+<h3 class="anchored" data-anchor-id="the-power-curve">The power curve</h3>
+<p>Sweeping <span class="math inline">\(n\)</span> across a range and plotting the resulting power traces a <strong>power curve</strong>, the single most useful object for planning. Reading off where the curve crosses 0.8 gives the required sample size. The analytic version is a smooth line; the simulated version is the same curve, scattered by Monte Carlo noise. Their agreement is the point: the formula and the simulation compute the same quantity in two different ways.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>NN    <span class="ot">&lt;-</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">200</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>Power <span class="ot">&lt;-</span> <span class="fu">power.t.test</span>(<span class="at">n =</span> NN, <span class="at">delta =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">2</span>, <span class="at">sig.level =</span> <span class="fl">0.05</span>,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">type =</span> <span class="st">"two.sample"</span>, <span class="at">alternative =</span> <span class="st">"two.sided"</span>)<span class="sc">$</span>power</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Power <span class="sc">~</span> NN, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Power curve for the two-sample t-test"</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"n per group"</span>, <span class="at">ylab =</span> <span class="st">"Power"</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="fl">0.8</span>, <span class="dv">64</span>, <span class="fl">0.8</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="fu">arrows</span>(<span class="dv">64</span>, <span class="fl">0.8</span>, <span class="dv">64</span>, <span class="fl">0.05</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">64</span>, <span class="fl">0.02</span>, <span class="st">"n = 64"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="02-design_files/figure-html/power-curve-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The dashed guides mark the crossing: approximately 64 per group to reach a power of 0.8 for this effect size and noise level, in agreement with the a priori calculation above. Changing the effect size or <span class="math inline">\(\sigma\)</span> shifts the entire curve — which is, once again, the message of the whole chapter. Power is not a property of the test alone; it is a property of the <em>design</em>.</p>
+</section>
+<section id="integration-power-as-the-summary-of-design" class="level3">
+<h3 class="anchored" data-anchor-id="integration-power-as-the-summary-of-design">Integration: power as the summary of design</h3>
+<p>The three computations of this section — the analytic post-hoc and a priori calls, the simulation, and the power curve — are three views of one quantity. Each shows that power is determined jointly by the effect size, the residual standard deviation, the significance level and the sample size, and that the sample size in question is the number of experimental units. The design decisions of the first half of the chapter enter through <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(n\)</span>: blocking and control reduce <span class="math inline">\(\sigma\)</span>, correct identification of the experimental unit determines the true <span class="math inline">\(n\)</span>, and randomisation ensures that what remains in <span class="math inline">\(\sigma\)</span> is noise rather than bias. A power calculation performed before the experiment is therefore the point at which every earlier design decision is tested against the effect the study aims to detect.</p>
+</section>
+</section>
+<section id="key-takeaways" class="level2">
+<h2 class="anchored" data-anchor-id="key-takeaways">Key takeaways</h2>
+<ul>
+<li>The leverage over a study is spent before data collection. Design determines quality; analysis can only reveal it.</li>
+<li>Write the model first. It states what is to be measured, in what type, and where variance will enter — and it becomes the spreadsheet header.</li>
+<li>Partition the variance into named sources. SSH is signal; SSM and SSU are the dangerous terms that can violate assumptions or masquerade as signal.</li>
+<li>Use the four levers deliberately: <strong>control</strong> to make comparisons interpretable, <strong>randomise</strong> what cannot be controlled, <strong>replicate</strong> at the level of the experimental unit, and <strong>block</strong> what can be identified.</li>
+<li>Identify the experimental unit correctly. Counting sample units instead of experimental units is pseudoreplication, and it manufactures false confidence.</li>
+<li>Keep type I and type II error distinct. Fix <span class="math inline">\(\alpha\)</span>; maximise power. Every reduction in <span class="math inline">\(\sigma\)</span> purchases power at no cost.</li>
+<li>Compute the required sample size <em>a priori</em>, either with <code>power.t.test</code> or by simulating the experiment and counting successes.</li>
+</ul>
+</section>
+<section id="looking-ahead" class="level2">
+<h2 class="anchored" data-anchor-id="looking-ahead">Looking ahead</h2>
+<p>The dependencies you learned to <em>recognise</em> in this lecture, rats in boxes, pieces of a liver, treatments nested in strains, are the structures that decide on Day 7 how data may be resampled. Design and resampling are two halves of one skill: identifying correlation, then respecting it.</p>
+<p>The simulation-based power analysis is the more immediate bridge. When a practical asks you to simulate and analyse data, the same loop as the power simulation above is being run — setting a true effect, generating data around it, and observing what the analysis recovers. Two questions organise the whole lecture and should precede every real measurement: <em>has the true experimental unit been identified, and are there enough of them to detect the effect of interest?</em> Answering these in advance is what makes a post mortem unnecessary.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./01-why-statistics.html" class="pagination-link" aria-label="Why statistics?">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Why statistics?</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./02-confounding.html" class="pagination-link" aria-label="Correlation, Confounding, and Causation">
+        <span class="nav-page-text"><span class="chapter-title">Correlation, Confounding, and Causation</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
