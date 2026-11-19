@@ -1,0 +1,52 @@
+# Preface {.unnumbered}
+
+This book is the main learning resource for the course *Statistics for Machine Learning*, taken by second-year Bioinformatics students. It accompanies eleven two-hour lectures, each followed by a two-hour practical.
+
+The aim is that you understand not only *how* a machine-learning method works, but also *why* it works and which statistical assumptions it rests on. A method that you can only run is a method whose failures you cannot recognise.
+
+## How the course is organised
+
+| Day | Lecture | Practical |
+|:--|:--|:--|
+| 1 | Why statistics? | One gene to thousands: an expression matrix |
+| 2 | Experimental design and confounding | Data quality and batch structure |
+| 3 | Linear algebra refresher | Matrices and eigenvectors on expression data |
+| 4 | Principal component analysis | Finding structure in samples |
+| 5 | Cluster analysis | Clustering genes and samples |
+| 6 | Likelihood, information and AIC | Read counts and variant calls |
+| 7 | The bootstrap and cross-validation | Honest error estimates, grouped by patient |
+| 8 | Evaluating classifiers, KNN and SVM | Classifying tumour samples |
+| 9 | Regularisation, PCR and PLS | Prediction when genes outnumber samples |
+| 10 | Trees, bagging and random forests | Forests on molecular data |
+| 11 | Boosting and an honest comparison | Comparing methods on equal terms |
+
+The practicals use data that look like bioinformatics data: expression matrices, read counts, variant calls. They contain no gene ontologies or pathway databases, because the object of study is the statistics. Most data sets are simulated, so that the correct answer is known and your analysis can be checked against it.
+
+## Conventions
+
+The margin carries four kinds of note:
+
+- **DEF**: a definition.
+- **KEY**: a central idea to remember.
+- **↪**: a link to another day.
+- **⚠**: a common pitfall.
+
+R is the primary language. Python appears where it adds something, for example where a popular Python library behaves differently from its R counterpart.
+
+The textbook for the course is *An Introduction to Statistical Learning*, second edition [@James2021], referred to as ISLR. Each chapter ends with a reading guide.
+
+## Software
+
+You need a recent version of R, RStudio and these packages:
+
+```{r}
+#| eval: false
+install.packages(c(
+  "ggplot2", "car", "emmeans", "boot", "MASS", "broom", "dplyr", "tidyr",
+  "forcats", "stringr", "GGally", "igraph", "plotly", "ggfortify", "HSAUR3",
+  "cluster", "pvclust", "factoextra", "class", "e1071", "glmnet", "pls",
+  "glmmTMB", "rpart", "rpart.plot", "randomForest", "gbm"
+))
+```
+
+To run the Python examples you also need the `reticulate` package and a Python installation with `pandas` and `scikit-learn`.

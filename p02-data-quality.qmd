@@ -1,0 +1,331 @@
+# Practical: data quality
+
+```{r libraries}
+#| message: false
+#| warning: false
+#| code-fold: true
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(forcats)
+library(stringr)
+library(broom)
+```
+
+::: {.column-margin .margin-legend}
+**Margin legend**
+
+**DEF** — definition **KEY** — key idea to remember **↪** — bridge to another lecture **⚠** — common pitfall
+:::
+
+## Where this chapter fits  {.unnumbered}
+
+The lecture addressed obtaining good data *before* they exist. This practical addresses the immediately following step: a spreadsheet is now available, and before a single model is fitted it must be *examined*: its structure checked, its errors found, its outliers identified and, crucially, its observations assessed for independence.
+
+This is a **tutorial**. It is intended to be read with R open, running each chunk and modifying it to observe the consequences. The code is shown by default for exactly that reason. The code, however, is not the point; the *habits* are. Every technique here answers one of four questions that should be asked of any dataset before analysis:
+
+- **Is it structured correctly?** One row per observation, one column per variable, the appropriate type in each column.
+- **Is it clean?** No miscoded categories, impossible values, or silent data-entry errors.
+- **Does it contain outliers?** And if so, are they errors to be corrected or genuine biology to be retained?
+- **Is it independent?** Or do groups of rows belong together — the dependence one learned to *recognise* in the design chapter, now visible in the data themselves.
+
+The Tidyverse is used throughout — `dplyr` and `tidyr` for reshaping and summarising, `ggplot2` for visualisation, `forcats` for categorical variables, and `broom` for converting model output into tidy tables — because these tools are built around the concept of *tidy data*, which is where the chapter begins.
+
+## A dataset with problems to find
+
+Rather than a clean textbook dataset, we simulate one resembling what a laboratory would actually deliver: enzyme activity measured in fish from three lakes, with each fish measured on four consecutive days. Simulating the data has the same virtue it had in the design chapter: because the problems were planted deliberately, the correct answers are known, and the quality control can be checked against them.
+
+Two features are deliberate. First, the measurements are **repeated within each fish**, so rows belonging to the same fish are correlated — the dependence structure towards which the chapter builds. Second, the kinds of faults real data carry have been planted: two impossible outliers, a unit-conversion error, a missing value, and some miscoded lake names.
+
+```{r simulate}
+#| code-fold: true
+#| code-summary: "Simulation code plus introduced errors"
+set.seed(42)
+
+n_fish <- 8; n_day <- 4
+lakes  <- c("Aral", "Baikal", "Como")
+
+fish_id        <- 1:24
+fish_intercept <- rnorm(24, 0, 4)                 # each fish's own baseline
+lake_effect    <- c(Aral = 0, Baikal = 3, Como = -2)
+
+dat <- expand.grid(fish = fish_id, day = 1:n_day)
+dat$lake     <- lakes[((dat$fish - 1) %/% n_fish) + 1]
+dat$activity <- 20 + lake_effect[dat$lake] + fish_intercept[dat$fish] +
+                0.8 * dat$day + rnorm(96, 0, 2)
+dat$activity <- round(dat$activity, 1)
+
+# --- plant realistic faults ---
+dat$activity[10] <- 78.4                 # sensor glitch: impossibly high
+dat$activity[55] <- -3.2                 # impossible negative activity
+dat$activity[30] <- dat$activity[30] * 10   # unit error (mg vs g)
+dat$activity[7]  <- NA                    # missing value
+dat$lake[c(3, 40)] <- c("aral", "Baikal ")  # miscoded factor levels
+
+dat <- as_tibble(dat)
+dat
+```
+
+The printed tibble shows the four columns — `fish`, `day`, `lake`, `activity` — and the first rows of the 96 observations. Nothing in this first view reveals the planted faults; that is precisely why a systematic quality-control pass is required. Everything below is the process of earning the right to trust these data.
+
+## Tidy data: the shape everything assumes
+
+Before any summary or plot, the convention that the whole Tidyverse — and, implicitly, most of statistics — assumes should be stated. Data are **tidy** when:
+
+1.  each **variable** is a column,
+2.  each **observation** is a row,
+3.  each **type of observational unit** is its own table.
+
+The object `dat` is already tidy in this sense: `activity`, `fish`, `day` and `lake` are four variables, and each row is one measurement. This is exactly the spreadsheet header the design chapter derived from the model; the tidy shape and the model are two views of the same plan.
+
+Tidy is not the only shape in which data arrive, and reshaping is a routine quality-control step. Data are often recorded **wide** — one row per fish, one column per day — which is convenient for data entry but unsuitable for analysis. `tidyr` moves between the two with `pivot_longer` and `pivot_wider`. Since `pivot_wider` is used later to inspect dependence, the conversion is shown here in miniature.
+
+```{r pivot-demo}
+wide <- dat |>
+  select(fish, day, activity) |>
+  pivot_wider(names_from = day, values_from = activity,
+              names_prefix = "day_")
+wide
+```
+
+The wide table has one row per fish and one column per day. In this layout the four measurements of a fish sit on one line, and an anomalous value is more readily noticed by eye. The rule of thumb is therefore: **analyse long, inspect wide.** Models require one row per observation; visual inspection is often more effective in the wide layout.
+
+### First contact: structure before statistics
+
+The single most important habit in this chapter is to *inspect the structure before computing anything.* Three functions do almost all the work — `glimpse` for the column types, `summary` for the ranges, and a count of missing values. They should be run the moment a dataset arrives.
+
+```{r glimpse}
+glimpse(dat)
+```
+
+`glimpse` immediately reveals two problems: `lake` is a `character`, not a `factor`, and `activity` runs to implausible values. Before any mean is trusted, the extremes and the missingness are checked explicitly.
+
+```{r structure-check}
+dat |>
+  summarise(
+    n        = n(),
+    n_missing = sum(is.na(activity)),
+    min      = min(activity, na.rm = TRUE),
+    max      = max(activity, na.rm = TRUE),
+    median   = median(activity, na.rm = TRUE)
+  )
+```
+
+The summary reports one missing value, a minimum below zero, and a maximum of 225 for an enzyme activity whose median sits near 24. Each of these is a fault that would otherwise have been carried, undetected, into every downstream model. This is the numerical equivalent of Fisher's post-mortem warning: the fault is caught now rather than after the analysis has failed.
+
+### Cleaning categorical variables with forcats
+
+The lake variable's actual content is compared with its intended content.
+
+```{r factor-problem}
+dat |> count(lake)
+```
+
+Three lakes have become five "levels": a lowercase `aral` and a trailing-space `Baikal ` have split off as phantom categories. Left uncorrected, every group summary and every model would treat these as separate lakes. This is the most common and most invisible error in real biological data, because it survives a glance at the numbers: the values are correct; only their *labels* are broken.
+
+The remedy is a normalise-then-recode step. Whitespace is trimmed and case standardised, after which `forcats` locks the levels into a known, ordered set.
+
+```{r factor-fix}
+dat <- dat |>
+  mutate(
+    lake = lake |> str_squish() |> str_to_title(),   # "Baikal " -> "Baikal", "aral" -> "Aral"
+    lake = fct_relevel(lake, "Aral", "Baikal", "Como")
+  )
+
+dat |> count(lake)
+```
+
+The count now shows three clean levels of 32 rows each. `forcats` is useful here and again later: `fct_relevel` fixes the reference level (which determines how model coefficients read), and `fct_reorder` — introduced in the plotting section — orders categories *by the data* so that plots reveal structure rather than concealing it alphabetically.
+
+### Grouped summaries with dplyr
+
+With the categories clean, the `group_by |> summarise` idiom provides the per-group description that constitutes the first real view of the biology. Several statistics are computed at once, and the missing-value count and the group size are always carried alongside the mean; a mean without its $n$ is not a summary.
+
+```{r group-summary}
+lake_summary <- dat |>
+  group_by(lake) |>
+  summarise(
+    n        = n(),
+    n_fish   = n_distinct(fish),
+    n_missing = sum(is.na(activity)),
+    mean     = mean(activity, na.rm = TRUE),
+    sd       = sd(activity,   na.rm = TRUE),
+    median   = median(activity, na.rm = TRUE),
+    IQR      = IQR(activity,  na.rm = TRUE)
+  )
+lake_summary
+```
+
+Two features of this table deserve attention. The standard deviations of Aral and Baikal are very large relative to that of Como — a direct fingerprint of the outliers planted in those two lakes. And the `n` versus `n_fish` columns quietly tell the dependence story: 32 rows but only 8 fish per lake. Those 32 numbers are not 32 independent facts; this is the subject of the final section.
+
+The pairing of `mean` with `median` and `sd` with `IQR` is also deliberate. The mean and standard deviation are sensitive to outliers; the median and IQR are **robust** to them. When the two disagree sharply — as they do for Aral and Baikal — the disagreement is itself a diagnostic that something extreme is present.
+
+### Seeing the data: distributions and outliers with ggplot2
+
+Numbers summarise; plots reveal. The reason to plot before modelling is that summary statistics can conceal everything that matters — the classic demonstration is Anscombe's quartet, four datasets with identical means, variances and correlations but entirely different shapes. The habit to be formed is: **never trust a summary that has not been plotted.**
+
+### The distribution of one variable
+
+A histogram or density plot is the first view. Here the planted outliers make the scale itself the story.
+
+```{r hist-raw, fig.width = 7, fig.height = 3.5}
+ggplot(dat, aes(activity)) +
+  geom_histogram(bins = 40, fill = "steelblue", colour = "white") +
+  labs(title = "Raw activity: three outliers stretch the axis",
+       x = "Enzyme activity", y = "Count") +
+  theme_minimal()
+```
+
+The bulk of the data is compressed into a narrow band on the left because three points sit far to the right. That compression *is* the diagnostic: a distribution that should form a compact mound instead has a long, empty tail with a few isolated points, and those isolated points are what must be investigated.
+
+### Boxplots by group
+
+The boxplot is the single most useful quality-control plot, because it shows the median, the IQR and the outliers (by the 1.5×IQR rule) for every group at once. Overlaying the raw points — jittered so they do not stack — reveals the sample size and the individual values behind the summary.
+
+```{r box-group, fig.width = 7, fig.height = 4}
+ggplot(dat, aes(lake, activity)) +
+  geom_boxplot(outlier.colour = "red", outlier.size = 2) +
+  geom_jitter(width = 0.15, alpha = 0.4) +
+  labs(title = "Activity by lake, with 1.5×IQR outliers in red",
+       x = NULL, y = "Enzyme activity") +
+  theme_minimal()
+```
+
+The red points are exactly the values flagged by the IQR rule: two in Aral and one in Baikal. The plot performs the outlier detection directly: no fences need be computed by hand to see that some lakes carry extreme values and Como does not.
+
+### Making outliers legible with a transformed axis
+
+When outliers dominate the scale, a logarithmic axis allows the bulk and the extremes to be seen together without removing anything. This is a display choice, not a change to the data: the values are untouched; only the axis is stretched.
+
+```{r box-log, fig.width = 7, fig.height = 4}
+ggplot(dat, aes(lake, activity)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.15, alpha = 0.4) +
+  scale_y_log10() +
+  labs(title = "Same data, log axis: the bulk becomes visible",
+       x = NULL, y = "Enzyme activity (log scale)") +
+  theme_minimal()
+```
+
+On the logarithmic axis the three lakes' distributions become comparable and their medians and spreads can be read. The negative planted value is absent from this plot, since it has no logarithm — itself a useful signal that the value is impossible for this measurement.
+
+### Integration: what the plots establish
+
+The three plots answer the same question at increasing resolution. The histogram shows that the overall distribution is distorted by a small number of extreme values; the grouped boxplot locates them in their lakes and identifies them individually; the log-scale version confirms that, once the extremes are set aside, the three lakes have distributions of similar shape and spread, differing in location. The plots therefore convert the vague impression of "large standard deviations in Aral and Baikal" from the summary table into a specific list of observations to investigate.
+
+### Detecting outliers quantitatively
+
+The eye is good at noticing outliers but poor at defending the judgement. Two rules make the decision reproducible, and it is worth knowing both because they can disagree.
+
+The **1.5×IQR rule** (used by the boxplot) flags any point below $Q_1 - 1.5\,\text{IQR}$ or above $Q_3 + 1.5\,\text{IQR}$. The **robust z-score**, or MAD rule, measures each point's distance from the median in units of the median absolute deviation, and flags anything beyond approximately 3.5. It is called robust because, unlike the ordinary z-score, its centre and spread are not themselves displaced by the outliers they are intended to detect.
+
+```{r outlier-flags}
+dat <- dat |>
+  mutate(
+    med    = median(activity, na.rm = TRUE),
+    MADv   = mad(activity,   na.rm = TRUE),
+    rob_z  = (activity - med) / MADv,
+    is_outlier = abs(rob_z) > 3.5
+  )
+
+dat |>
+  filter(is_outlier) |>
+  select(fish, day, lake, activity, rob_z)
+```
+
+The rule flags exactly the three planted points — the sensor glitch (78.4), the unit error (225.0) and the impossible negative (−3.2). This is the moment for the judgement the design chapter anticipated: **an outlier is not automatically an error.** Here the three are known to be faults because they were constructed. In real data each would be investigated: the negative value is physically impossible and must be corrected or removed; the ×10 value is a classic unit slip that may be recoverable; a merely *large* value might be entirely real biology that there is no justification for deleting. The rule identifies candidates; only knowledge of the system settles them.
+
+For this tutorial the three are treated as genuine errors and set to missing, to be handled explicitly downstream rather than silently dropped.
+
+```{r outlier-clean}
+dat_clean <- dat |>
+  mutate(activity = if_else(is_outlier, NA_real_, activity)) |>
+  select(fish, day, lake, activity)
+```
+
+### Seeing dependence
+
+Everything so far has been housekeeping. This final section connects the lecture day together, and it is where the quality-control habit earns its keep. The design chapter taught the *recognition* of non-independent measurements — rats in a box, pieces of a liver, repeated measures on a subject. Here that non-independence is *observed* directly in the data, using the same tidy tools.
+
+Each fish was measured on four days. The question is whether those four measurements are four independent facts or four correlated views of the same fish. Plotting the raw trajectories answers it immediately.
+
+```{r spaghetti, fig.width = 7.5, fig.height = 4.5}
+dat_clean |>
+  mutate(fish = factor(fish)) |>
+  ggplot(aes(day, activity, group = fish, colour = lake)) +
+  geom_line(alpha = 0.6) +
+  geom_point(alpha = 0.6) +
+  labs(title = "Each line is one fish across four days",
+       subtitle = "Lines stay in their lane: measurements within a fish are correlated",
+       x = "Day", y = "Enzyme activity") +
+  theme_minimal()
+```
+
+This "spaghetti plot" is the visual signature of repeated-measures dependence. Each fish traces its own roughly horizontal line, well separated from the others. A fish that is high on day 1 is high on days 2–4; the measurements do not scatter freely but cluster by individual. Were the 96 rows truly independent, the lines would be tangled noise with no per-fish coherence. They are not.
+
+The dependence can be quantified. The data are reshaped to wide — one column per day — and the days are correlated with one another.
+
+```{r day-cor}
+dat_clean |>
+  select(fish, day, activity) |>
+  pivot_wider(names_from = day, values_from = activity,
+              names_prefix = "day_") |>
+  select(starts_with("day_")) |>
+  cor(use = "pairwise.complete.obs") |>
+  round(2)
+```
+
+Every off-diagonal correlation is high and positive, around 0.9. Day 1 predicts day 4 almost perfectly, because both are mostly reporting *which fish this is*. That shared fish identity is precisely the dependence a naive analysis would ignore.
+
+The consequence deserves to be stated starkly, because it is the same pseudoreplication error as in the design chapter, now quantified. The row count is compared with the number of genuine experimental units.
+
+```{r pseudorep}
+dat_clean |>
+  summarise(
+    rows            = n(),
+    true_units_fish = n_distinct(fish)
+  )
+```
+
+A model treating all 96 rows as independent believes it has 96 experimental units. It has 24. That fourfold inflation of the sample size would shrink every standard error, narrow every confidence interval, and confer significance that was not earned — the "false power" described in the discussion of blocking. The purpose of *seeing* the dependence now is that it decides what you may do later: on Day 7 the fish, not the row, is what gets resampled and held out.
+
+### Integration: what the dependence section establishes
+
+The spaghetti plot, the day-by-day correlation matrix and the unit count are three expressions of one fact: the 96 rows are organised in 24 groups, and the within-group similarity is strong. The plot shows the structure qualitatively; the correlation matrix quantifies it at roughly 0.9; the unit count states its consequence for inference. Together they translate the abstract notion of the experimental unit from the design chapter into a property of the data that can be measured, and they explain why resampling on Day 7 must respect the fish.
+
+## Tidy model output with broom
+
+One further tool closes the loop between quality control and modelling. When a model is fitted, its default `print` output is a block of text that is difficult to compute on. `broom` converts any model into a tidy tibble, so that model results become another dataset that can be filtered, arranged and plotted with the same verbs.
+
+As a preview — and as a demonstration of *why* the dependence matters — the naive linear model that wrongly ignores fish identity is fitted and its coefficients tidied.
+
+```{r broom-fit}
+naive_fit <- lm(activity ~ lake + day, data = dat_clean)
+
+tidy(naive_fit, conf.int = TRUE) |>
+  mutate(across(where(is.numeric), \(x) round(x, 3)))
+```
+
+`tidy` returns one row per coefficient with its estimate, standard error, test statistic, p-value and confidence interval. The lake contrasts and the day slope are reported with standard errors computed as if the 96 observations were independent; these standard errors are too small.
+
+```{r broom-glance}
+glance(naive_fit) |>
+  select(r.squared, sigma, df, nobs) |>
+  mutate(across(where(is.numeric), \(x) round(x, 3)))
+```
+
+`glance` returns one row of whole-model summaries. The `nobs` column reports the number of observations the model believes it has, which, as the previous section established, is four times the number of experimental units.
+
+## Key takeaways
+
+- Inspect structure before computing. `glimpse`, `summary` and an explicit missing count catch most serious faults immediately.
+- Clean categorical variables deliberately. Trailing spaces and case differences create phantom groups that survive a glance at the numbers; `forcats` locks levels down.
+- Summarise in groups, and always carry $n$, the missing count, and a *robust* statistic (median, IQR) alongside the mean and SD. Disagreement between robust and non-robust summaries is itself a diagnostic.
+- Plot before modelling. Boxplots flag outliers directly; a transformed axis shows bulk and extremes together; Anscombe's warning stands — identical summaries can conceal entirely different data.
+- Flag outliers with a reproducible rule (IQR or robust z), but let knowledge of the system, not the rule, decide whether each is an error or genuine biology.
+- Observe dependence directly. The spaghetti plot and a day-by-day correlation turn the abstract "experimental unit" of the design chapter into something concrete, and reveal how severely a naive model would overstate its evidence.
+- `broom` makes model output tidy, so the same verbs that cleaned the data also interrogate the models.
+
+## Looking ahead
+
+The simulate-then-analyse loop is the engine of the practicals in this course, and this one has walked through every step of it: a data set was generated whose truth was controlled, corrupted in the way real collection corrupts data, its structure recovered with tidy tools, and the dependence that a careless analysis would miss exposed. The quality-control pass should be run before any modelling, because the habit of *inspecting first* is the one that will preserve a real analysis later.

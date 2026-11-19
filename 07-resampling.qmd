@@ -1,0 +1,1507 @@
+# Resampling: The Bootstrap and Cross-Validation
+
+::: {.column-margin}
+**Margin legend**
+
+**DEF** — definition of a term.
+
+**KEY** — a central idea to remember.
+
+**↪** — link to another chapter or lecture.
+
+**⚠** — common pitfall or point of caution.
+:::
+
+## Two questions
+
+Two questions motivate this chapter, and they are not the same question.
+
+The first is the question of uncertainty. An estimate computed from a sample would have been different if a different sample had been observed. But how different? On Day 1, we answered this question by assuming a distribution for the residuals and deriving the standard error (SE). The bootstrap takes a different approach: rather than assuming a distribution, it uses the sample itself to approximate the sampling distribution of the estimate.
+
+The second is the question of **predictive performance**. A model that fits the observed data well need not predict new observations well. On Day 1, we framed this tension in terms of degrees of freedom: a model with as many parameters as observations can fit the data perfectly, but such a fit has no useful predictive content as it is particular to that specific sample itself and therefore not generalisable to new samples. For the flexible methods considered in this chapter, however, the number of parameters is no longer a useful measure of flexibility, so the degrees-of-freedom argument cannot be applied simply by counting parameters. **Cross-validation** provides an empirical alternative: rather than measuring flexibility by the number of parameters, we assess it by its predictive consequences, using a tuning parameter to control the trade-off between fit and flexibility, the bias variance trade-off.
+
+
+::: {.column-margin}
+**KEY** — Both methods make the same trade. They spend computer time in order to
+avoid a mathematical derivation or a distributional assumption.
+:::
+
+The two questions are joined by a third idea that runs through the second half of this chapter: **what should be resampled?** Resampling is valid only when the units being resampled are appropriately **exchangeable**. When observations are clustered—leaves within trees, fish within lakes, measurements within subjects—the individual row is not the exchangeable unit. Resampling rows as if they were independent can therefore produce an answer that appears precise but is systematically wrong. The solution on the bootstrap side is the **hierarchical bootstrap**; on the cross-validation side, it is **grouped folds**.
+
+
+::: {.column-margin}
+**↪** Day 2 introduced pseudoreplication and the experimental unit. This chapter shows what they mean for resampling.
+:::
+
+
+## What a standard error actually is
+
+### The sampling distribution
+
+::: {.column-margin}
+**DEF** — A **standard error** of an estimate $\hat\theta$ is the standard
+deviation of the sampling distribution of $\hat\theta$.
+:::
+
+As a reminder, a standard error is needed whenever we report a confidence interval, a prediction interval, or a \(p\)-value. For the mean of a sample, we write it down almost without hesitation:
+
+$$
+\mathrm{SE}(\bar y) = \frac{s}{\sqrt{n}},
+$$
+
+and for the slope of a simple linear regression the expression is already considerably more challenging,
+
+$$
+\mathrm{SE}(\hat\beta_1) =
+\frac{\sqrt{\dfrac{1}{n-2}\sum_{i=1}^{n}\left(y_i - \hat y_i\right)^2}}
+     {\sqrt{\sum_{i=1}^{n}\left(x_i - \bar x\right)^2}} .
+$$
+
+These are different formulae because they describe different quantities, but
+they are instances of one definition. Imagine repeating the entire experiment:
+new individuals, same protocol, same population. Each repetition yields a
+slightly different estimate. The distribution of those hypothetical estimates is
+the sampling distribution, and its standard deviation is the standard error.
+
+```{r}
+#| label: fig-sampdist
+#| fig-cap: "The sampling distribution. Each sample has a spread of its own,
+#|   marked in blue and measured by the sample standard deviation s. The means
+#|   of those samples vary far less, and the standard deviation of their
+#|   distribution is the standard error."
+#| fig-width: 8.5
+#| fig-height: 6.2
+#| code-fold: true
+
+set.seed(256)
+
+sd_s  <- 0.32   # spread of the individual observations within a sample
+n_ind <- 4      # observations drawn per sample
+
+bell <- function(x0, sdv, base, height, col = "grey15", lwd = 1.7) {
+  xx <- seq(x0 - 2.5 * sdv, x0 + 2.5 * sdv, length.out = 250)
+  yy <- base + height * exp(-0.5 * ((xx - x0) / sdv)^2)
+  lines(xx, yy, lwd = lwd, col = col)
+}
+
+op <- par(mar = c(0, 0, 0, 0))
+plot(NA, xlim = c(-3.2, 10.7), ylim = c(0.2, 10.6),
+     axes = FALSE, xlab = "", ylab = "")
+
+## the population
+th <- seq(0, 2 * pi, length.out = 200)
+polygon(5 + 3.4 * cos(th), 9.3 + 0.95 * sin(th),
+        col = "grey94", border = "grey35", lwd = 2)
+u <- runif(600, -1, 1); v <- runif(600, -1, 1)
+keep <- u^2 + v^2 < 1
+points(5 + 3.15 * u[keep], 9.3 + 0.82 * v[keep],
+       pch = 16, cex = 0.35, col = "steelblue")
+text(-3.1, 9.3, "population", adj = 0, font = 2, cex = 0.85, col = "grey25")
+
+## five samples, each with its own distribution
+xs <- c(1.4, 3.2, 5.0, 6.8, 8.6)
+arrows(xs, 8.2, xs, 7.55, length = 0.08, lwd = 1.6, col = "grey25")
+
+for (j in seq_along(xs)) {
+  segments(xs[j] - 0.85, 6.3, xs[j] + 0.85, 6.3, col = "grey60")
+  bell(xs[j], sd_s, base = 6.3, height = 1.0)
+  points(xs[j] + rnorm(n_ind, 0, sd_s), rep(6.13, n_ind),
+         pch = 16, cex = 0.55, col = "steelblue")
+  arrows(xs[j] - sd_s, 5.72, xs[j] + sd_s, 5.72, code = 3,
+         length = 0.04, lwd = 1.8, col = "steelblue")
+  text(xs[j], 5.42, "s", col = "steelblue", cex = 0.8)
+  text(xs[j], 4.8, bquote(bar(y)[.(j)]), cex = 1.05)
+}
+text(-3.1, 6.9,  "samples",        adj = 0, font = 2, cex = 0.85, col = "grey25")
+text(-3.1, 5.72, "spread of data", adj = 0, font = 2, cex = 0.85, col = "steelblue")
+text(-3.1, 4.8,  "sample means",   adj = 0, font = 2, cex = 0.85, col = "grey25")
+
+## the sampling distribution they trace out
+arrows(xs, 4.4, 5, 3.6, length = 0.06, lwd = 1.2, col = "grey60")
+gx <- seq(1.6, 8.4, length.out = 300)
+gy <- 0.9 + 2.1 * exp(-0.5 * ((gx - 5) / 1.05)^2)
+segments(1.6, 0.9, 8.4, 0.9, col = "grey35")
+lines(gx, gy, lwd = 2)
+text(-3.1, 2.6, "sampling distribution", adj = 0, font = 2, cex = 0.85, col = "grey25")
+
+## the standard error is its spread
+arrows(5, 1.55, 6.05, 1.55, code = 3, length = 0.06,
+       lwd = 2, col = "firebrick")
+text(5.25, 1.3, "SE", adj = 0, font = 2, cex = 0.85, col = "firebrick")
+
+par(op)
+```
+
+
+::: {.column-margin}
+**⚠** The residual standard error printed by `summary.lm` is a standard
+deviation of residuals, not a standard error in the sampling sense. The label is
+misleading and is worth flagging every time it appears.
+:::
+
+### Three routes to the sampling distribution
+
+There are three ways to obtain a sampling distribution, and they differ mainly in what they require.
+
+The first is to **repeat the experiment** many times and observe the variation in the estimates directly. This is conceptually transparent but practically impossible: the problem is precisely that we have only one sample.
+
+The second is to **derive an analytic expression**. The formulae above are examples of this approach, one of the central achievements of twentieth-century mathematical statistics. It typically requires distributional assumptions, and for many quantities of biological interest, no closed-form expression exists.
+
+The third is to **compute** the sampling distribution. This is the subject of this chapter.
+
+The first approach is unavailable in practice, but it is available in a simulation, where we can repeat the experiment as many times as we like. We use simulation here to establish what the target—the sampling distribution—actually is.
+
+### A simulated population
+
+We work throughout with a simulated study of leaf morphology in oak. Specific
+leaf area (SLA, in mm² mg⁻¹) is expected to decline with canopy openness,
+because leaves developed in high light are thicker and denser. In the first part
+of the chapter each tree contributes a single leaf, so the observations are
+independent; later in the chapter the design becomes hierarchical.
+
+
+```{r sim-flat}
+#| code-fold: true
+#| code-summary: "sim-code"
+set.seed(11)
+
+n_tree <- 40
+light  <- runif(n_tree, 0.05, 0.60)          # canopy openness (proportion)
+SLA    <- 24 - 20 * light + rnorm(n_tree, 0, 3)
+
+oak_flat <- round(data.frame(light = light, SLA = SLA), 2)
+head(oak_flat)
+```
+
+The data-generating process is fixed and known: the intercept is 24, the slope
+is $-20$, and the residual distribution has mean 0 and variance $3^2$. Every
+estimate below can therefore be judged against a truth that we set ourselves.
+
+```{r plot-flat}
+#| code-summary: "Fitted vs true plot"
+#| code-fold: false
+fit_flat <- lm(SLA ~ light, data = oak_flat)
+
+plot(SLA ~ light, data = oak_flat, pch = 16, col = "grey30",
+     xlab = "Canopy openness", ylab = expression(SLA~(mm^2~mg^-1)))
+abline(fit_flat, lwd = 2)
+abline(a = 24, b = -20, lwd = 2, lty = 2, col = "firebrick")
+legend("topright", c("fitted", "true"), lwd = 2, lty = c(1, 2),
+       col = c("black", "firebrick"), bty = "n")
+```
+
+The fitted line and the generating line differ, and the difference is the
+estimation error we now wish to quantify.
+
+```{r se-analytic}
+#| code-summary: "Summary regression statistics"
+summary(fit_flat)$coefficients
+```
+
+The analytic standard error of the slope appears in the second column. It is a
+statement about a distribution we have never seen: the distribution of slopes
+that repeated experiments would have produced.
+
+### The expensive route, made available by simulation
+
+```{r repeat-experiment}
+#| code-summary: "simulation code"
+#| code-fold: false
+B_rep  <- 1000
+slopes <- numeric(B_rep)
+
+for (i in seq_len(B_rep)) {
+  light_i   <- runif(n_tree, 0.05, 0.60)
+  SLA_i     <- 24 - 20 * light_i + rnorm(n_tree, 0, 3)
+  slopes[i] <- coef(lm(SLA_i ~ light_i))[2]
+}
+
+c("mean slope" = mean(slopes), "sd slopes" = sd(slopes))
+```
+
+We have repeated the whole experiment a thousand times. The mean of the
+resulting slopes sits close to the generating value of $-20$, confirming that
+least squares is unbiased here, and the standard deviation of those slopes is
+the standard error — obtained, for once, by its definition rather than by a
+formula.
+
+```{r repeat-hist}
+#| code-summary: "Histogram code"
+hist(slopes, breaks = 30, col = "grey85", border = "white",
+     main = "", xlab = "Estimated slope")
+abline(v = -20, lwd = 2, col = "firebrick")
+```
+
+The histogram is the sampling distribution of @fig-sampdist made concrete. It is
+centred on the truth, and its width is what `summary.lm` reported analytically.
+Two of the three routes therefore agree. The problem remains that the route just
+taken is impossible with real data, because it required generating new samples
+from a population we do not have.
+
+## The bootstrap
+
+### The plug-in principle
+
+::: {.column-margin}
+**DEF** — The **bootstrap** estimates the sampling distribution of a statistic
+by repeatedly drawing samples of size $n$, with replacement, from the observed
+sample of size $n$, and recomputing the statistic on each.
+:::
+
+The bootstrap begins from an observation that is almost too simple to be useful. We cannot draw new samples from the population, but the sample in hand is our best available picture of that population. So we draw from it instead.
+
+Formally, the unknown distribution $\mathcal{D}$ is replaced by the empirical distribution $\widehat{\mathcal{D}}_n$ — the sample itself, treated as if it were the entire population, with each of the $n$ observed values equally likely and nothing else possible. Drawing one observation from $\widehat{\mathcal{D}}_n$ is therefore drawing one row of the data set at random, and drawing $n$ of them is drawing $n$ rows with replacement. Every quantity that would have been computed from repeated samples of $\mathcal{D}$ is then computed from repeated samples of $\widehat{\mathcal{D}}_n$.
+
+::: {.column-margin}
+**KEY** — Day 1 assumed a distribution for the residual and derived the
+consequences. The bootstrap substitutes the empirical distribution for the
+assumed one. The logic of the inference is unchanged; only the source of the
+distribution has moved from assumption to data.
+:::
+
+### Sampling with replacement
+
+```{r sample-demo}
+set.seed(1)
+sample(1:5)                       # a permutation: each value once
+sample(1:5, replace = TRUE)       # with replacement: repeats and omissions
+sample(1:5, replace = TRUE)
+```
+
+The first call reorders the five values; it contains exactly the same
+information as the original and is of no use here. The second and third calls
+are bootstrap samples: some values appear twice, others not at all. That
+variation between resamples is what stands in for variation between experiments.
+
+::: {.column-margin}
+**⚠** A bootstrap sample must be the same size as the original sample. Drawing
+fewer observations changes the very quantity being estimated, since a standard
+error depends on $n$.
+:::
+
+On average a bootstrap sample omits a fraction $(1 - 1/n)^n \approx
+0.368$ of the original observations. Roughly two-thirds of the rows appear in
+any given resample; the remainder form what later becomes the **out-of-bag sample
+in random forests**.
+
+::: {.column-margin}
+**↪** The out-of-bag error of a random forest, on Day 10, is
+built from precisely this one-third.
+:::
+
+The figure 0.368 follows from a one-line calculation. In a single draw, a given row is missed with probability $1 - 1/n$. The $n$ draws are independent, so the row is missed by all of them with probability
+
+$$
+\Big(1 - \frac1n\Big)^n \;\longrightarrow\; e^{-1} \approx 0.368 \qquad (n \to \infty).
+$$
+
+The number of *distinct* bootstrap samples can be counted as well. A resample is determined by how often each of the $n$ rows appears, and there are $\binom{2n-1}{n}$ ways to distribute $n$ draws over $n$ rows.
+
+```{r boot-count}
+n_rows <- c(6, 10, 40)
+data.frame(n = n_rows,
+           prob_row_omitted = round((1 - 1 / n_rows)^n_rows, 3),
+           distinct_samples = signif(choose(2 * n_rows - 1, n_rows), 3))
+```
+
+With six observations there are only 462 different resamples, which is why the bootstrap cannot be trusted for very small samples. With forty there are more than $10^{22}$, and the $B = 2000$ resamples drawn in practice are a tiny random sample of them.
+
+### A bootstrap standard error
+
+```{r boot-slope}
+#| code-fold: false
+set.seed(1234)
+B        <- 2000
+boot_slp <- numeric(B)
+
+for (i in seq_len(B)) {
+  rows        <- sample(seq_len(nrow(oak_flat)), replace = TRUE)
+  d           <- oak_flat[rows, ]
+  boot_slp[i] <- coef(lm(SLA ~ light, data = d))[2]
+}
+
+sd(boot_slp)
+```
+
+This number should be compared with two others already computed: the analytic
+standard error from `summary.lm`, and the standard deviation of the thousand
+replicated experiments. All three estimate the same quantity, and they agree to
+within simulation error. The bootstrap has reproduced, by brute force and
+without any derivation, the result that required a page of algebra.
+
+That is a reassuring demonstration and a pointless one: for a slope we already
+had the formula. The bootstrap earns its place where no formula exists.
+
+### A statistic with no formula
+
+Suppose the biological question concerns a threshold. At what canopy openness
+does mean SLA fall to 14 mm² mg⁻¹, the value below which the leaves in this
+system are functionally sun leaves? Inverting the fitted line gives
+
+$$
+\hat\lambda = \frac{\hat\beta_0 - 14}{-\hat\beta_1},
+$$
+
+a ratio of two estimated coefficients that are themselves correlated. There is
+no elementary standard error for this quantity, and the delta-method
+approximation to it behaves poorly when the denominator is not comfortably far
+from zero.
+
+::: {.column-margin}
+**DEF** — Estimating the value of $x$ at which the response reaches a stated
+level is **inverse prediction**. LD50 and LC50 are the familiar cases.
+:::
+
+```{r threshold-point}
+threshold <- 14
+lambda_hat <- (coef(fit_flat)[1] - threshold) / (-coef(fit_flat)[2])
+as.numeric(lambda_hat)
+```
+
+The point estimate is immediate. The uncertainty is not, and this is exactly the
+situation in which the bootstrap is the practical tool rather than the
+pedagogical one.
+
+```{r boot-threshold}
+set.seed(99)
+boot_lambda <- numeric(B)
+
+for (i in seq_len(B)) {
+  rows <- sample(seq_len(nrow(oak_flat)), replace = TRUE)
+  cf   <- coef(lm(SLA ~ light, data = oak_flat[rows, ]))
+  boot_lambda[i] <- (cf[1] - threshold) / (-cf[2])
+}
+
+c(estimate = as.numeric(lambda_hat),
+  boot_se  = sd(boot_lambda))
+```
+
+Each iteration refits the line to a resampled data set and inverts it. The
+standard deviation of the two thousand resulting thresholds is the bootstrap
+standard error, obtained without knowing anything about the distribution of a
+ratio of correlated estimators.
+
+```{r boot-threshold-hist}
+hist(boot_lambda, breaks = 40, col = "grey85", border = "white",
+     main = "", xlab = "Bootstrapped threshold openness")
+abline(v = lambda_hat, lwd = 2, col = "firebrick")
+```
+
+The histogram is not symmetric. The right tail is longer, because resamples that
+happen to produce a shallower slope push the inverted threshold far to the
+right, whereas no resample can push it correspondingly far to the left. Any
+interval built on the assumption of symmetry will misplace both endpoints.
+
+### Confidence intervals from a bootstrap distribution
+
+Three constructions are in common use, in increasing order of both cost and
+fidelity. All three are general, but we continue to illustrate them on the
+threshold $\hat\lambda$ of the previous section rather than on the slope,
+because the three agree whenever the bootstrap distribution is symmetric and
+differ only when it is not. A skewed case is the only one that distinguishes
+them.
+
+The **normal approximation** takes the bootstrap standard error and pretends the
+sampling distribution is normal:
+
+$$
+\hat\theta \pm 1.96 \cdot \mathrm{SE}_{\mathrm{boot}} .
+$$
+
+It is remarkably efficient — a few hundred resamples suffice, because only a
+standard deviation is being estimated — and it is wrong whenever the sampling
+distribution is skewed.
+
+The **percentile interval** discards the normality assumption and reads the
+empirical quantiles of the bootstrap distribution directly.
+
+```{r ci-compare}
+normal_ci <- as.numeric(lambda_hat) + c(-1.96, 1.96) * sd(boot_lambda)
+perc_ci   <- quantile(boot_lambda, c(0.025, 0.975))
+
+rbind(normal = normal_ci, percentile = as.numeric(perc_ci))
+```
+
+The percentile interval is asymmetric about the estimate, the normal interval is
+symmetric by construction, and the two differ most in the tail where the skew
+lies. The percentile method asks more of the simulation: estimating a 2.5%
+quantile well requires thousands of resamples, where a standard deviation needs
+only hundreds.
+
+```{r ci-symmetric-case}
+slope_hat <- coef(fit_flat)[2]
+
+rbind(normal     = as.numeric(slope_hat) + c(-1.96, 1.96) * sd(boot_slp),
+      percentile = as.numeric(quantile(boot_slp, c(0.025, 0.975))))
+```
+
+The same two constructions applied to the slope, whose bootstrap distribution
+above is symmetric, give almost identical intervals. This is the
+contrast that justifies the choice of example: for a well-behaved statistic the
+extra machinery buys nothing, and the reason to know about percentile and BCa
+intervals is the badly behaved case.
+
+::: {.column-margin}
+**KEY** — Standard errors are cheap ($B \approx 200$); tail quantiles are
+expensive ($B \approx 2{,}000$ or more). Choose $B$ according to what is being
+read off the bootstrap distribution.
+:::
+
+The **bias-corrected and accelerated (BCa)** interval adjusts the percentile
+method for median bias and for a skewness that changes with the parameter value.
+It is the default recommendation, and the `boot` package computes all three at
+once.
+
+```{r boot-package}
+library(boot)
+
+lambda_stat <- function(data, i) {
+  cf <- coef(lm(SLA ~ light, data = data[i, ]))
+  as.numeric((cf[1] - threshold) / (-cf[2]))
+}
+
+set.seed(7)
+boot_out <- boot(oak_flat, statistic = lambda_stat, R = 2000)
+boot.ci(boot_out, type = c("norm", "perc", "bca"))
+```
+
+The `statistic` argument must be a function of the data and an index vector;
+`boot` supplies the resampled indices in `i`, and everything else follows the
+same loop written out above. Where the three intervals disagree, the
+disagreement is itself informative: it is a direct measure of how far the
+sampling distribution departs from normality.
+
+### What the bootstrap does not do
+
+
+The bootstrap resamples the data. It cannot repair a sample that was not
+representative to begin with. If the oaks were measured only on the sunny edge
+of the wood, every resample inherits that bias, and the bootstrap will report a
+tight interval around the wrong value. Resampling estimates variance, never
+bias.
+
+::: {.column-margin}
+**⚠** The bootstrap has one assumption, and it is not mild: the sample must be
+representative of the population about which a claim is made, underlining the importance of good experimental design and execution. 
+:::
+
+Nor does the bootstrap manufacture information. With $n = 6$ there are few
+distinct resamples, the empirical distribution is a poor likeness of $\mathcal{D}$, and
+the resulting interval is unreliable in a way that no increase in $B$ can cure.
+Increasing $B$ reduces Monte Carlo error only; it does not reduce sampling
+error.
+
+Finally, the bootstrap fails outright for statistics that depend on the extremes
+of the distribution. The sample maximum is the standard example: no resample can
+exceed the largest observed value, so the bootstrap distribution of the maximum
+is piled up against a ceiling and misrepresents the true sampling distribution
+badly.
+
+```{r boot-max}
+set.seed(5)
+x <- runif(50, 0, 10)
+boot_max <- replicate(2000, max(sample(x, replace = TRUE)))
+
+c(observed_max = max(x),
+  boot_mean    = mean(boot_max),
+  prop_equal   = mean(boot_max == max(x)))
+```
+
+The bootstrap distribution places a large point mass exactly at the observed
+maximum, which is the probability that the largest observation is drawn at least
+once. No continuous sampling distribution looks like that, and the failure is
+structural rather than a matter of too few resamples.
+
+Taken together, the three limitations define the scope of the method. The
+bootstrap converts a derivation problem into a computation problem, provided the
+units being resampled are exchangeable draws from the population of interest.
+The next section is about what happens when they are not.
+
+## The hierarchical bootstrap
+
+### When the row is not the unit
+
+Biological data are rarely a flat list of independent observations. Leaves are
+measured on trees, fish are caught in lakes, cells are counted in animals, and
+repeated measurements are taken on subjects. Day 2 named the consequence:
+counting rows as independent replicates is pseudoreplication, and it inflates
+the apparent precision of every estimate. Here we ask what the same problem does to
+a bootstrap.
+
+We rebuild the oak study as the hierarchical design it would realistically be.
+Twenty trees are sampled, canopy openness is measured once per tree, and eight
+leaves are collected from each tree.
+
+```{r sim-nested}
+set.seed(2026)
+
+a       <- 20                       # trees
+n_leaf  <- 8                        # leaves per tree
+sigma_b <- 2.0                      # between-tree SD of the intercept
+sigma   <- 1.5                      # within-tree residual SD
+
+light_tree <- runif(a, 0.05, 0.60)
+b_tree     <- rnorm(a, 0, sigma_b)
+
+oak <- data.frame(
+  tree  = factor(rep(seq_len(a), each = n_leaf)),
+  light = rep(light_tree, each = n_leaf)
+)
+oak$SLA <- 24 - 20 * oak$light +
+           rep(b_tree, each = n_leaf) +
+           rnorm(a * n_leaf, 0, sigma)
+
+str(oak)
+```
+
+The generating structure is explicit. Tree $j$ has a true intercept that departs
+from the population intercept by $b_j$, and the $b_j$ are drawn from a normal
+distribution with mean 0 and variance $\sigma_b^2 = 4$. Within a tree, leaves
+scatter about that tree's own line with variance $\sigma^2 = 2.25$. The
+predictor, canopy openness, varies only between trees.
+
+::: {.column-margin}
+**KEY** — With a tree-level predictor and 160 leaves, the slope is still
+estimated from twenty independent pieces of information about light, not from
+one hundred and sixty.
+:::
+
+```{r naive-lm}
+fit_naive <- lm(SLA ~ light, data = oak)
+summary(fit_naive)$coefficients
+```
+
+The naive fit treats every leaf as an independent observation. The point
+estimate of the slope is respectable, because ordinary least squares remains
+unbiased under clustering. The standard error is not, and neither is the
+residual degrees-of-freedom count of 158 that underlies the reported $p$-value.
+
+### Row-wise resampling reproduces the error
+
+The natural first attempt is to bootstrap as before, resampling rows.
+
+```{r boot-rows}
+set.seed(21)
+B <- 2000
+slope_rows <- numeric(B)
+
+for (i in seq_len(B)) {
+  rows          <- sample(seq_len(nrow(oak)), replace = TRUE)
+  slope_rows[i] <- coef(lm(SLA ~ light, data = oak[rows, ]))[2]
+}
+
+c(lm_se = summary(fit_naive)$coefficients[2, 2],
+  row_boot_se = sd(slope_rows))
+```
+
+The two numbers agree closely, and that agreement is the point. The row-wise
+bootstrap has not diagnosed the problem; it has faithfully reproduced the wrong
+answer. Resampling is not a safety net that catches design errors. It answers
+the question of how much the estimate would vary if the *rows* were redrawn
+independently, and in this design the rows were never drawn independently.
+
+::: {.column-margin}
+**⚠** A bootstrap inherits the independence assumption of whatever it resamples.
+It cannot detect that the assumption is false.
+:::
+
+### The cluster bootstrap
+
+::: {.column-margin}
+**DEF** — The **cluster bootstrap** resamples whole clusters with replacement,
+keeping each selected cluster's observations intact.
+:::
+
+If trees are the units drawn from a population, then trees are what a repeated
+experiment would redraw. The bootstrap should mirror the sampling design:
+resample trees, and carry each selected tree's eight leaves along with it.
+
+```{r boot-cluster}
+tree_ids  <- levels(oak$tree)
+rows_by_tree <- split(seq_len(nrow(oak)), oak$tree)
+
+set.seed(22)
+slope_clust <- numeric(B)
+
+for (i in seq_len(B)) {
+  picked <- sample(tree_ids, size = a, replace = TRUE)
+  rows   <- unlist(rows_by_tree[picked], use.names = FALSE)
+  slope_clust[i] <- coef(lm(SLA ~ light, data = oak[rows, ]))[2]
+}
+
+c(row_boot_se   = sd(slope_rows),
+  cluster_boot_se = sd(slope_clust))
+```
+
+`split()` is used once, before the loop, to store the row indices belonging to
+each tree; inside the loop a resample of tree labels is translated into a
+resample of rows. A selected tree contributes all eight of its leaves, and a
+tree may be selected twice or not at all.
+
+The cluster bootstrap standard error is substantially larger than the row-wise
+one. Nothing about the data changed between the two calculations; only the
+definition of the exchangeable unit did.
+
+::: {.column-margin}
+**⚠** Some trees appear more than once in a resample. Their leaves then appear
+twice with the same tree label, which is harmless for the ordinary least squares
+fit used here but will confuse any model that estimates a per-tree effect.
+Construct a fresh, unique identifier for each *copy* of a tree before fitting a
+mixed model to a cluster-bootstrap resample.
+:::
+
+### The two-stage bootstrap
+
+The cluster bootstrap resamples trees and keeps their leaves fixed. It therefore
+propagates between-tree variation but treats the observed leaves of a selected
+tree as if they were the tree's whole population. The **two-stage** or
+**hierarchical bootstrap** resamples at both levels: trees with replacement,
+then leaves with replacement within each selected tree.
+
+```{r boot-two-stage}
+set.seed(23)
+slope_two <- numeric(B)
+
+for (i in seq_len(B)) {
+  picked <- sample(tree_ids, size = a, replace = TRUE)
+  rows   <- unlist(lapply(rows_by_tree[picked],
+                          function(r) sample(r, replace = TRUE)),
+                   use.names = FALSE)
+  slope_two[i] <- coef(lm(SLA ~ light, data = oak[rows, ]))[2]
+}
+
+c(cluster = sd(slope_clust),
+  two_stage = sd(slope_two))
+```
+
+::: {.column-margin}
+**⚠** `sample(r, replace = TRUE)` on a vector `r` of length one does not return
+that value: R interprets a single number as `1:n` and returns a permutation of
+`1:r`. Clusters of size one therefore break the inner stage silently. Use
+`r[sample(length(r), replace = TRUE)]` in any code that may meet them.
+:::
+
+The inner `sample(r, replace = TRUE)` performs the second stage. The two
+standard errors are close, which is expected: in a balanced design with a
+cluster-level predictor, most of the uncertainty about the slope comes from the
+tree level, and resampling leaves adds relatively little.
+
+The choice between the two schemes follows the inferential target. If the claim
+concerns a wider population of trees, both levels are random and the two-stage
+scheme is the honest one. If the trees are the entire population of interest and
+only the leaves were sampled, the trees should not be resampled at all.
+
+::: {.column-margin}
+**KEY** — Resample every level that was sampled, and only those. The bootstrap
+scheme is a statement about the design, not a tuning choice.
+:::
+
+### How much is at stake
+
+The inflation is not arbitrary; it is predictable from the variance components.
+The intraclass correlation is
+
+$$
+\mathrm{ICC} = \frac{\sigma_b^2}{\sigma_b^2 + \sigma^2},
+$$
+
+and for a balanced design with $m$ observations per cluster the variance of an
+estimate is inflated by the **design effect**
+
+$$
+\mathrm{deff} = 1 + (m - 1)\,\mathrm{ICC},
+$$
+
+so that standard errors are too small by a factor of $\sqrt{\mathrm{deff}}$ when
+clustering is ignored.
+
+The design effect is derived in three lines. Let $m$ observations in one cluster each have variance $\sigma_t^2$, and let every pair have correlation $\rho$, the intraclass correlation. The variance of their sum is the sum of all variances and covariances, so the variance of their mean is
+
+$$
+\operatorname{Var}(\bar y) = \frac{1}{m^2}\Big[m\,\sigma_t^2 + m(m-1)\,\rho\,\sigma_t^2\Big]
+= \frac{\sigma_t^2}{m}\,\big[1 + (m-1)\rho\big].
+$$
+
+The first factor is what independence would give. The second is the design effect. With $\rho = 0$ it equals 1, and with $\rho = 1$ it equals $m$: the $m$ observations then carry the information of one.
+
+::: {.column-margin}
+**↪** The same three lines return on Day 10, where they explain why averaging correlated trees cannot reduce variance below $\rho\sigma^2$.
+:::
+
+```{r design-effect}
+icc  <- sigma_b^2 / (sigma_b^2 + sigma^2)
+deff <- 1 + (n_leaf - 1) * icc
+
+c(ICC = icc,
+  design_effect = deff,
+  SE_inflation  = sqrt(deff),
+  effective_n   = nrow(oak) / deff)
+```
+
+With $\sigma_b = 2$ and $\sigma = 1.5$ the intraclass correlation is 0.64, the
+design effect is 5.48, and standard errors computed on the assumption of
+independence are too small by a factor of 2.34. The 160 leaves carry about as
+much information as 29 independent leaves would. This is the arithmetic behind
+the gap between the row-wise and cluster bootstrap standard errors, and it
+depends on the design rather than on the seed.
+
+### Agreement with the model-based answer
+
+::: {.column-margin}
+**DEF** — A **random intercept** model gives each cluster its own baseline, $y_{ij} = \beta_0 + b_j + \beta_1 x_{ij} + \varepsilon_{ij}$, with $b_j \sim N(0, \sigma_b^2)$. Such mixed models are outside this course. They appear here only as a check on the resampling answer.
+:::
+
+Three further routes lead to the same place, and their agreement is the check
+that the cluster bootstrap is doing what is claimed.
+
+```{r tree-means}
+tree_data <- aggregate(SLA ~ tree + light, data = oak, FUN = mean)
+fit_means <- lm(SLA ~ light, data = tree_data)
+summary(fit_means)$coefficients
+```
+
+Collapsing each tree to its mean leaves twenty observations and eighteen
+residual degrees of freedom. Because the design is balanced and the predictor is
+constant within a tree, this analysis is not a crude approximation: it is close
+to optimal, and its standard error is in the same region as the cluster
+bootstrap value.
+
+```{r mixed-model}
+library(glmmTMB)
+
+fit_mm <- glmmTMB(SLA ~ light + (1 | tree), data = oak, REML = TRUE)
+summary(fit_mm)
+```
+
+The mixed model recovers the two variance components and reports a slope
+standard error close to the bootstrap and tree-mean values. It also recovers
+the generating parameters, which the naive fit did not attempt to separate.
+
+::: {.column-margin}
+**⚠** `glmmTMB` defaults to maximum likelihood. With few clusters the ML fit can
+collapse a variance component and return a non-positive-definite Hessian; pass
+`REML = TRUE`, as here, for variance-component estimation.
+:::
+
+The model-based and the resampling-based routes are answering the same question
+with different machinery. The mixed model assumes a normal distribution for the
+$b_j$ and derives the standard error; the cluster bootstrap assumes only that
+trees are exchangeable and obtains the standard error by simulation. When both
+are available they should broadly agree, and when the normality of the random
+effects is doubtful — a handful of clusters, or a strongly skewed cluster-level
+distribution — the bootstrap is the more robust of the two.
+
+### Stratified and parametric variants
+
+Two further schemes complete the picture.
+
+A **stratified bootstrap** resamples within strata, holding the number of
+observations per stratum fixed. When treatment groups are a fixed design factor,
+an unstratified resample can produce a data set with three controls and
+thirty-seven treated plants, or with a level missing entirely, and the model then
+fails to fit. Resampling within each level preserves the design.
+
+```{r boot-stratified}
+#| eval: false
+rows <- unlist(lapply(split(seq_len(nrow(d)), d$treatment),
+                      function(r) sample(r, replace = TRUE)))
+```
+
+A **parametric bootstrap** takes a different route to the same destination.
+Rather than resampling the data, it simulates new response vectors from the
+fitted model, refits, and collects the estimates. For mixed models this is the
+standard tool for confidence intervals on variance components and for
+likelihood-ratio tests whose null distribution is not $\chi^2$, because the
+null places a variance on the boundary of the parameter space.
+
+```{r boot-parametric}
+#| eval: false
+sim_y <- simulate(fit_mm, nsim = 1000)
+
+est <- vapply(sim_y, function(y) {
+  d      <- transform(oak, SLA = y)
+  refit  <- glmmTMB(SLA ~ light + (1 | tree), data = d, REML = TRUE)
+  fixef(refit)$cond[["light"]]
+}, numeric(1))
+
+sd(est)
+```
+
+::: {.column-margin}
+**↪** `lme4::bootMer` and `pbkrtest::PBmodcomp` wrap this pattern for `lmer`
+fits, including the boundary-corrected likelihood-ratio test.
+:::
+
+The parametric bootstrap trusts the fitted model's distributional structure and
+buys precision with that trust; the cluster bootstrap trusts only
+exchangeability and pays for it in width. The choice is the usual one between
+assumption and robustness, made explicit.
+
+## Cross-validation
+
+### A different question
+
+The bootstrap answers a question about a parameter. Cross-validation answers a
+question about a model: how large will the error be on data the model has not
+seen?
+
+Two familiar tools do not answer it. **Model diagnostics** — residual plots,
+quantile plots, `DHARMa` simulations — establish whether the assumptions behind
+the standard errors and $p$-values are tenable. A model can pass every
+diagnostic and still predict new observations poorly. **Goodness-of-fit
+measures** such as $R^2$ are computed from the same observations that determined
+the coefficients, and therefore describe the fit to this sample rather than the
+fit to the population.
+
+::: {.column-margin}
+**KEY** — Diagnostics ask whether the model's inferences can be trusted.
+Cross-validation asks whether the model's predictions can be trusted. Neither
+answers the other's question.
+:::
+
+### Training error is optimistic
+
+Because the generating process is known, the size of the optimism can be
+measured directly: we fit polynomials of increasing degree to the flat oak data
+and evaluate each on a freshly generated test set from the same population.
+
+```{r train-test}
+set.seed(3)
+test <- data.frame(light = runif(2000, 0.05, 0.60))
+test$SLA <- 24 - 20 * test$light + rnorm(2000, 0, 3)
+
+degrees   <- 1:10
+train_mse <- numeric(length(degrees))
+test_mse  <- numeric(length(degrees))
+
+for (d in degrees) {
+  fit <- lm(SLA ~ poly(light, d, raw = TRUE), data = oak_flat)
+  train_mse[d] <- mean(residuals(fit)^2)
+  test_mse[d]  <- mean((predict(fit, newdata = test) - test$SLA)^2)
+}
+
+round(rbind(train = train_mse, test = test_mse), 3)
+```
+
+The training error decreases monotonically with degree, as it must: a more
+flexible model can always follow the observed points more closely. The test
+error does not. It falls at first, because genuine curvature is being captured,
+and then rises as the extra terms begin to fit the residuals of this particular
+sample.
+
+```{r train-test-plot}
+plot(degrees, test_mse, type = "b", pch = 16, log = "y",
+     ylim = range(c(train_mse, test_mse)),
+     xlab = "Polynomial degree", ylab = "Mean squared error")
+lines(degrees, train_mse, type = "b", pch = 1, lty = 2, col = "steelblue")
+abline(h = 9, col = "firebrick", lty = 3)
+legend("topleft", c("test (new data)", "training", expression(sigma^2)),
+       pch = c(16, 1, NA), lty = c(1, 2, 3),
+       col = c("black", "steelblue", "firebrick"), bty = "n")
+```
+
+The horizontal reference line marks $\sigma^2 = 9$, the irreducible error. No
+model can predict better than that, because the residual variation is not a
+function of the predictor. The gap between the training curve and the test curve
+is the optimism, and it widens with flexibility.
+
+::: {.column-margin}
+**↪** This is the bias–variance decomposition of Day 9,
+seen here as two curves rather than as an equation.
+:::
+
+In practice the second curve is unavailable: there is no fresh test set. The
+remainder of the chapter is about constructing a substitute from the one sample
+we have.
+
+### The validation set approach
+
+The simplest substitute is to split the data once, fit on one part, and evaluate
+on the other.
+
+```{r validation-set}
+set.seed(4)
+n_flat <- nrow(oak_flat)
+
+val_curve <- function(seed) {
+  set.seed(seed)
+  train_id <- sample(n_flat, size = n_flat / 2)
+  vapply(degrees, function(d) {
+    fit <- lm(SLA ~ poly(light, d, raw = TRUE), data = oak_flat[train_id, ])
+    mean((predict(fit, newdata = oak_flat[-train_id, ]) -
+            oak_flat$SLA[-train_id])^2)
+  }, numeric(1))
+}
+
+round(val_curve(1), 3)
+```
+
+The approach is unbiased in spirit and unreliable in practice on data sets of
+biological size. Two defects follow immediately: the model is fitted to half the
+data, so its error is representative of a model trained on $n/2$ rather than on
+$n$; and the answer depends on which half happened to be drawn.
+
+```{r validation-variability}
+curves <- sapply(1:10, val_curve)
+
+matplot(degrees, curves, type = "l", lty = 1, col = "grey50",
+        xlab = "Polynomial degree", ylab = "Validation MSE")
+```
+
+Ten splits of the same data produce ten different curves, and they do not all
+have their minimum at the same degree. Choosing a model from a single split
+means choosing partly at random. This instability is the reason
+cross-validation exists, and it is illustrated for the `Auto` data in Figure 5.2
+of ISLR.
+
+### Leave-one-out cross-validation
+
+::: {.column-margin}
+**DEF** — **LOOCV** fits the model $n$ times, each time omitting one
+observation, and averages the $n$ squared prediction errors:
+$\mathrm{CV}_{(n)} = \frac{1}{n}\sum_{i=1}^n \mathrm{MSE}_i$.
+:::
+
+```{r}
+#| label: fig-loocv
+#| fig-cap: "Leave-one-out cross-validation. Each observation in turn is held
+#|   out (red) while the model is fitted to all the others (blue). The procedure
+#|   is repeated n times."
+#| fig-width: 7
+#| fig-height: 3.4
+#| code-fold: true
+
+n_blk <- 9
+held  <- c(1, 2, 3, n_blk)
+rows  <- c("1", "2", "3", "n")
+ys    <- c(4.0, 3.1, 2.2, 0.7)
+
+op <- par(mar = c(1.6, 0, 0, 0))
+plot(NA, xlim = c(-0.5, n_blk + 1), ylim = c(0, 4.7),
+     axes = FALSE, xlab = "", ylab = "")
+
+for (r in seq_along(ys)) {
+  for (i in seq_len(n_blk)) {
+    rect(i - 0.44, ys[r] - 0.3, i + 0.44, ys[r] + 0.3,
+         col = if (i == held[r]) "firebrick" else "steelblue",
+         border = "white", lwd = 2)
+  }
+  text(0.15, ys[r], rows[r], adj = 1, font = 2, col = "grey25")
+}
+points(c(4.4, 5.0, 5.6), rep(1.45, 3), pch = 16, cex = 0.9, col = "grey35")
+
+legend("bottom", horiz = TRUE, bty = "n", inset = -0.02,
+       legend = c("used for fitting", "held out"),
+       fill = c("steelblue", "firebrick"), border = "white")
+par(op)
+```
+
+Every observation serves once as the test set, so nothing is wasted and no
+randomness enters: LOOCV run twice on the same data gives the same answer. The
+training sets contain $n - 1$ observations, so the estimate is nearly unbiased
+for the error of a model trained on the full sample.
+
+```{r loocv-loop}
+loocv <- function(d) {
+  err <- numeric(n_flat)
+  for (i in seq_len(n_flat)) {
+    fit    <- lm(SLA ~ poly(light, d, raw = TRUE), data = oak_flat[-i, ])
+    err[i] <- (predict(fit, newdata = oak_flat[i, ]) - oak_flat$SLA[i])^2
+  }
+  mean(err)
+}
+
+round(vapply(degrees[1:5], loocv, numeric(1)), 3)
+```
+
+The cost is $n$ model fits per candidate model. For least squares there is a
+shortcut, given as equation (5.2) in ISLR: the leave-one-out error can be read
+off a single fit by dividing each residual by $1 - h_i$, where $h_i$ is the
+leverage of observation $i$.
+
+```{r loocv-shortcut}
+loocv_fast <- function(d) {
+  fit <- lm(SLA ~ poly(light, d, raw = TRUE), data = oak_flat)
+  mean((residuals(fit) / (1 - hatvalues(fit)))^2)
+}
+
+round(rbind(loop     = vapply(degrees[1:5], loocv, numeric(1)),
+            shortcut = vapply(degrees[1:5], loocv_fast, numeric(1))), 3)
+```
+
+The two rows are identical, which is a useful check on the loop and a reminder
+of what leverage means: a high-leverage point pulls the fitted line towards
+itself, so its ordinary residual understates how badly the model would have
+predicted it had it been absent. Dividing by $1 - h_i$ restores exactly the
+right amount. The shortcut is specific to linear models fitted by least squares;
+for anything else the $n$ fits must actually be performed.
+
+::: {.callout-note collapse="true" title="Why the shortcut is exact"}
+Write $\hat y_{(i)}$ for the prediction of observation $i$ from the model fitted *without* it, and recall from Day 3 that the fitted values are $\hat{\mathbf{y}} = \mathbf{H}\mathbf{y}$, so that $\hat y_i = \sum_j h_{ij}\,y_j$.
+
+Now imagine replacing the observed $y_i$ by $\hat y_{(i)}$ and refitting on all $n$ points. The new point lies exactly on the leave-one-out line, so it adds nothing to that line's sum of squares: the leave-one-out fit is also the least-squares fit of the modified data. Applying the hat matrix to the modified data therefore returns $\hat y_{(i)}$ itself:
+
+$$
+\hat y_{(i)} = \sum_{j \ne i} h_{ij}\,y_j + h_{ii}\,\hat y_{(i)} ,
+\qquad\text{while}\qquad
+\hat y_i = \sum_{j \ne i} h_{ij}\,y_j + h_{ii}\,y_i .
+$$
+
+Subtracting the first equation from the second gives $\hat y_i - \hat y_{(i)} = h_{ii}\,(y_i - \hat y_{(i)})$, and rearranging,
+
+$$
+y_i - \hat y_{(i)} = \frac{y_i - \hat y_i}{1 - h_{ii}} .
+$$
+
+The leave-one-out residual is the ordinary residual, inflated by the leverage. No model needs to be refitted.
+:::
+
+### k-fold cross-validation
+
+::: {.column-margin}
+**DEF** — **$k$-fold CV** splits the data into $k$ groups of roughly equal size,
+fits the model $k$ times with one group held out each time, and averages:
+$\mathrm{CV}_{(k)} = \frac{1}{k}\sum_{i=1}^{k} \mathrm{MSE}_i$.
+:::
+
+```{r}
+#| label: fig-kfold
+#| fig-cap: "Five-fold cross-validation. The observations are split into five
+#|   groups of roughly equal size; each group serves once as the test set while
+#|   the model is fitted to the remaining four."
+#| fig-width: 7
+#| fig-height: 3.2
+#| code-fold: true
+
+k_blk <- 5
+ys    <- seq(4.2, 0.6, length.out = k_blk)
+
+op <- par(mar = c(1.6, 0, 0, 0))
+plot(NA, xlim = c(-1.0, k_blk + 1.1), ylim = c(0, 5),
+     axes = FALSE, xlab = "", ylab = "")
+
+for (r in seq_len(k_blk)) {
+  for (i in seq_len(k_blk)) {
+    rect(i - 0.46, ys[r] - 0.28, i + 0.46, ys[r] + 0.28,
+         col = if (i == r) "firebrick" else "steelblue",
+         border = "white", lwd = 2)
+  }
+  text(0.2, ys[r], paste0("fit ", r), adj = 1, cex = 0.8, col = "grey25")
+}
+
+legend("bottom", horiz = TRUE, bty = "n", inset = -0.04,
+       legend = c("training folds", "test fold"),
+       fill = c("steelblue", "firebrick"), border = "white")
+par(op)
+```
+
+LOOCV is the special case $k = n$. In practice $k = 5$ or $k = 10$ is preferred,
+and the reasons are both computational and statistical. Ten fits are cheaper
+than $n$ fits. Less obviously, LOOCV averages $n$ models that are trained on
+almost identical data sets and whose errors are therefore highly correlated,
+which makes the average itself variable. Five- or ten-fold CV trades a little
+bias — training sets are smaller — for a worthwhile reduction in variance. ISLR
+develops this argument in Section 5.1.4 and shows the result in Figure 5.6.
+
+```{r kfold-function}
+cv_mse <- function(d, k = 10, data = oak_flat, seed = 1) {
+  set.seed(seed)
+  fold <- cut(sample(seq_len(nrow(data))), breaks = k, labels = FALSE)
+  err  <- numeric(k)
+  for (j in seq_len(k)) {
+    train <- data[fold != j, ]
+    test  <- data[fold == j, ]
+    fit   <- lm(SLA ~ poly(light, d, raw = TRUE), data = train)
+    err[j] <- mean((predict(fit, newdata = test) - test$SLA)^2)
+  }
+  weighted.mean(err, w = table(fold) / nrow(data))
+}
+
+round(vapply(degrees, cv_mse, numeric(1)), 3)
+```
+
+`cut()` on a random permutation assigns each row to one of ten folds. The fold
+errors are combined as a weighted mean so that unequal fold sizes, which arise
+whenever $n$ is not a multiple of $k$, are handled correctly.
+
+```{r kfold-plot}
+cv_curve <- vapply(degrees, cv_mse, numeric(1))
+
+plot(degrees, cv_curve, type = "b", pch = 16,
+     xlab = "Polynomial degree", ylab = "10-fold CV error")
+points(degrees, test_mse, type = "b", pch = 1, lty = 2, col = "firebrick")
+legend("topleft", c("10-fold CV", "true test error"),
+       pch = c(16, 1), lty = c(1, 2), col = c("black", "firebrick"), bty = "n")
+```
+
+The cross-validation curve tracks the true test curve, which we are able to plot
+here only because the population is simulated. The two do not coincide exactly,
+and the cross-validated minimum need not fall at the same degree as the true
+minimum, but the shape — a decline, a shallow floor, then a rise — is recovered
+from the sample alone.
+
+### The one-standard-error rule
+
+A cross-validated error is itself an estimate, with its own uncertainty. The standard error of the mean over the $k$ folds gives a rough measure of that uncertainty, and it leads to a rule that returns on Days 9 and 10: among all models whose error lies within one standard error of the minimum, take the simplest.
+
+```{r one-se}
+fold_errors <- function(d, k = 10, data = oak_flat, seed = 1) {
+  set.seed(seed)
+  fold <- cut(sample(seq_len(nrow(data))), breaks = k, labels = FALSE)
+  vapply(seq_len(k), function(j) {
+    fit <- lm(SLA ~ poly(light, d, raw = TRUE), data = data[fold != j, ])
+    mean((predict(fit, newdata = data[fold == j, ]) -
+            data$SLA[fold == j])^2)
+  }, numeric(1))
+}
+
+E  <- sapply(degrees, fold_errors)
+m  <- colMeans(E)
+se <- apply(E, 2, sd) / sqrt(nrow(E))
+
+best <- which.min(m)
+c(minimum = degrees[best],
+  one_se  = degrees[min(which(m <= m[best] + se[best]))])
+```
+
+::: {.column-margin}
+**KEY** — A difference smaller than the uncertainty of the estimates is not evidence. When the data cannot distinguish two models, prefer the simpler one.
+:::
+
+### Cross-validation as a model-selection tool
+
+```{r selection-compare}
+r2  <- numeric(length(degrees))
+ar2 <- numeric(length(degrees))
+aic <- numeric(length(degrees))
+
+for (d in degrees) {
+  fit    <- lm(SLA ~ poly(light, d, raw = TRUE), data = oak_flat)
+  r2[d]  <- summary(fit)$r.squared
+  ar2[d] <- summary(fit)$adj.r.squared
+  aic[d] <- AIC(fit)
+}
+
+round(rbind(R2 = r2, adjR2 = ar2, AIC = aic, CV = cv_curve), 3)
+```
+
+$R^2$ increases with every term added, without exception, because adding a
+predictor cannot increase the residual sum of squares. It is therefore useless
+for choosing between nested models and will always point at the most complex
+candidate. Adjusted $R^2$ and AIC do apply a penalty, and they are substantial
+improvements; but they penalise the *number of parameters*, which measures
+flexibility only when the model is fitted in the ordinary way and the parameter
+count is the right bookkeeping. Cross-validation does not need that bookkeeping,
+because it measures the consequence of flexibility rather than its cause.
+
+::: {.column-margin}
+**↪** Why AIC penalises exactly $2p$, and what it is approximating, was the subject of Day 6. Cross-validation and AIC are
+asymptotically equivalent for some model classes; they are not the same thing.
+:::
+
+This independence from parameter counting is why cross-validation is the
+workhorse of the remainder of the course. A random forest of five hundred trees
+has no interpretable parameter count, and a ridge regression with penalty
+$\lambda$ has $p$ coefficients but far fewer effective degrees of freedom.
+Neither can be handled by an information criterion in the routine way; both can
+be cross-validated.
+
+## Cross-validation with structure
+
+### The leak
+
+Everything in the previous section assumed that a randomly chosen fold is a fair
+stand-in for new data. Under clustering it is not, and the failure mirrors the
+one seen in the hierarchical bootstrap.
+
+Consider predicting SLA in the hierarchical oak data with a model that includes
+a tree effect. Under random folds, the held-out leaf almost always comes from a
+tree that is also represented in the training set. The model has already seen
+that tree, and has estimated its intercept. The prediction is therefore not a
+prediction for a new tree at all.
+
+```{r grouped-cv}
+k <- 10
+set.seed(31)
+
+# random folds: leaves assigned independently
+fold_random <- cut(sample(seq_len(nrow(oak))), breaks = k, labels = FALSE)
+
+# grouped folds: whole trees assigned together
+tree_fold   <- cut(sample(seq_len(a)), breaks = k, labels = FALSE)
+fold_group  <- tree_fold[as.integer(oak$tree)]
+
+cv_by_fold <- function(fold) {
+  err <- numeric(k)
+  for (j in seq_len(k)) {
+    train <- oak[fold != j, ]
+    test  <- oak[fold == j, ]
+    fit   <- glmmTMB(SLA ~ light + (1 | tree), data = train, REML = TRUE)
+    pred  <- predict(fit, newdata = test, allow.new.levels = TRUE)
+    err[j] <- mean((pred - test$SLA)^2)
+  }
+  mean(err)
+}
+
+c(random_folds  = cv_by_fold(fold_random),
+  grouped_folds = cv_by_fold(fold_group))
+```
+
+`allow.new.levels = TRUE` instructs `glmmTMB` to predict at the population level
+for a tree it has never seen, which is precisely the behaviour required in the
+grouped scheme. In the random scheme the option is never exercised, because
+every test tree is already in the training data.
+
+The grouped estimate is markedly larger, and the two numbers have interpretable
+targets. Predicting a new leaf on a *known* tree leaves only the within-tree
+residual, so the error should approach $\sigma^2 = 2.25$. Predicting a leaf on
+an *unseen* tree leaves both components, so the error should approach
+$\sigma_b^2 + \sigma^2 = 6.25$.
+
+```{r cv-targets}
+c(known_tree = sigma^2,
+  new_tree   = sigma_b^2 + sigma^2)
+```
+
+The two variance components of the simulation reappear here as the
+targets of two different cross-validation schemes. This is the sharpest
+statement of the chapter's theme: the resampling scheme defines the question,
+and a scheme chosen carelessly answers a question nobody asked.
+
+::: {.column-margin}
+**KEY** — Random folds estimate the error for a new observation in a known
+cluster. Grouped folds estimate the error for a new cluster. Both are legitimate
+quantities; only one of them is usually the one intended.
+:::
+
+::: {.column-margin}
+**⚠** The same leak occurs whenever folds are drawn without regard to structure:
+technical replicates split across folds, repeated measurements on one patient,
+neighbouring quadrats in a spatial survey, or consecutive days in a time series.
+For time series the fold must also respect direction — the training set precedes
+the test set.
+:::
+
+The remedy is the same as for the bootstrap. Identify the unit that a genuinely
+new data set would consist of, and make that unit the unit of resampling.
+Leave-one-cluster-out cross-validation, blocked spatial cross-validation and
+rolling-origin validation for time series are all the same instruction applied
+to different structures.
+
+## Nested cross-validation
+
+### The second layer of optimism
+
+Cross-validation has now been used for two distinct purposes: to estimate
+predictive error, and to select a model. Using one cross-validation for both at
+once is a mistake, and a common one.
+
+If ten candidate models are compared and the lowest cross-validated error is
+reported as the model's performance, that reported number is the minimum of ten
+noisy estimates. Minima of noisy quantities are biased downwards. The selection
+has used up the held-out data, which is therefore no longer held out.
+
+::: {.column-margin}
+**⚠** Any choice informed by the data is part of the modelling procedure —
+tuning parameters, variable screening, and the choice of transformation
+included. All of it must sit inside the loop whose error is being estimated.
+:::
+
+### The nested scheme
+
+```{r}
+#| label: fig-nestedcv
+#| fig-cap: "Nested cross-validation. The outer loop (thick bars) reserves a
+#|   test fold and estimates performance. Within each outer training set an
+#|   inner loop (thin bars) selects the tuning parameter, and the selected model
+#|   is then refitted on the whole outer training set."
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+
+n_out  <- 3          # outer folds shown
+n_cell <- 6          # data blocks
+outer_test <- list(5:6, 3:4, 1:2)
+
+col_otrain <- "#2f5d3a"; col_otest <- "#a9c992"
+col_itrain <- "#2b6b73"; col_itest <- "#c4c4c4"
+
+cell_x <- function(i) c(2 + (i - 1) * 1.35, 2 + i * 1.35 - 0.12)
+
+op <- par(mar = c(0, 0, 0, 0))
+plot(NA, xlim = c(-1.6, 11.6), ylim = c(-1.0, 10.4),
+     axes = FALSE, xlab = "", ylab = "")
+
+for (o in seq_len(n_out)) {
+  ytop  <- 9.5 - (o - 1) * 3.2
+  train <- setdiff(seq_len(n_cell), outer_test[[o]])
+
+  ## outer split
+  for (i in seq_len(n_cell)) {
+    xx <- cell_x(i)
+    rect(xx[1], ytop - 0.34, xx[2], ytop + 0.34,
+         col = if (i %in% outer_test[[o]]) col_otest else col_otrain,
+         border = "white", lwd = 1.5)
+  }
+  text(1.8, ytop, paste("outer fold", o), adj = 1, cex = 0.85, col = "grey20")
+
+  ## inner splits, over the outer training blocks only
+  for (j in seq_along(train)) {
+    yin <- ytop - 0.75 - j * 0.42
+    for (m in seq_along(train)) {
+      xx <- cell_x(train[m])
+      rect(xx[1], yin - 0.15, xx[2], yin + 0.15,
+           col = if (m == j) col_itest else col_itrain,
+           border = "white", lwd = 1.2)
+    }
+  }
+  text(cell_x(n_cell)[2] + 0.25, ytop - 1.2,
+       "inner loop:\nselect the model", adj = 0, cex = 0.8, col = "grey30")
+}
+
+arrows(-0.2, 9.5, -0.2, 3.3, length = 0.1, lwd = 2, col = "firebrick")
+text(-0.7, 6.4, "outer loop: estimate performance", srt = 90,
+     cex = 0.9, col = "firebrick")
+
+legend(x = 1.6, y = 0.15, horiz = FALSE, ncol = 2, bty = "n", cex = 0.8,
+       legend = c("outer training", "outer test",
+                  "inner training", "inner test"),
+       fill = c(col_otrain, col_otest, col_itrain, col_itest),
+       border = "white")
+par(op)
+```
+
+The outer loop splits the data and reserves a test fold. Inside each outer
+training set, a second cross-validation selects the model. The selected model is
+refitted on the whole outer training set and evaluated once on the outer test
+fold. The outer folds therefore measure the performance of the entire procedure
+— selection included — rather than the performance of a model chosen with their
+help.
+
+```{r nested-cv}
+nested_cv <- function(data, degrees, k_out = 5, k_in = 5, seed = 12) {
+  set.seed(seed)
+  n_all <- nrow(data)
+  outer <- cut(sample(seq_len(n_all)), breaks = k_out, labels = FALSE)
+
+  err <- numeric(k_out)
+  chosen <- integer(k_out)
+
+  for (o in seq_len(k_out)) {
+    train_o <- data[outer != o, ]
+    test_o  <- data[outer == o, ]
+
+    inner <- cut(sample(seq_len(nrow(train_o))), breaks = k_in, labels = FALSE)
+    inner_err <- matrix(NA_real_, nrow = k_in, ncol = length(degrees))
+
+    for (j in seq_len(k_in)) {
+      tr <- train_o[inner != j, ]
+      te <- train_o[inner == j, ]
+      for (d in degrees) {
+        fit <- lm(SLA ~ poly(light, d, raw = TRUE), data = tr)
+        inner_err[j, d] <- mean((predict(fit, newdata = te) - te$SLA)^2)
+      }
+    }
+
+    best <- degrees[which.min(colMeans(inner_err))]
+    chosen[o] <- best
+
+    fit_best <- lm(SLA ~ poly(light, best, raw = TRUE), data = train_o)
+    err[o] <- mean((predict(fit_best, newdata = test_o) - test_o$SLA)^2)
+  }
+
+  list(chosen = chosen, outer_error = mean(err))
+}
+
+res <- nested_cv(oak_flat, degrees = 1:6)
+res
+```
+
+Two results are worth reading separately. The vector of chosen degrees records
+which model the inner loop selected in each outer fold; if those choices are not
+all the same, the selection itself is unstable, which is information that a
+single cross-validation would have concealed. The outer error is an honest
+estimate of what the whole procedure achieves on new data, and it is typically
+larger than the minimum of the single-loop curve computed earlier.
+
+::: {.column-margin}
+**↪** Every tuning parameter met later in the course — $\lambda$ in ridge and lasso,
+`mtry` and tree depth in a random forest, the number of boosting iterations —
+belongs in an inner loop of exactly this shape.
+:::
+
+Nested cross-validation is expensive: $k_{\mathrm{out}} \times k_{\mathrm{in}}
+\times |\text{candidates}|$ model fits. When the cost is prohibitive, the
+honest alternative is to set aside a genuine test set at the very beginning,
+touch it once, and report that. What is not acceptable is to report the inner
+minimum as though it were an out-of-sample result.
+
+## The two schemes side by side
+
+| | Bootstrap | Cross-validation |
+|:--|:--|:--|
+| Question | How variable is the estimate? | How large is the error on new data? |
+| Resampling | $n$ draws with replacement | disjoint folds, without replacement |
+| Each replicate uses | all $n$ rows, some repeated | $(k-1)/k$ of the rows, each once |
+| Output | standard error, confidence interval | estimated prediction error |
+| Typical size | $B = 2{,}000$ and upwards | $k = 5$ or $10$ |
+| Structured data | resample clusters | group folds by cluster |
+| Assumption | the sample is representative | the folds resemble new data |
+
+The row that matters most is the last but one. Both methods fail in the same way
+and are repaired by the same idea: the resampling unit must be the unit that a
+new data set would consist of. Get that wrong and both methods return a precise,
+confident, incorrect answer.
+
+::: {.column-margin}
+**KEY** — Neither method rescues a bad design. Both make the consequences of a
+design visible, but only if the resampling scheme is told what the design was.
+:::
+
+It is also worth naming what the two methods share with the rest of the course.
+Day 1 partitioned the response into a deterministic part and a residual
+drawn from an assumed distribution. The bootstrap replaces that assumed
+distribution with the empirical one. Day 1 also argued that degrees of
+freedom govern what the data can reveal; cross-validation measures the same
+thing without counting, which is what makes it usable for methods whose
+flexibility cannot be counted.
+
+## Reading in ISLR
+
+Chapter 5 of *An Introduction to Statistical Learning* (2nd edition) covers the
+non-hierarchical half of this chapter. The figures are worth studying in the
+order given.
+
+| Topic | ISLR | Figure | Page |
+|:--|:--|:--|:--|
+| Validation set approach | §5.1.1 | 5.1, 5.2 | 198–200 |
+| Instability of a single split | §5.1.1 | 5.2 (right) | 200 |
+| LOOCV and the leverage shortcut | §5.1.2 | 5.3, 5.4 | 200–202 |
+| $k$-fold cross-validation | §5.1.3 | 5.5 | 203 |
+| CV against the true test error | §5.1.3 | 5.6 | 204 |
+| Bias–variance trade-off in $k$ | §5.1.4 | — | 205 |
+| CV for classification | §5.1.5 | 5.7, 5.8 | 206–208 |
+| Sampling distribution of $\hat\alpha$ | §5.2 | 5.9, 5.10 | 209–211 |
+| The bootstrap, schematically | §5.2 | 5.11 | 212 |
+| Lab code | §5.3 | — | 212–219 |
+
+Two points of difference are worth holding in mind while reading. ISLR's
+bootstrap example estimates a portfolio weight $\alpha$; the biological analogue
+in this chapter is the inverse-prediction threshold, and the reason for choosing
+it is the same — no usable analytic standard error. And ISLR treats observations
+as independent throughout Chapter 5. The hierarchical bootstrap and grouped
+cross-validation of this chapter are not in the book, and they are precisely
+the parts that biological data make unavoidable.
+
+::: {.column-margin}
+**↪** For the bootstrap in greater depth, Efron & Hastie, *Computer Age
+Statistical Inference* (2016), Chapters 10 and 11.
+:::
+
+## Where this leads
+
+The bootstrap and cross-validation are not two topics but two applications of one manoeuvre: when a quantity is hard to derive, resample. Both were introduced here on models simple enough that the answers could be checked against a formula or a known truth. Both become indispensable from now on.
+
+Day 8 tunes the number of neighbours and the SVM cost by cross-validation. Day 9 adds a penalty $\lambda$ whose whole justification is out-of-sample performance. On Day 10, trees are pruned by cross-validation, and bagging and random forests use the bootstrap not to measure variance but to reduce it, with the out-of-bag third of each resample supplying a cross-validation that costs nothing extra. On Day 11, boosting adds a number of iterations that must be chosen, and choosing it on training error guarantees overfitting.
+
+The practical applies both tools to expression data in which samples come from a limited number of patients, and asks which of two error estimates answers the question that was posed.

@@ -1,0 +1,79 @@
+project:
+  type: book
+  output-dir: docs
+
+book:
+  title: "Statistics for Machine Learning"
+  subtitle: "Second-year Bioinformatics"
+  author: ""
+  date: last-modified
+  date-format: "D MMMM YYYY"
+  search: true
+  repo-actions: []
+  chapters:
+    - index.qmd
+    - part: "Day 1. Why statistics?"
+      chapters:
+        - 01-why-statistics.qmd
+    - part: "Day 2. Design and data"
+      chapters:
+        - 02-design.qmd
+        - 02-confounding.qmd
+        - p02-data-quality.qmd
+    - part: "Day 3. Linear algebra"
+      chapters:
+        - 03-linear-algebra.qmd
+    - part: "Day 4. Directions"
+      chapters:
+        - 04-pca.qmd
+    - part: "Day 5. Groups"
+      chapters:
+        - 05-clustering.qmd
+    - part: "Day 6. Likelihood"
+      chapters:
+        - 06-likelihood-aic.qmd
+    - part: "Day 7. Resampling"
+      chapters:
+        - 07-resampling.qmd
+    - part: "Day 8. Classifiers"
+      chapters:
+        - 08-classifiers-knn-svm.qmd
+    - part: "Day 9. Regularisation"
+      chapters:
+        - 09-regularisation.qmd
+    - part: "Day 10. Trees"
+      chapters:
+        - 10-trees-forests.qmd
+    - part: "Day 11. Boosting"
+      chapters:
+        - 11-boosting-comparison.qmd
+    - references.qmd
+  appendices:
+    - a-linear-models.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    toc-depth: 3
+    number-sections: false
+    code-copy: true
+    code-overflow: wrap
+    fig-width: 7
+    fig-height: 4.6
+    fig-align: center
+    fig-responsive: true
+
+execute:
+  echo: true
+  warning: false
+  message: false
+  freeze: auto
+
+knitr:
+  opts_chunk:
+    collapse: false
+    comment: "#>"

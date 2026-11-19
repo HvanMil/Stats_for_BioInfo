@@ -1,0 +1,15 @@
+{
+  "hash": "66d0f9223c72364762210f1d0ab993ff",
+  "result": {
+    "engine": "knitr",
+    "markdown": "# Preface {.unnumbered}\n\nThis book is the main learning resource for the course *Statistics for Machine Learning*, taken by second-year Bioinformatics students. It accompanies eleven two-hour lectures, each followed by a two-hour practical.\n\nThe aim is that you understand not only *how* a machine-learning method works, but also *why* it works and which statistical assumptions it rests on. A method that you can only run is a method whose failures you cannot recognise.\n\n## How the course is organised\n\n| Day | Lecture | Practical |\n|:--|:--|:--|\n| 1 | Why statistics? | One gene to thousands: an expression matrix |\n| 2 | Experimental design and confounding | Data quality and batch structure |\n| 3 | Linear algebra refresher | Matrices and eigenvectors on expression data |\n| 4 | Principal component analysis | Finding structure in samples |\n| 5 | Cluster analysis | Clustering genes and samples |\n| 6 | Likelihood, information and AIC | Read counts and variant calls |\n| 7 | The bootstrap and cross-validation | Honest error estimates, grouped by patient |\n| 8 | Evaluating classifiers, KNN and SVM | Classifying tumour samples |\n| 9 | Regularisation, PCR and PLS | Prediction when genes outnumber samples |\n| 10 | Trees, bagging and random forests | Forests on molecular data |\n| 11 | Boosting and an honest comparison | Comparing methods on equal terms |\n\nThe practicals use data that look like bioinformatics data: expression matrices, read counts, variant calls. They contain no gene ontologies or pathway databases, because the object of study is the statistics. Most data sets are simulated, so that the correct answer is known and your analysis can be checked against it.\n\n## Conventions\n\nThe margin carries four kinds of note:\n\n- **DEF**: a definition.\n- **KEY**: a central idea to remember.\n- **↪**: a link to another day.\n- **⚠**: a common pitfall.\n\nR is the primary language. Python appears where it adds something, for example where a popular Python library behaves differently from its R counterpart.\n\nThe textbook for the course is *An Introduction to Statistical Learning*, second edition [@James2021], referred to as ISLR. Each chapter ends with a reading guide.\n\n## Software\n\nYou need a recent version of R, RStudio and these packages:\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\ninstall.packages(c(\n  \"ggplot2\", \"car\", \"emmeans\", \"boot\", \"MASS\", \"broom\", \"dplyr\", \"tidyr\",\n  \"forcats\", \"stringr\", \"GGally\", \"igraph\", \"plotly\", \"ggfortify\", \"HSAUR3\",\n  \"cluster\", \"pvclust\", \"factoextra\", \"class\", \"e1071\", \"glmnet\", \"pls\",\n  \"glmmTMB\", \"rpart\", \"rpart.plot\", \"randomForest\", \"gbm\"\n))\n```\n:::\n\n\n\n\nTo run the Python examples you also need the `reticulate` package and a Python installation with `pandas` and `scikit-learn`.\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

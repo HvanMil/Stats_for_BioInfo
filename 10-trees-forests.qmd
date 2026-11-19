@@ -1,0 +1,865 @@
+# Trees, bagging and random forests
+
+::: {.column-margin}
+**Margin legend**
+
+**DEF** — definition of a term.
+
+**KEY** — a central idea to remember.
+
+**↪** — link to another chapter or lecture.
+
+**⚠** — common pitfall or point of caution.
+:::
+
+## Where this chapter fits
+
+Day 7 delivered two tools and left them without an application
+that needed them. The bootstrap was demonstrated on a slope for which a formula
+already existed; cross-validation was demonstrated on a polynomial whose degree
+could almost have been chosen by eye. Both were introduced on models simple
+enough to check. This chapter is where they become load-bearing.
+
+A regression tree has no coefficient table, no residual degrees of freedom, and
+no parameter count that measures its flexibility. The question of how large to
+grow it therefore cannot be answered by an information criterion in the routine
+way; it is answered by cross-validation. A single tree is also strikingly
+unstable: refit it on a resampled data set and it changes shape. That
+instability, which would ordinarily be a fatal defect, turns out to be the raw
+material for the most successful family of predictive methods in applied
+statistics — because the bootstrap can average it away.
+
+::: {.column-margin}
+**KEY** — Bagging is the bootstrap applied not to measure variance but to
+destroy it. Day 7 built the machine; this chapter puts it to
+work.
+:::
+
+The arc runs from a single tree, through its weaknesses, to three distinct
+repairs. Bagging averages many trees grown on bootstrap resamples. Random
+forests improve on bagging by making the trees less alike. Boosting abandons
+averaging altogether and grows trees in sequence, each one correcting its
+predecessors. The three differ in what part of the error they attack, and that
+difference is the organising idea of the second half.
+
+::: {.column-margin}
+**↪** ISLR Chapter 8 covers the same ground. A reading guide with figure and
+page numbers is given at the end of Day 11.
+:::
+
+## Explaining variance by splitting
+
+### The idea
+
+Every method in the course so far has explained variation in a response by
+writing it as a function of the predictors: a line, a curve, a link function
+applied to a linear predictor. A tree does something different and cruder. It
+partitions the predictor space into rectangular regions and predicts a single
+constant within each one.
+
+::: {.column-margin}
+**DEF** — A **regression tree** partitions the predictor space into
+non-overlapping regions $R_1, \dots, R_J$ and predicts, for any observation
+falling in $R_j$, the mean of the training responses in that region.
+:::
+
+The connection to the rest of the course is the variance partition of Day 1.
+A split is accepted when the combined within-group sum of squares of the two
+resulting subsets is smaller than that of the parent. This is the quantity that
+one-way ANOVA minimises when it assigns observations to known groups; the tree
+differs only in that it also chooses the groups.
+
+::: {.column-margin}
+**↪** Day 1 partitioned total variance into a part explained by the model
+and a residual. A tree does the same, but searches for the partition rather than
+being handed it by the design.
+:::
+
+### A simulated forest-floor survey
+
+We simulate a survey of understorey vegetation in 400 forest plots. The
+predictors are canopy openness, soil moisture, soil pH and litter depth, plus
+two variables that carry no signal at all and are included so that we can see
+what each method does with them.
+
+```{r sim-plots}
+set.seed(8)
+
+n <- 400
+plots <- data.frame(
+  light    = runif(n, 0.02, 0.80),   # canopy openness (proportion)
+  moisture = runif(n, 10, 45),       # soil moisture (%)
+  pH       = runif(n, 3.8, 7.2),
+  litter   = runif(n, 0, 8),         # litter depth (cm)
+  noise1   = runif(n, 0, 1),         # no effect
+  noise2   = rnorm(n)                # no effect
+)
+
+wet <- plots$moisture >= 25
+
+mu <- 18 +
+      35 * plots$light * wet +       # light helps only where moisture allows
+      12 * (plots$pH > 5.5) +        # a step, not a gradient
+      -1.5 * plots$litter            # a genuine linear effect
+
+plots$cover <- mu + rnorm(n, 0, 6)   # herb cover (%)
+
+summary(plots$cover)
+```
+
+The generating process is deliberately awkward for a linear model and
+comfortable for a tree. Canopy openness raises herb cover, but only in plots
+with at least 25% soil moisture: in dry plots extra light does nothing. Soil pH
+acts as a step at 5.5 rather than as a gradient. Litter depth alone enters
+linearly. The residual distribution has mean 0 and variance $6^2 = 36$, which is
+the irreducible error that no method can beat.
+
+::: {.column-margin}
+**KEY** — Two of the three structures — an interaction and a threshold — are
+exactly what a rectangular partition represents naturally and an additive linear
+model represents badly.
+:::
+
+```{r sim-binary}
+eta <- -1.8 +
+       4.0 * plots$light * wet +
+       1.2 * (plots$pH > 5.5) +
+       -0.15 * plots$litter
+
+plots$p_true <- plogis(eta)
+plots$moss   <- factor(rbinom(n, 1, plots$p_true), labels = c("absent", "present"))
+
+table(plots$moss)
+```
+
+The same plots also carry a binary response: presence of an indicator moss,
+generated from a logistic model driven by the same threshold structure. Because
+the true probability of presence is stored in `p_true`, we will later be able to
+compute the best performance any classifier could possibly achieve.
+
+::: {.column-margin}
+**⚠** `p_true` is in the data frame, so a formula written as `moss ~ .` would
+include the true probability as a predictor and produce a flawless classifier
+that has learned nothing. Every model below uses an explicit formula. Leakage of
+this kind is rarely so obvious in real data — an identifier correlated with
+treatment, or a variable measured after the outcome, does the same damage
+quietly.
+:::
+
+```{r formulas}
+f_reg <- cover ~ light + moisture + pH + litter + noise1 + noise2
+f_cls <- moss  ~ light + moisture + pH + litter + noise1 + noise2
+```
+
+### What the linear model can and cannot say
+
+```{r lm-baseline}
+lm_add <- lm(f_reg, data = plots)
+summary(lm_add)$coefficients
+round(summary(lm_add)$r.squared, 3)
+```
+
+The additive linear model recovers a positive light effect, a positive moisture
+effect and a negative litter effect. None of these is wrong, and none of them is
+the structure that generated the data. An additive model has no way to represent
+"light matters only when moisture exceeds 25%"; it can only report an average
+light effect taken across wet and dry plots, which is too small in the wet plots
+and too large in the dry ones. Nor can it represent a step: a linear pH term
+spreads a discontinuity at 5.5 across the whole pH range.
+
+The remedy within the linear framework is to specify the interaction and the
+threshold explicitly. That requires knowing they are there. A tree searches for
+them.
+
+### Recursive binary splitting
+
+The algorithm is a greedy search. At each node, every predictor and every
+candidate split point is considered; the split chosen is the one that most
+reduces the residual sum of squares,
+
+$$
+\sum_{i \in R_{\text{left}}} (y_i - \bar y_{\text{left}})^2 +
+\sum_{i \in R_{\text{right}}} (y_i - \bar y_{\text{right}})^2 ,
+$$
+
+and the procedure then repeats within each of the two children until a stopping
+rule intervenes.
+
+::: {.column-margin}
+**DEF** — The search is **greedy** because it takes the best split available
+now, without considering whether a worse split now would permit a better pair of
+splits later. The globally optimal tree is not found, and is not sought.
+:::
+
+Two properties follow immediately from the algorithm and are worth stating
+before any code is run. Predictors are never transformed and never scaled,
+because only the *order* of a numeric predictor matters to a split point: any
+monotone transformation of a predictor leaves the tree unchanged. And
+interactions are represented without being specified, because a split made below
+another split applies only within that branch.
+
+::: {.column-margin}
+**⚠** The converse of scale invariance is that a tree cannot extrapolate. Every
+prediction is an average of training observations, so predicted values are
+bounded by the range of the observed response. A tree fitted to plots with up to
+60% cover will never predict 80%, whatever the predictors say.
+:::
+
+```{r partition-figure}
+#| label: fig-partition
+#| fig-cap: "Left: a rectangular partition of two predictors, with the mean
+#|   response predicted in each region. Right: the same partition written as a
+#|   tree. Reading the tree from the root downwards reproduces the splits from
+#|   the outside inwards."
+#| fig-width: 9
+#| fig-height: 4.4
+#| code-fold: true
+
+op <- par(mfrow = c(1, 2), mar = c(4, 4, 1, 1))
+
+## the partition
+plot(NA, xlim = c(10, 45), ylim = c(0, 0.8),
+     xlab = "Soil moisture (%)", ylab = "Canopy openness")
+rect(10, 0,   25, 0.8, col = "#e9eef2", border = "grey30", lwd = 2)
+rect(25, 0,   45, 0.35, col = "#cfdde6", border = "grey30", lwd = 2)
+rect(25, 0.35, 45, 0.8, col = "#8fb3c7", border = "grey30", lwd = 2)
+text(17.5, 0.40, expression(R[1]), cex = 1.2)
+text(35,   0.17, expression(R[2]), cex = 1.2)
+text(35,   0.58, expression(R[3]), cex = 1.2)
+
+## the same thing as a tree
+par(mar = c(1, 1, 1, 1))
+plot(NA, xlim = c(0, 10), ylim = c(0, 10), axes = FALSE, xlab = "", ylab = "")
+segments(5, 9, 2.5, 7); segments(5, 9, 7.5, 7)
+segments(7.5, 6.4, 5.8, 4.4); segments(7.5, 6.4, 9.2, 4.4)
+text(5, 9.5, "moisture < 25", cex = 0.95)
+text(7.5, 6.7, "light < 0.35", cex = 0.95)
+text(2.5, 6.5, expression(R[1]), cex = 1.2)
+text(5.8, 3.9, expression(R[2]), cex = 1.2)
+text(9.2, 3.9, expression(R[3]), cex = 1.2)
+text(3.4, 8.3, "yes", cex = 0.8, col = "grey40")
+text(6.6, 8.3, "no",  cex = 0.8, col = "grey40")
+par(op)
+```
+
+The two panels are the same object. The tree is a compact notation for a
+partition, and the partition is what the model actually is. Regions are
+rectangles with sides parallel to the axes, which is both the strength of the
+method — the shape is found automatically — and its limitation, since a
+diagonal boundary must be approximated by a staircase.
+
+### Fitting and reading a tree
+
+```{r fit-tree}
+library(rpart)
+
+tree_full <- rpart(f_reg, data = plots, method = "anova",
+                   control = rpart.control(cp = 0.002, minsplit = 10, xval = 10))
+
+print(tree_full, digits = 3)
+```
+
+Each line of the printed output is a node. It gives the node number, the split
+that defines it, the number of observations reaching it, the deviance (the
+within-node sum of squares), and the predicted value, which for a regression
+tree is the node mean. An asterisk marks a terminal node, or leaf. The
+indentation records the hierarchy: node 2 and node 3 are the children of the
+root, nodes 4 and 5 the children of node 2.
+
+```{r plot-tree}
+draw_tree <- function(fit, ...) {
+  if (requireNamespace("rpart.plot", quietly = TRUE)) {
+    rpart.plot::rpart.plot(fit, ...)
+  } else {
+    plot(fit, margin = 0.05)
+    text(fit, use.n = TRUE, cex = 0.7)
+  }
+}
+
+draw_tree(tree_full, type = 2, extra = 101, tweak = 0.9,
+           box.palette = "Blues", main = "")
+```
+
+Each box reports the predicted cover, the number of plots reaching the node and
+that number as a percentage of the total. The first split should be inspected
+closely: the variable chosen there is the one that most reduces the total sum of
+squares, and in a well-behaved data set it is the dominant predictor. The first
+split is not always trustworthy, however — a single extreme observation can
+motivate a split that isolates it.
+
+::: {.column-margin}
+**⚠** The tree grown here is deliberately too large: `cp = 0.002` permits splits
+that improve the fit only slightly. It is the starting point for pruning, not a
+model to interpret.
+:::
+
+The algorithm's handling of the two noise predictors is worth checking in the
+printed tree. Because the search is greedy and exhaustive, a noise variable will
+occasionally produce the best split available in a small node purely by chance.
+This is not a malfunction; it is overfitting, and it is what pruning exists to
+remove.
+
+### The split search, from scratch
+
+The search for the best split looks expensive: for every candidate cut-point, two means and two sums of squares. It is cheap, because of an identity. Splitting a node of $n$ observations into a left part of $n_L$ and a right part of $n_R$ reduces the residual sum of squares by
+
+$$
+\text{RSS}_{\text{parent}} - \big(\text{RSS}_L + \text{RSS}_R\big) = \frac{n_L\,n_R}{n}\,\big(\bar y_L - \bar y_R\big)^2 .
+$$
+
+This is the between-group sum of squares of Day 1 for two groups. The gain is large when the two means differ strongly *and* both parts are reasonably large; the factor $n_Ln_R/n$ is what discourages splitting off a single extreme point. Only the two means are needed, and after sorting the predictor once they are available for every cut-point from a running sum.
+
+```{r best-split}
+best_split <- function(x, y) {
+  o <- order(x); x <- x[o]; y <- y[o]
+  n  <- length(y)
+  nL <- 1:(n - 1); nR <- n - nL                  # sizes for every possible cut
+  sL <- cumsum(y)[nL]; sR <- sum(y) - sL         # running sums give the two means
+  gain <- nL * nR / n * (sL / nL - sR / nR)^2    # reduction in RSS
+  gain[x[nL] == x[nL + 1]] <- -Inf               # cannot cut between equal values
+  i <- which.max(gain)
+  c(cut = (x[i] + x[i + 1]) / 2, gain = gain[i])
+}
+
+vars <- all.vars(f_reg)[-1]
+round(t(sapply(plots[vars], best_split, y = plots$cover)), 2)
+```
+
+Each row is the best cut for one predictor at the root. Moisture wins by a wide margin, at a cut-point next to the true threshold of 25, and the two noise variables offer the smallest gains. `rpart` made the same choice:
+
+```{r best-split-check}
+tree_full$splits[1, c("count", "index", "improve")]
+
+total_ss <- sum((plots$cover - mean(plots$cover))^2)
+c(gain_as_fraction_of_total = unname(best_split(plots$moisture, plots$cover)["gain"]) / total_ss)
+```
+
+`rpart` reports the improvement as a fraction of the node's sum of squares, which matches the gain computed by hand.
+
+::: {.column-margin}
+**KEY** — One node costs a sort per predictor: of the order of $p\,n\log n$ operations. A whole tree costs roughly that times its depth. This is why trees, and forests of hundreds of trees, are feasible on large data.
+:::
+
+## Growing and pruning
+
+### Why the unpruned tree is a saturated model
+
+Left alone, recursive splitting continues until every leaf holds a single
+observation. At that point the training residual sum of squares is zero and the
+tree reproduces the data exactly. Day 1 named this situation: a model with
+as many parameters as observations has no residual degrees of freedom, fits
+perfectly, and reveals nothing about the population.
+
+::: {.column-margin}
+**KEY** — A fully grown tree is the saturated model of Day 1 arrived at by a
+different route. The problem is the same and so is the diagnosis; only the
+remedy is new, because the flexibility of a tree cannot be counted in
+parameters.
+:::
+
+The difficulty is that the number of leaves is not a usable parameter count. A
+tree with eight leaves has consumed far more than eight degrees of freedom,
+because the split points and split variables were themselves chosen by searching
+the data. There is no simple correction, which is why AIC is not the tool here.
+
+### Cost-complexity pruning
+
+The standard approach grows a large tree deliberately and then removes branches,
+trading fit against size. For a tree $T$ with $|T|$ terminal nodes, define
+
+$$
+R_\alpha(T) = R(T) + \alpha \, |T|,
+$$
+
+where $R(T)$ is the training error — the residual sum of squares for a
+regression tree — and $\alpha \ge 0$ is the complexity parameter. For each value
+of $\alpha$ there is a unique smallest subtree minimising $R_\alpha$, and as
+$\alpha$ increases the sequence of these subtrees is nested: branches are pruned
+away in a fixed order, never rearranged.
+
+::: {.column-margin}
+**DEF** — `rpart` reports a scaled version of $\alpha$ called **`cp`**, expressed
+relative to the error of the root-only tree. A split is attempted only if it
+improves the relative error by at least `cp`.
+:::
+
+Pruning backwards rather than stopping early matters. A split that appears weak can enable a highly informative split beneath it. In our simulation the split on moisture is useful in itself, but much of its value lies in the light split it makes possible in the wet branch. A rule that judged every split only by its immediate gain would undervalue that structure.
+
+### Choosing the complexity parameter by cross-validation
+
+```{r cptable}
+printcp(tree_full)
+```
+
+The table has one row per value of `cp` in the pruning sequence. `rel error` is
+the training error, which falls monotonically; `xerror` is the ten-fold
+cross-validated error, computed internally by `rpart` because `xval = 10` was
+set; and `xstd` is its standard error across folds. The cross-validated column
+is the one to read. It falls and then rises, and the size of the tree at its
+minimum is the size supported by the data.
+
+```{r plotcp}
+plotcp(tree_full)
+```
+
+The plot shows the same information: cross-validated relative error against tree
+size, with vertical bars giving one standard error either side. The dotted
+horizontal line sits one standard error above the minimum.
+
+::: {.column-margin}
+**↪** This is the cross-validation of Day 7, run inside `rpart`
+rather than written out by hand. The folds are drawn on the training data, and
+the selected `cp` is a tuning parameter chosen in an inner loop.
+:::
+
+```{r prune}
+cp_tab <- tree_full$cptable
+
+i_min  <- which.min(cp_tab[, "xerror"])
+cp_min <- cp_tab[i_min, "CP"]
+
+thresh <- cp_tab[i_min, "xerror"] + cp_tab[i_min, "xstd"]
+i_1se  <- min(which(cp_tab[, "xerror"] <= thresh))
+cp_1se <- cp_tab[i_1se, "CP"]
+
+rbind(minimum   = c(cp = cp_min, size = cp_tab[i_min, "nsplit"] + 1),
+      one_se    = c(cp = cp_1se, size = cp_tab[i_1se, "nsplit"] + 1))
+```
+
+Two defensible choices are shown. The first takes the `cp` with the lowest
+cross-validated error. The second applies the **one-standard-error rule**: among
+all trees whose cross-validated error lies within one standard error of the
+minimum, take the smallest. The rule acknowledges that the cross-validated
+errors are themselves estimates, so a difference smaller than their own
+uncertainty is not evidence of a better model, and prefers the simpler tree when
+the evidence does not distinguish them.
+
+::: {.column-margin}
+**KEY** — The one-standard-error rule is a general device, not a tree-specific
+one. It was introduced on Day 7 and also chose $\lambda$ on Day 9.
+:::
+
+```{r pruned-tree}
+tree_pruned <- prune(tree_full, cp = cp_1se)
+
+draw_tree(tree_pruned, type = 2, extra = 101, tweak = 0.9,
+           box.palette = "Blues", main = "")
+```
+
+The pruned tree should be compared against the generating process stated
+above. A split on moisture near 25, with a light split appearing only in
+the wet branch, is the interaction recovered without having been specified. A
+split on pH near 5.5 is the threshold recovered without having been specified.
+Litter, whose effect is linear and moderate, is approximated by whatever
+staircase the remaining splits can afford.
+
+## Classification trees
+
+### The same algorithm, a different criterion
+
+For a categorical response the partition is built in exactly the same way, and
+only the quantity minimised changes. A leaf predicts the majority class among
+its training observations, and reports the class proportions alongside it.
+
+Three measures of node impurity are in use. For a node $m$ with class
+proportions $\hat p_{mk}$:
+
+$$
+\text{misclassification error} \quad E = 1 - \max_k \hat p_{mk},
+$$
+$$
+\text{Gini index} \quad G = \sum_{k=1}^{K} \hat p_{mk} (1 - \hat p_{mk}),
+$$
+$$
+\text{cross-entropy} \quad D = -\sum_{k=1}^{K} \hat p_{mk} \log \hat p_{mk}.
+$$
+
+::: {.column-margin}
+**↪** Cross-entropy is the Shannon entropy of the class distribution within the
+node. Day 6 introduced it and
+connected it to deviance and AIC.
+:::
+
+```{r impurity-figure}
+#| label: fig-impurity
+#| fig-cap: "The three node-impurity measures for a two-class node, as a
+#|   function of the proportion of the first class. Cross-entropy is halved so
+#|   that all three share the same maximum. The misclassification rate is
+#|   piecewise linear and has zero gradient nowhere except at its peak."
+#| fig-width: 6.5
+#| fig-height: 4.6
+#| code-fold: true
+
+p <- seq(0.0005, 0.9995, length.out = 600)
+
+gini <- 2 * p * (1 - p)
+ent  <- -(p * log2(p) + (1 - p) * log2(1 - p)) / 2
+err  <- pmin(p, 1 - p)
+
+plot(p, ent, type = "l", lwd = 2, col = "firebrick", ylim = c(0, 0.55),
+     xlab = expression(hat(p)), ylab = "impurity")
+lines(p, gini, lwd = 2, col = "steelblue")
+lines(p, err,  lwd = 2, col = "grey35", lty = 2)
+legend("topright", bty = "n", lwd = 2, lty = c(2, 1, 1),
+       col = c("grey35", "steelblue", "firebrick"),
+       legend = c("misclassification error", "Gini index",
+                  "cross-entropy (halved)"))
+```
+
+The figure explains why trees are grown with Gini or entropy rather than with
+the error rate. All three are zero at a pure node and maximal at an even split,
+but the error rate is piecewise linear: splitting a node with proportions
+$(0.8, 0.2)$ into two children with proportions $(0.9, 0.1)$ and $(0.7, 0.3)$
+leaves the total error rate unchanged, so the split appears worthless. Gini and
+entropy are strictly concave and reward the increase in purity. The error rate
+is nevertheless the right criterion for *pruning*, where predictive accuracy is
+the target.
+
+The claim about the $(0.8, 0.2)$ node is easily checked. The split produces two children of equal size.
+
+```{r impurity-check}
+gini_2 <- function(p) 2 * p * (1 - p)
+err_2  <- function(p) pmin(p, 1 - p)
+
+c(error_before = err_2(0.8),  error_after = mean(err_2(c(0.9, 0.7))),
+  gini_before  = gini_2(0.8), gini_after  = mean(gini_2(c(0.9, 0.7))))
+```
+
+The error rate does not move, while the Gini index falls: one child has become purer, and a later split can exploit that.
+
+### Fitting
+
+```{r fit-class-tree}
+tree_cls <- rpart(f_cls, data = plots, method = "class",
+                  parms = list(split = "gini"),
+                  control = rpart.control(cp = 0.005, xval = 10))
+
+print(tree_cls, digits = 3)
+```
+
+The printed output has one extra column compared with the regression case. After
+the node size comes the **loss** — the number of observations in the node not
+belonging to the predicted class — followed by the predicted class and the class
+probabilities in parentheses. A node reading `120 18 present (0.15 0.85)`
+contains 120 plots of which 18 are not moss-present, and predicts presence with
+probability 0.85.
+
+```{r plot-class-tree}
+draw_tree(tree_cls, type = 2, extra = 104, tweak = 0.9,
+           box.palette = "BuGn", main = "")
+```
+
+`extra = 104` displays the fitted class probabilities together with the
+percentage of observations at each node, which is the most informative layout
+for a classification tree: the predicted class alone conceals the difference
+between a leaf that is 51% present and one that is 98% present.
+
+```{r prune-class}
+cp_cls  <- tree_cls$cptable
+i_min_c <- which.min(cp_cls[, "xerror"])
+tree_cls_p <- prune(tree_cls, cp = cp_cls[i_min_c, "CP"])
+
+c(leaves_before = sum(tree_cls$frame$var == "<leaf>"),
+  leaves_after  = sum(tree_cls_p$frame$var == "<leaf>"))
+```
+
+Pruning proceeds exactly as for the regression tree, using the cross-validated
+error column of the `cptable`. The `frame` component of a fitted `rpart` object
+records one row per node, with the splitting variable or the marker `<leaf>`, so
+counting leaves is a matter of counting that marker.
+
+::: {.column-margin}
+**↪** A classification tree outputs a probability at each leaf. Day 8 showed how such scores are evaluated with confusion matrices and ROC curves. A pruned tree can output only as many distinct probabilities as it has leaves, so its ROC curve has few corners; averaging many trees removes that limitation.
+:::
+
+## A single tree is a weak learner
+
+### Instability
+
+The defect that motivates everything in the rest of the chapter is easiest to
+see than to describe. We refit the tree on four bootstrap resamples of the same
+data.
+
+::: {.column-margin}
+**DEF** — A **weak learner** performs only slightly better than a trivial
+baseline: better than chance for classification, better than the intercept-only
+model for regression. Weakness is not a disqualification; it is the input to an
+ensemble.
+:::
+
+```{r instability}
+#| fig-width: 9
+#| fig-height: 7
+set.seed(562)
+op <- par(mfrow = c(2, 2), mar = c(1, 1, 2, 1))
+
+for (b in 1:4) {
+  boot_rows <- sample(nrow(plots), replace = TRUE)
+  tree_b <- rpart(f_reg, data = plots[boot_rows, ], method = "anova",
+                  control = rpart.control(cp = 0.03))
+  draw_tree(tree_b, type = 2, extra = 0, tweak = 1.1,
+             box.palette = "Blues", main = paste("resample", b))
+}
+par(op)
+```
+
+The four trees are fitted to data sets that differ only through resampling, and
+yet they differ in which variable is split first, where the split points fall,
+and sometimes in which variables appear at all. The greedy search is the cause:
+once the root split changes, everything beneath it is fitted to different
+subsets, so a small perturbation near the top propagates into a completely
+different structure.
+
+::: {.column-margin}
+**⚠** The instability is a property of the fitted structure, not necessarily of
+the predictions. Two visibly different trees may predict similarly. The
+consequence is that the *interpretation* of a single tree — "pH is the most
+important variable, and the cutoff is 5.5" — is far less reliable than it looks.
+:::
+
+### The variance problem, stated
+
+In the language of the bias–variance decomposition, a deep tree has low bias and
+high variance. It can approximate almost any structure given enough splits, so
+it is not systematically wrong; but the particular structure it produces depends
+heavily on the particular sample, so it is unreliable.
+
+High variance is the easier of the two problems to attack, because variance is
+reduced by averaging. If $B$ independent estimates each have variance
+$\sigma^2$, their mean has variance $\sigma^2 / B$. The obstacle is that we have
+only one data set and therefore only one tree. That obstacle was removed on
+Day 7.
+
+## Bagging
+
+### Bootstrap aggregating
+
+::: {.column-margin}
+**DEF** — **Bagging** draws $B$ bootstrap resamples of the training data, fits a
+deep unpruned tree to each, and averages their predictions (for regression) or
+takes a majority vote (for classification).
+:::
+
+$$
+\hat f_{\text{bag}}(x) = \frac{1}{B} \sum_{b=1}^{B} \hat f^{\,b}(x)
+$$
+
+Two details of the recipe deserve attention. The individual trees are grown
+*deep and unpruned*: pruning would reduce their variance, but variance is what
+the averaging is for, and pruning would raise their bias, which averaging cannot
+repair. And $B$ is not a tuning parameter. Increasing it can only reduce the
+variance of the ensemble, so it is set as large as the computing budget allows
+and never chosen by cross-validation.
+
+::: {.column-margin}
+**↪** Day 7 established that a bootstrap resample
+omits about 37% of the rows. Those omitted rows are about to become useful.
+:::
+
+### Why the trees must differ
+
+The averaging argument above assumed independence, which bootstrap resamples of
+one data set certainly are not: they share most of their rows. If the individual
+predictions have variance $\sigma^2$ and pairwise correlation $\rho$, the
+variance of their average is
+
+$$
+\mathrm{Var}\!\left(\hat f_{\text{bag}}\right)
+  = \sigma^2 \left( \rho + \frac{1 - \rho}{B} \right).
+$$
+
+The formula follows from the three lines that gave the design effect on Day 7. The variance of a sum is the sum of all variances and covariances. There are $B$ variances $\sigma^2$ and $B(B-1)$ covariances $\rho\sigma^2$, so
+
+$$
+\mathrm{Var}\!\left(\frac1B\sum_{b=1}^B \hat f^{\,b}\right)
+= \frac{1}{B^2}\Big[B\,\sigma^2 + B(B-1)\,\rho\,\sigma^2\Big]
+= \rho\,\sigma^2 + \frac{(1-\rho)\,\sigma^2}{B} .
+$$
+
+Correlated trees are the clustered observations of Day 7 in a new guise: a hundred trees that all make the same mistake carry the information of one.
+
+```{r variance-figure}
+#| label: fig-bagvar
+#| fig-cap: "Variance of an ensemble average, relative to the variance of a
+#|   single member, as the number of members grows. Each curve is a different
+#|   pairwise correlation between members. The second term vanishes with B; the
+#|   first does not."
+#| fig-width: 6.5
+#| fig-height: 4.6
+#| code-fold: true
+
+B_seq <- 1:200
+rhos  <- c(0, 0.2, 0.5, 0.8)
+cols  <- c("grey25", "steelblue", "darkorange3", "firebrick")
+
+plot(NA, xlim = c(1, 200), ylim = c(0, 1), xlab = "number of trees, B",
+     ylab = expression(Var(bar(f)) / sigma^2))
+for (i in seq_along(rhos)) {
+  lines(B_seq, rhos[i] + (1 - rhos[i]) / B_seq, lwd = 2, col = cols[i])
+  abline(h = rhos[i], lty = 3, col = cols[i])
+}
+legend("topright", bty = "n", lwd = 2, col = cols,
+       legend = paste("rho =", rhos))
+```
+
+The figure contains the entire argument for random forests. The second term
+falls away as $B$ grows, but the first does not: the ensemble variance has a
+floor at $\rho \sigma^2$, however many trees are grown. Adding trees beyond a
+few hundred is therefore pointless, and the only remaining way to improve the
+ensemble is to reduce the correlation between its members.
+
+Correlation between bagged trees is high whenever one predictor dominates,
+because every resample will choose it for the root split and the trees will all
+share their most consequential decision.
+
+### Out-of-bag error
+
+```{r bagging-fit}
+library(randomForest)
+
+set.seed(101)
+bag_fit <- randomForest(f_reg, data = plots, mtry = 6, ntree = 500,
+                        importance = TRUE)
+bag_fit
+```
+
+Setting `mtry` equal to the number of predictors — all six here — means every
+split considers every variable, which is exactly bagging. `randomForest` is
+therefore used for both methods, with one argument distinguishing them.
+
+The printed "Mean of squared residuals" is not a training error. It is the
+**out-of-bag** error: for each observation, the prediction is averaged over only
+those trees whose bootstrap sample excluded it, so every prediction is made by
+trees that never saw that observation. About a third of the ensemble contributes
+to each OOB prediction.
+
+::: {.column-margin}
+**KEY** — Out-of-bag error is cross-validation that costs nothing. It comes free
+with the resampling that bagging performs anyway, and for large $B$ it is close
+to the leave-one-out cross-validated error.
+:::
+
+```{r oob-curve}
+plot(bag_fit, lwd = 2, main = "")
+```
+
+The out-of-bag error is plotted against the number of trees. It falls steeply
+and then flattens, exactly as @fig-bagvar predicts: once the $(1-\rho)/B$ term
+has become negligible the curve reaches its floor, and further trees change
+nothing. The plot is the standard check that $B$ was set large enough, and it
+answers that question rather than the question of which model is best.
+
+### What bagging costs
+
+The ensemble no longer has a picture. There is no single tree to plot, no set of
+decision rules to quote, and no cutoff to report. Bagging buys accuracy with
+interpretability, and this is the point at which tree-based methods stop being
+an exploratory tool and become a predictive one.
+
+Something interpretable can still be recovered, in the form of variable
+importance, which is developed in the next section because it matters equally
+for random forests.
+
+## Random forests
+
+### Decorrelating the trees
+
+::: {.column-margin}
+**DEF** — A **random forest** is bagging with one modification: at each split,
+only a random subset of $m$ of the $p$ predictors is considered as a candidate.
+A fresh subset is drawn at every split of every tree.
+:::
+
+The modification looks perverse — the algorithm is forbidden from using the best
+variable at most splits — and it works for the reason @fig-bagvar makes visible.
+If a dominant predictor is unavailable at a given split, the tree is forced to
+use something else, so trees stop making the same decisions. The correlation
+$\rho$ falls, the floor of the variance curve drops, and the ensemble improves
+even though every individual member has become slightly worse.
+
+::: {.column-margin}
+**KEY** — Random forests trade a small increase in the bias of each tree for a
+large reduction in the correlation between them. This is the only place in the
+course where deliberately weakening the components improves the whole.
+:::
+
+Conventional defaults are $m \approx \sqrt{p}$ for classification and
+$m \approx p/3$ for regression. Unlike $B$, $m$ is a genuine tuning parameter
+and is worth cross-validating: small $m$ gives maximal decorrelation and maximal
+individual bias, large $m$ returns to bagging.
+
+```{r rf-fit}
+set.seed(102)
+rf_fit <- randomForest(f_reg, data = plots, mtry = 2, ntree = 500,
+                       importance = TRUE)
+
+c(bagging_oob_mse = tail(bag_fit$mse, 1),
+  forest_oob_mse  = tail(rf_fit$mse, 1),
+  irreducible     = 36)
+```
+
+The two out-of-bag errors are directly comparable, since both are computed on
+the same data by the same mechanism, and both should be read against the
+irreducible error of 36 that no method can go below. The `mse` component of a
+fitted object holds the out-of-bag error after each tree, so its last element is
+the error of the full ensemble.
+
+```{r rf-tune-mtry}
+set.seed(103)
+mtry_grid <- 1:6
+oob <- vapply(mtry_grid, function(m) {
+  fit <- randomForest(f_reg, data = plots, mtry = m, ntree = 300)
+  tail(fit$mse, 1)
+}, numeric(1))
+
+plot(mtry_grid, oob, type = "b", pch = 16,
+     xlab = "mtry (variables considered per split)",
+     ylab = "out-of-bag MSE")
+abline(h = 36, lty = 3, col = "firebrick")
+```
+
+Sweeping `mtry` from 1 to 6 traces the trade-off directly, with $m = 6$ being
+bagging. The curve is usually shallow, which is the practical reason random
+forests have a reputation for working without tuning: the default is rarely far
+from optimal. The horizontal line marks the irreducible error.
+
+### Variable importance
+
+```{r rf-importance}
+importance(rf_fit)
+```
+
+Two measures are reported for regression forests. **`%IncMSE`** is a permutation
+measure: the values of one predictor are shuffled in the out-of-bag data, the
+increase in prediction error is recorded, and the result is averaged over trees.
+A variable that matters produces a large increase when scrambled.
+**`IncNodePurity`** accumulates the reduction in residual sum of squares
+attributable to splits on that variable, summed over the whole forest. For
+classification forests the second measure is the mean decrease in the Gini index
+instead.
+
+```{r rf-varimp-plot}
+varImpPlot(rf_fit, main = "")
+```
+
+The two panels need not agree, and the noise predictors provide the calibration:
+whatever score they receive is the score of a variable that is known to be
+irrelevant, so any predictor scoring near them has not been shown to matter.
+
+::: {.column-margin}
+**⚠** Importance measures are unreliable under correlated predictors. Two nearly
+redundant variables split the credit between them and may both look unimportant,
+even when the pair is essential. Importance is a property of the variable *in
+this ensemble*, not a test of a biological effect.
+:::
+
+::: {.column-margin}
+**⚠** The impurity-based measure is also biased towards variables with many
+possible split points: continuous predictors and factors with many levels score
+higher than binary predictors regardless of signal. The permutation measure is
+the safer of the two.
+:::
+
+## Where this leads
+
+Bagging and random forests fit their trees independently and average them. On Day 11 the trees are instead fitted in sequence, each correcting what its predecessors got wrong, and all methods are then compared on equal terms.

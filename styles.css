@@ -1,0 +1,24 @@
+/* Margin notes: the DEF / KEY / bridge / pitfall convention of the course */
+.column-margin {
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.margin-legend {
+  color: #5a6470;
+}
+
+/* Exercises in the practicals */
+.callout.callout-style-default .callout-title {
+  font-weight: 600;
+}
+
+/* Keep wide R output readable */
+pre.sourceCode,
+div.sourceCode {
+  font-size: 0.86rem;
+}
+
+table {
+  font-size: 0.93rem;
+}
