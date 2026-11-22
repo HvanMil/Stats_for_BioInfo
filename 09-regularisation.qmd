@@ -1141,6 +1141,10 @@ post-selection inference exists — the `selectiveInference` package implements
 it — but it is not obtained by refitting with `lm` and reading off the stars.
 :::
 
+::: {.column-margin}
+**↪** This is the double dipping of Day 2 (Exercise 2.1) in another guise: the data chose the variables, and the same data are then asked to test them.
+:::
+
 An honest summary of a lasso analysis is a prediction error estimated by
 cross-validation, together with the selected set of predictors, described as a
 set. If the aim is a statement about the effect of one particular predictor, a

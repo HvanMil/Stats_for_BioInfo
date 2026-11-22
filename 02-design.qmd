@@ -24,11 +24,64 @@ Some of what follows may appear almost too simple. That is intentional. These "o
 
 Four principles underlie the whole lecture:
 
-- A statistical method is motivated by the hypothesis, not the reverse (but also see machine learning chapters).
+- In confirmatory research the hypothesis chooses the method and the data. In exploratory research and in prediction the order is reversed, and the design must protect against that reversal.
 - A good method or model yields an **unambiguous** decision about the hypothesis.
 - Any statement about a hypothesis is a statement about random variables — a statement in terms of *probability*, never certainty.
 - Errors propagate forward. A poor research question cannot be repaired by good statistics, and poor data cannot be repaired by a clever model.
 
+## Three kinds of question
+
+Before any design decision, one question has to be answered: *what kind of question is this study asking?* The course meets three kinds, and they differ in the order in which hypothesis and data arrive.
+
+- **Confirming a hypothesis.** The hypothesis comes first and chooses the data: what to measure, on whom, how many. The study ends with a test, and a well-designed, randomised study may say that the treatment *causes* the effect. This is the world of Day 1 and of most of this chapter.
+- **Exploring data to generate hypotheses.** The data come first, often measured on thousands of genes at once, and the analysis looks for structure: groups of patients, directions of variation, modules of co-expressed genes. What comes out is a *hypothesis*, not a conclusion. This is the world of PCA and clustering (Days 4 and 5).
+- **Predicting an outcome.** The aim is neither to test nor to explain, but to predict a label or a value for new cases: tumour or normal, responder or not. Success is measured by the error on cases the model has never seen, and nothing is claimed about mechanism. This is the world of Days 6 to 11.
+
+::: column-margin
+**DEF** — **Hypothesis-driven** (confirmatory) research lets the hypothesis select the data. **Data-driven** (exploratory) research lets the data select the hypothesis.
+:::
+
+```{r fig-three-questions}
+#| code-fold: true
+#| code-summary: "Code for the diagram"
+#| fig-width: 8.5
+#| fig-height: 3.6
+#| fig-cap: "Three kinds of question, read from left to right. The orange box marks where data that played no part in forming the hypothesis or building the model enter. In confirmatory research these are the data of the study itself, because the hypothesis was fixed beforehand. In exploration and prediction they have to be new data, and that has to be designed in."
+box <- function(x, y, label, fill = "white", border = "grey30") {
+  rect(x - 0.7, y - 0.28, x + 0.7, y + 0.28, col = fill, border = border, lwd = 1.5)
+  text(x, y, label, cex = 0.8)
+}
+chain <- function(y, labels, fills, title) {
+  xs <- seq(1.5, by = 1.8, length.out = length(labels))
+  text(0, y, title, adj = 0, font = 2, cex = 0.85)
+  for (k in seq_along(labels)) box(xs[k], y, labels[k], fills[k])
+  if (length(xs) > 1) arrows(xs[-length(xs)] + 0.72, y, xs[-1] - 0.72, y, length = 0.07, lwd = 1.5)
+}
+new <- "#F6D7C3"; plain <- "white"
+par(mar = c(0, 0, 0, 0))
+plot(NA, xlim = c(0, 9.6), ylim = c(0.4, 3.6), axes = FALSE, xlab = "", ylab = "")
+chain(3.1, c("hypothesis", "design", "new data", "test"), c(plain, plain, new, plain), "Confirm")
+chain(2.0, c("data", "pattern", "hypothesis", "new data", "test"), c(plain, plain, plain, new, plain), "Explore")
+chain(0.9, c("data", "model", "new data", "error"), c(plain, plain, new, plain), "Predict")
+```
+
+The diagram shows why the distinction matters for design. A *p*-value, a confidence interval or an error rate is only honest when it is computed on data that played no part in choosing what is being tested. In confirmatory research this is guaranteed by the order of events: the hypothesis was fixed before the data existed. In exploration and prediction the order is reversed. A pattern found in a data set will always look convincing *in that data set*, because that is why it was found. The independent data have to come from somewhere else, and that "somewhere else" must be planned before the study starts.
+
+The three kinds of question also license different claims. A randomised experiment may claim a cause; an exploratory analysis may claim only that something is worth testing; a predictive model may claim an error rate on a stated population, and nothing about why it works [@Shmueli2010; @Breiman2001].
+
+::: column-margin
+**KEY** — A hypothesis cannot be tested on the data that suggested it. Exploration and prediction are as dependent on design as a confirmatory test; the design simply has to provide something else.
+:::
+
+Most of this chapter treats the confirmatory case, because its vocabulary (experimental unit, randomisation, blocking, power) is needed for everything else. The section [When the data come first](#sec-data-first) then shows what changes, and what does not, when the data come before the hypothesis.
+
+::: {.callout-caution title="Check yourself"}
+Classify each study as confirmatory, exploratory or predictive. (a) RNA-seq of 200 breast tumours, to find out whether there are subtypes not yet described. (b) A randomised trial of a drug against placebo, with blood pressure after eight weeks as the outcome. (c) A model that uses methylation at 500 CpG sites to tell whether a biopsy contains tumour cells.
+
+::: {.callout-tip collapse="true" title="Answer"}
+(a) is exploratory: the subtypes are the result, and they are hypotheses until confirmed in other tumours. (b) is confirmatory: the hypothesis was fixed in advance, the treatment is randomised, and the trial ends in a test. (c) is predictive: the question is how often the model is right on new biopsies, not which CpG sites cause cancer. Real projects often combine the three; the design must say which part answers which kind of question.
+:::
+:::
 ## From data to facts
 
 The purpose of an experiment is to turn measurements into a defensible claim about the world — to convert **data into facts**. That conversion succeeds only if a chain of earlier decisions was made well. The chain is set out explicitly, because each link is a place at which the whole argument can quietly fail:
@@ -45,7 +98,7 @@ The last point is the through-line of the lecture. Data quality is not a propert
 
 ## A model is where experimental design begins
 
-The idea that connects this lecture to the first one is the following: before any pipette or field is touched, the hypothesis of interest is translated into a model to be fitted. For a study of blood pressure, for example:
+For a confirmatory study, the idea that connects this lecture to the first one is the following: before any pipette or field is touched, the hypothesis of interest is translated into a model to be fitted. For a study of blood pressure, for example:
 
 $$\text{Bloodpressure} \sim \text{Gender} + \text{Concentration} + \text{Time of day}$$
 
@@ -339,8 +392,7 @@ The procedure for using power well is therefore a fixed sequence of decisions:
 
 With those four numbers, an a priori analysis returns the required $n$. After the study, a post-hoc analysis reports the power that was actually attained.
 
-### Where the required sample size comes from
-
+::: {.callout-note collapse="true" title="Where the number 64 comes from"}
 The number 64 is not magic, and a short derivation shows where it comes from. Take two groups of $n$ observations with a true difference $\delta$ and a known standard deviation $\sigma$. The difference of the two sample means is normally distributed,
 
 $$\bar x_1 - \bar x_2 \sim N\!\left(\delta,\ \frac{2\sigma^2}{n}\right),$$
@@ -360,6 +412,7 @@ c(normal_formula = 2 * (qnorm(0.975) + qnorm(0.80))^2 * sigma^2 / delta^2,
 ```
 
 The formula gives 62.8, and `power.t.test` gives one more, because it uses the $t$ distribution: $\sigma$ has to be estimated, which costs a little power. The formula also makes the heuristic of the previous section exact. Power depends on the data only through $\delta\sqrt{n}/\sigma$. Halving the effect size, or doubling the noise, therefore *quadruples* the number of units required.
+:::
 
 ### Power without a formula: simulation
 
@@ -410,18 +463,329 @@ The dashed guides mark the crossing: approximately 64 per group to reach a power
 
 The three computations of this section — the analytic post-hoc and a priori calls, the simulation, and the power curve — are three views of one quantity. Each shows that power is determined jointly by the effect size, the residual standard deviation, the significance level and the sample size, and that the sample size in question is the number of experimental units. The design decisions of the first half of the chapter enter through $\sigma$ and $n$: blocking and control reduce $\sigma$, correct identification of the experimental unit determines the true $n$, and randomisation ensures that what remains in $\sigma$ is noise rather than bias. A power calculation performed before the experiment is therefore the point at which every earlier design decision is tested against the effect the study aims to detect.
 
+## When the data come first {#sec-data-first}
+
+Everything so far assumed that the hypothesis was fixed before the data existed. From Day 4 onwards that is rarely the case. PCA and clustering search the data for structure; classifiers search them for whatever separates the labels. Experimental design does not become irrelevant there. Some of its ideas carry over unchanged, some change their meaning, and one new requirement appears: an honest check on independent data has to be planned before the study starts.
+
+### A pattern found in the data will be confirmed by the same data
+
+Suppose 100 patients are measured on a panel of 50 genes, and the patients are clustered into two groups. A natural next step is to ask which genes differ between the two groups, with a *t*-test per gene. The tests will find differences, even if the patients were all the same: the clustering algorithm chose the split that makes the groups as different as possible, and the tests then ask whether the groups are different. The question has been answered before it was asked. This is called **circular analysis** or **double dipping** [@Kriegeskorte2009], and it is one of the most common errors in genomics.
+
+The same trap exists for prediction. If the genes that best separate tumour from normal are selected using *all* samples, and a classifier built on those genes is then evaluated on part of the same samples, the evaluation is no longer independent of the selection. Accuracies of 90% are then easily obtained from pure noise [@Ambroise2002]. Exercises 2.1 and 2.2 below let you produce both effects yourself.
+
+::: column-margin
+**DEF** — **Double dipping**: using the same data first to choose a hypothesis (a split, a set of genes, a model) and then to test or evaluate it.
+:::
+
+The remedy is a design decision, not an analysis trick: **split the data, or the study, before looking.**
+
+- Set aside a **validation set** (or test set) at random, and do not touch it until every choice has been made on the other part, the **discovery set** (or training set).
+- Better still, plan an **independent replication cohort**: other patients, another hospital, another time. Genome-wide association studies have long required this, which is one reason why their findings replicate far better than those of the earlier candidate-gene studies, many of which did not replicate at all.
+- Decide the split in advance, and size *both* parts. A validation set of ten samples cannot confirm anything.
+
+::: column-margin
+**↪** Day 7 develops this into cross-validation, where every sample takes a turn in the validation set, and into nested cross-validation, where every data-driven choice is kept inside the loop.
+:::
+
+::: {.callout-note title="Exercise 2.1 — Clusters from nothing"}
+Simulate a study in which there is nothing to find: 100 patients, measured on a panel of 50 genes, all values independent standard normal.
+
+```{r}
+#| eval: false
+set.seed(2026)
+n <- 100; p <- 50
+X <- matrix(rnorm(n * p), nrow = n, ncol = p)   # patients in rows, genes in columns
+```
+
+a. Cluster the patients into two groups with `kmeans(X, centers = 2, nstart = 20)`. How large are the groups?
+b. Test every gene for a difference between the two clusters with a *t*-test. How many genes have $p < 0.05$, and how many would you expect if there were no structure? How many survive a false-discovery-rate correction, `p.adjust(p_values, method = "BH")`?
+c. Explain the result of (b) in one or two sentences.
+d. Now do it honestly. Before clustering, split the patients at random into a discovery half and a validation half. Cluster each half separately. Then assign every validation patient to the *nearest discovery centre* and compare this assignment with the clustering of the validation half itself. Use the helper functions below. Repeat for a few different random splits.
+
+```{r}
+#| eval: false
+# for every row of Xnew: the number of the nearest centre
+nearest <- function(Xnew, centers)
+  apply(Xnew, 1, function(x) which.min(colSums((t(centers) - x)^2)))
+# fraction of patients on which two partitions agree (labels are arbitrary)
+agree <- function(a, b) max(mean(a == b), mean(a != b))
+```
+
+e. Give the patients a real subtype: add 1 to genes 1 to 10 for patients 51 to 100. Repeat (d). How does the agreement compare with that for pure noise?
+f. You are planning a study to discover subtypes in 100 patients. Which decisions about discovery and validation should be written down before the samples are collected, and what does the split cost?
+:::
+
+::: {.callout-tip collapse="true" title="Hints"}
+For (b), loop over the columns: `sapply(1:p, function(j) t.test(X[cl == 1, j], X[cl == 2, j])$p.value)`. For (d), `disc <- sample(n, n / 2)` and `val <- setdiff(1:n, disc)` give the two halves; the centres of a clustering are in `km$centers`. An agreement of 0.5 means that the two partitions have nothing to do with each other; 1 means they are identical.
+:::
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r ex21-solution}
+set.seed(2026)
+n <- 100; p <- 50
+X  <- matrix(rnorm(n * p), nrow = n, ncol = p)
+
+# (a) and (b): cluster, then test the clusters
+cl <- kmeans(X, centers = 2, nstart = 20)$cluster
+p_values <- sapply(1:p, function(j) t.test(X[cl == 1, j], X[cl == 2, j])$p.value)
+c(cluster_sizes = table(cl), p_below_0.05 = sum(p_values < 0.05),
+  expected = 0.05 * p, after_BH = sum(p.adjust(p_values, method = "BH") < 0.05))
+```
+
+(c) There is no structure in these data, yet about a third of the genes "differ" between the clusters, and several survive the false-discovery-rate correction. The clustering chose the split that separates the patients as much as possible along some combination of genes; the *t*-tests then confirm that this split separates the patients. The *p*-values assume that the groups were defined independently of the data, and they were not.
+
+```{r ex21-solution-split}
+nearest <- function(Xnew, centers)
+  apply(Xnew, 1, function(x) which.min(colSums((t(centers) - x)^2)))
+agree <- function(a, b) max(mean(a == b), mean(a != b))
+
+replicate_split <- function(X, seed) {
+  set.seed(seed)
+  disc <- sample(nrow(X), nrow(X) / 2); val <- setdiff(seq_len(nrow(X)), disc)
+  km_disc <- kmeans(X[disc, ], centers = 2, nstart = 20)
+  km_val  <- kmeans(X[val, ],  centers = 2, nstart = 20)
+  agree(nearest(X[val, ], km_disc$centers), km_val$cluster)
+}
+
+Y <- X
+Y[51:100, 1:10] <- Y[51:100, 1:10] + 1          # (e) a real subtype
+
+rbind(pure_noise   = sapply(1:8, function(s) replicate_split(X, s)),
+      real_subtype = sapply(1:8, function(s) replicate_split(Y, s)))
+```
+
+(d, e) For pure noise the agreement stays close to 0.5: the discovery clustering found a split, but a different split appears in new patients. With a real subtype the agreement is clearly higher, because the same structure is present in both halves. It is not perfect, because 50 patients are not many for finding a difference spread over 10 of 50 genes.
+
+(f) Before collecting samples: how the patients will be divided (random, and stratified by hospital or batch if these exist), the size of each part, that the validation part will not be looked at until the discovery analysis is finished, and what counts as a successful replication. The cost is that each analysis has only half the patients, so a weaker structure may be missed in discovery, as the imperfect agreement in (e) shows. Sizing the study must take both halves into account, or plan an independent cohort.
+:::
+
+::: {.callout-note title="Exercise 2.2 — Selecting genes before testing a classifier"}
+Simulate 40 samples on 1,000 genes of pure noise, and give them labels: 20 "tumour" and 20 "normal". The labels carry no information. A **nearest-centroid classifier** assigns a new sample to the class whose mean profile is closest; it is given below, together with a fast *t*-test for every column of a matrix.
+
+```{r ex22-helpers}
+nearest_centroid_accuracy <- function(X_train, y_train, X_test, y_test) {
+  m1 <- colMeans(X_train[y_train == 1, , drop = FALSE])
+  m2 <- colMeans(X_train[y_train == 2, , drop = FALSE])
+  d1 <- rowSums(sweep(X_test, 2, m1)^2)
+  d2 <- rowSums(sweep(X_test, 2, m2)^2)
+  mean(ifelse(d1 < d2, 1, 2) == y_test)
+}
+# two-sample t-test for every column of X at once
+column_t_pvalues <- function(X, y) {
+  a <- X[y == 1, , drop = FALSE]; b <- X[y == 2, , drop = FALSE]
+  ss_a <- colSums(sweep(a, 2, colMeans(a))^2)
+  ss_b <- colSums(sweep(b, 2, colMeans(b))^2)
+  s2 <- (ss_a + ss_b) / (nrow(a) + nrow(b) - 2)
+  t <- (colMeans(a) - colMeans(b)) / sqrt(s2 * (1 / nrow(a) + 1 / nrow(b)))
+  2 * pt(-abs(t), nrow(a) + nrow(b) - 2)
+}
+```
+
+a. Using all 40 samples, select the 20 genes with the smallest *p*-values. Then split the samples into a training half and a test half (10 of each class in each half), build the classifier on the training half with the selected genes, and compute its accuracy on the test half.
+b. Repeat, but now select the 20 genes using the training half only.
+c. Repeat (a) and (b) 100 times with new data, and report the average accuracy of each.
+d. Which of the two numbers would you expect to see in a paper, and why is this a problem of design rather than of analysis?
+:::
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r ex22-solution}
+one_study <- function() {
+  X <- matrix(rnorm(40 * 1000), nrow = 40)
+  y <- rep(1:2, each = 20)
+  train <- c(sample(1:20, 10), sample(21:40, 10)); test <- setdiff(1:40, train)
+  genes_all   <- order(column_t_pvalues(X, y))[1:20]                     # (a)
+  genes_train <- order(column_t_pvalues(X[train, ], y[train]))[1:20]     # (b)
+  acc_all   <- nearest_centroid_accuracy(X[train, genes_all], y[train],
+                                         X[test, genes_all], y[test])
+  acc_train <- nearest_centroid_accuracy(X[train, genes_train], y[train],
+                                         X[test, genes_train], y[test])
+  c(selected_on_all_samples = acc_all, selected_on_training_only = acc_train)
+}
+set.seed(1)
+rowMeans(replicate(100, one_study()))                                     # (c)
+```
+
+(d) Selecting on all samples gives an accuracy above 90% for labels that carry no information; selecting on the training half gives the honest 50%. The first number is the one that looks publishable, and versions of it have been published [@Ambroise2002]. The test samples took part in choosing the genes, so they were no longer independent of the model. No later analysis can repair this: the remedy is to lock the test set away *before* the first data-driven decision, which is a matter of how the study is organised.
+:::
+
+### Collect the variation, and record it
+
+A confirmatory design keeps nuisance variation small, because every bit of it costs power. Exploration needs almost the opposite. Subtypes can only be discovered in a sample that contains them, so the sample should span the variation that might matter: disease stages, ages, both sexes, several hospitals. A homogeneous sample is efficient for a test but blind for discovery.
+
+The price is that this variation must be **recorded**. In exploration nobody knows in advance which variable will turn out to explain a cluster or a principal component, so every piece of metadata should be kept: age, sex, tissue, RNA quality, date of extraction, operator, sequencing run, position on the plate. A cluster that coincides with the extraction date is a finding about the laboratory, not about the disease, and it can only be recognised as such if the date was written down.
+
+::: column-margin
+**KEY** — Confirmatory design minimises nuisance variation. Exploratory design samples the variation broadly and records its sources.
+:::
+
+### Batches: the four levers still apply
+
+The levers of this chapter return almost unchanged in the laboratory part of a data-driven study, and they matter even more, because an exploratory method will find *any* strong source of variation, including the technical ones [@Leek2010]. Consider 24 samples, 12 tumour and 12 normal, sequenced in two runs of 12. Suppose there is no biological difference at all, but the second run reads 100 of the 500 genes slightly higher. The figure compares two ways of filling the runs.
+
+```{r fig-batch}
+#| code-fold: true
+#| code-summary: "Code for the figure"
+#| fig-width: 8.5
+#| fig-height: 4.2
+#| fig-cap: "The same technical batch effect, and no biological difference, in two designs. The samples are drawn by principal component analysis (Day 4), which places them along the directions in which they differ most. Left: all tumours were sequenced in run 1 and all normals in run 2. The two groups separate perfectly, and nothing in the data can show that this is the run. Right: each run contains six tumours and six normals. The first component now separates the runs, and within each run tumours and normals are mixed: there is no biological signal, and the run effect can be estimated and removed."
+set.seed(42)
+n <- 24; p <- 500
+group    <- rep(c("tumour", "normal"), each = 12)
+run_conf <- ifelse(group == "tumour", "run 1", "run 2")          # confounded design
+run_bal  <- rep(rep(c("run 1", "run 2"), each = 6), 2)           # balanced design
+simulate <- function(run) {
+  X <- matrix(rnorm(n * p), n, p)
+  X[run == "run 2", 1:100] <- X[run == "run 2", 1:100] + 1       # technical effect only
+  X
+}
+X_conf <- simulate(run_conf); X_bal <- simulate(run_bal)
+
+draw <- function(X, run, main) {
+  pc <- prcomp(X)$x
+  plot(pc[, 1], pc[, 2], pch = ifelse(run == "run 1", 19, 17), cex = 1.4,
+       col = ifelse(group == "tumour", "#D35400", "#1F4E79"), las = 1,
+       xlab = "first principal component", ylab = "second principal component", main = main)
+}
+par(mfrow = c(1, 2), mar = c(4, 4, 2.5, 1))
+draw(X_conf, run_conf, "confounded: group = run")
+legend("top", bty = "n", cex = 0.8, ncol = 2, pch = c(19, 19, 19, 17),
+       col = c("#D35400", "#1F4E79", "grey40", "grey40"),
+       legend = c("tumour", "normal", "run 1", "run 2"))
+draw(X_bal, run_bal, "balanced: both groups in each run")
+```
+
+```{r batch-tests}
+# genes declared "differentially expressed" at a false discovery rate of 5%
+p_conf <- apply(X_conf, 2, function(g) t.test(g ~ group)$p.value)
+p_bal  <- apply(X_bal,  2, function(g) anova(lm(g ~ run_bal + group))["group", "Pr(>F)"])
+c(confounded = sum(p.adjust(p_conf, "BH") < 0.05),
+  balanced_with_run_in_model = sum(p.adjust(p_bal, "BH") < 0.05))
+```
+
+In the confounded design, the analysis reports a clean separation and a list of "differentially expressed" genes, none of which is real. In the balanced design, the run is a block: it can be put in the model, and the false discoveries disappear. The levers translate directly:
+
+- **Blocking and randomisation** → spread the biological groups evenly over runs, plates, extraction days and technicians, and randomise the positions within each.
+- **Control** → include technical replicates, reference samples or pooled quality-control samples in every run; they measure the variation added by the measurement itself (SSM).
+- **The experimental unit** → know which samples come from the same patient, mouse or culture. Several biopsies per patient form clusters that are simply patients, and on Day 7 they decide how the data may be split.
+
+::: column-margin
+**⚠** A batch that is confounded with the biological groups cannot be corrected afterwards. Batch-correction methods need both groups present in every batch.
+:::
+
+::: {.callout-caution title="Check yourself"}
+A colleague has 48 RNA samples, 24 from responders and 24 from non-responders, and a sequencer that takes 16 samples per run. She proposes to sequence the responders first, because their samples arrived first. What would you advise, and what should be recorded?
+
+::: {.callout-tip collapse="true" title="Answer"}
+Use three runs, each with 8 responders and 8 non-responders, with the positions within each run randomised. Sequencing the responders first would confound response with run, and possibly with storage time as well. Record the run, the position, the extraction date and the arrival date for every sample, so that any of these can be checked or put in the model later.
+:::
+:::
+
+### How many samples, when there is no hypothesis to power?
+
+There is no effect size to plug into `power.t.test` when the question is "are there subtypes?". Sample size still matters, and it can still be reasoned about.
+
+- **Rare groups.** A subtype that makes up 5% of patients can only be discovered if enough of its members are in the sample. To have a 90% chance of including at least ten of them requires almost 300 patients (see below).
+- **Stable structure.** A principal component or a cluster should be a property of the population, not of this sample. Exercise 2.1 showed that 50 patients recovered a real subtype only imperfectly. For PCA there is even a sharp limit, known from random-matrix theory: with many more genes than samples, a direction with a modest amount of extra variance cannot be distinguished from noise at all, however carefully it is measured.
+- **The precision of an error rate.** An accuracy measured on $n$ test samples has a standard error of about $\sqrt{a(1-a)/n}$. With 50 test samples and an accuracy of 80%, that is almost six percentage points, more than many of the "improvements" reported between classifiers.
+
+```{r sample-size-explore}
+# (1) patients needed for a 90% chance of at least 10 members of a 5% subtype
+n_try <- 50:600
+min(n_try[1 - pbinom(9, n_try, 0.05) >= 0.9])
+
+# (3) standard error of an 80% accuracy, and the test size for a 95% interval of +/- 5%
+c(se_50_test_samples = sqrt(0.8 * 0.2 / 50),
+  n_for_plus_minus_5 = ceiling(0.8 * 0.2 * (1.96 / 0.05)^2))
+```
+
+Where no formula applies, a pilot study and a simulation of the planned analysis, in the style of the power simulation above, answer the same question.
+
+### Confirming what was found: the winner's curse
+
+Exploration ends with a hypothesis, and testing it is a confirmatory study like any other, with randomisation and a power calculation. There is one trap. The effect size for the power calculation is naturally taken from the discovery data, and that estimate is too large. The genes, clusters or predictors that were carried forward were chosen *because* they looked strongest, and looking strongest is partly luck. This is the **winner's curse** [@Ioannidis2008].
+
+```{r fig-winners-curse}
+#| code-fold: true
+#| code-summary: "Code for the figure"
+#| fig-width: 6
+#| fig-height: 4.4
+#| fig-cap: "2,000 genes, all with the same true effect of 0.3 standard deviations, measured in a discovery study and an independent replication with 20 samples per group. The 20 genes with the largest discovery t-statistics (orange) have an estimated effect of about 1 in the discovery data, but about 0.4 in the replication. They were selected partly for their luck, and the luck does not replicate."
+set.seed(3)
+G <- 2000; m <- 20; true_effect <- 0.3
+study <- function() {
+  a <- matrix(rnorm(m * G), m); b <- matrix(rnorm(m * G, true_effect), m)
+  d <- colMeans(b) - colMeans(a)
+  s <- sqrt((apply(a, 2, var) + apply(b, 2, var)) / 2)
+  list(effect = d, t = d / (s * sqrt(2 / m)))
+}
+discovery <- study(); replication <- study()
+top <- order(-discovery$t)[1:20]
+
+par(mar = c(4, 4, 1, 1))
+plot(discovery$effect, replication$effect, pch = 19, cex = 0.4, col = "grey75", las = 1, asp = 1,
+     xlab = "estimated effect in discovery", ylab = "estimated effect in replication")
+abline(0, 1, lty = 2); abline(h = true_effect, v = true_effect, col = "#1F4E79", lty = 3)
+points(discovery$effect[top], replication$effect[top], pch = 19, col = "#D35400")
+```
+
+```{r winners-curse-power}
+c(true_effect = true_effect,
+  top20_in_discovery   = mean(discovery$effect[top]),
+  top20_in_replication = mean(replication$effect[top]))
+
+# replicates per group for 80% power: on the discovery estimate, and on the truth
+c(planned_on_discovery = power.t.test(power = 0.8, delta = mean(discovery$effect[top]))$n,
+  needed_for_truth     = power.t.test(power = 0.8, delta = true_effect)$n)
+```
+
+A replication powered on the discovery estimate would use about 15 samples per group and have very little power for an effect that is really 0.3. The consequence for design: power a confirmation on a deliberately conservative effect size, and treat a failed replication of an exploratory finding as the expected outcome rather than a surprise.
+
+::: column-margin
+**KEY** — Effects chosen because they look largest are overestimated. Plan the confirmation on a smaller effect than the discovery suggests.
+:::
+
+::: column-margin
+**↪** Day 9 meets the same phenomenon after variable selection with the lasso: refitting the selected variables gives *p*-values that are too small.
+:::
+
+### Write down the choices
+
+An exploratory analysis is allowed to be flexible, but each choice (the normalisation, which genes to filter, the distance measure, the number of clusters, which outliers to drop) is an opportunity to make the result look better. Trying many and reporting the most convincing is multiple testing in disguise, sometimes called the *garden of forking paths* [@Gelman2014]. Three habits keep this honest: fix the preprocessing before looking at the outcome; keep the validation labels hidden until the analysis plan is final; and keep a log of what was tried, so that the report can say how many paths were explored.
+
+### Prediction: design for where the model will be used
+
+A predictive model is judged by its error on new cases, so the test data should resemble those cases. A classifier developed on biopsies from one hospital, with half of the patients diseased, will meet a different prevalence, a different scanner or sequencer and a different patient mix when it is used elsewhere. The design questions are therefore about the **target population**: which hospitals, which time period, which prevalence. An **external validation** set from another centre or a later period is the most convincing test. And a model cannot be more accurate than its labels: if the "truth" in the training data comes from a noisy diagnosis, that noise is part of the design too.
+
+### Integration: one design vocabulary, three kinds of question
+
+| Design question | Confirm | Explore | Predict |
+|:--|:--|:--|:--|
+| What comes first? | the hypothesis | the data | the outcome to predict |
+| What makes the conclusion honest? | randomisation, a fixed $\alpha$ | replication on independent data | a locked test set, external validation |
+| Nuisance variation | keep small, block | sample broadly, record | match the target population |
+| Experimental unit | sets the degrees of freedom | sets the unit of the split | sets the unit of the split |
+| Batches | block, randomise | balance groups over batches | balance; test on new batches |
+| Sample size | power for a stated effect | rare groups, stability, a pilot | precision of the error rate |
+| Allowed claim | "causes" (if randomised) | "suggests", "worth testing" | "predicts, with this error, here" |
+
+The vocabulary of the first half of the chapter is needed in every column. What changes is what it protects. In a confirmatory study it protects the test from bias; in a data-driven study it protects the patterns from being artefacts, and the honest check from having been used up before it was made.
+
 ## Key takeaways
 
+- First decide what kind of question the study asks. In **confirmatory** research the hypothesis selects the data; in **exploratory** research the data select the hypothesis; in **prediction** the aim is a low error on new cases. Each licenses a different claim.
 - The leverage over a study is spent before data collection. Design determines quality; analysis can only reveal it.
-- Write the model first. It states what is to be measured, in what type, and where variance will enter — and it becomes the spreadsheet header.
+- Write the model first. It states what is to be measured, in what type, and where variance will enter, and it becomes the spreadsheet header.
 - Partition the variance into named sources. SSH is signal; SSM and SSU are the dangerous terms that can violate assumptions or masquerade as signal.
 - Use the four levers deliberately: **control** to make comparisons interpretable, **randomise** what cannot be controlled, **replicate** at the level of the experimental unit, and **block** what can be identified.
 - Identify the experimental unit correctly. Counting sample units instead of experimental units is pseudoreplication, and it manufactures false confidence.
-- Keep type I and type II error distinct. Fix $\alpha$; maximise power. Every reduction in $\sigma$ purchases power at no cost.
-- Compute the required sample size *a priori*, either with `power.t.test` or by simulating the experiment and counting successes.
+- Keep type I and type II error distinct. Fix $\alpha$; maximise power. Every reduction in $\sigma$ purchases power at no cost. Compute the required sample size *a priori*, with `power.t.test` or by simulation.
+- A hypothesis cannot be tested on the data that suggested it. When the data come first, plan the independent check (a locked validation set or a replication cohort) before the study starts, and size it.
+- Balance biological groups over batches, record all metadata, and power a confirmation on a conservative effect size: discovered effects are overestimated.
 
 ## Looking ahead
 
-The dependencies you learned to *recognise* in this lecture, rats in boxes, pieces of a liver, treatments nested in strains, are the structures that decide on Day 7 how data may be resampled. Design and resampling are two halves of one skill: identifying correlation, then respecting it.
+The dependencies you learned to *recognise* in this lecture, rats in boxes, pieces of a liver, samples in sequencing runs, are the structures that decide on Day 7 how data may be resampled and split. Design and resampling are two halves of one skill: identifying correlation, then respecting it.
 
-The simulation-based power analysis is the more immediate bridge. When a practical asks you to simulate and analyse data, the same loop as the power simulation above is being run — setting a true effect, generating data around it, and observing what the analysis recovers. Two questions organise the whole lecture and should precede every real measurement: *has the true experimental unit been identified, and are there enough of them to detect the effect of interest?* Answering these in advance is what makes a post mortem unnecessary.
+The three kinds of question organise the rest of the course. Days 4 and 5 explore: PCA and clustering will always return directions and groups, and Exercise 2.1 showed why those are hypotheses rather than results. Day 6 returns to models and likelihood, and from Day 7 onwards the question is prediction, where Exercise 2.2 returns as cross-validation and the rule that every data-driven choice belongs inside the loop. The simulation skill of this chapter is the bridge throughout: set a known truth, generate data around it, and observe what the analysis recovers.
+
+Two questions should precede every real measurement: *has the true experimental unit been identified, and are there enough of them to detect the effect of interest?* For a data-driven study a third joins them: *where will the independent data come from?* Answering these in advance is what makes a post mortem unnecessary.

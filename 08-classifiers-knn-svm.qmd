@@ -279,7 +279,7 @@ legend("topright", c("hinge (SVM)", "logistic", "0-1 (misclassification)"), bty 
 **KEY** — Both losses are convex stand-ins for the misclassification count, which cannot be optimised directly. The hinge loss is exactly zero beyond the margin: points classified correctly with room to spare have no influence at all. That is the loss-function view of "only support vectors matter".
 :::
 
-Seen this way, the SVM can be fitted by the gradient descent of Day 3. The hinge has a kink at 1, so one uses a *subgradient*: a point inside the margin contributes $-y_i\mathbf{x}_i$, any other point contributes nothing.
+Seen this way, the SVM can be fitted by the gradient descent of Appendix B. The hinge has a kink at 1, so one uses a *subgradient*: a point inside the margin contributes $-y_i\mathbf{x}_i$, any other point contributes nothing.
 
 ```{r svm-subgradient}
 library(e1071)

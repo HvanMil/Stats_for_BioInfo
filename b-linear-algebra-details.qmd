@@ -1,0 +1,330 @@
+# Linear algebra: definitions, proofs and algorithms {#sec-la-details}
+
+This appendix gives the formal side of [Chapter 3](03-linear-algebra.qmd). The chapter builds intuition from pictures; here the same ideas are stated as definitions and theorems, a few are proved, and the algorithms that software uses are written out in R. The numbering (Definition B.1, Theorem B.2, …) is for reference.
+
+## Norms and inner products
+
+::: {.callout-note title="Definition B.1 — Norm"}
+A **norm** on $\mathbb{R}^p$ is a function $\mathbf{x} \mapsto \lVert\mathbf{x}\rVert$ with, for all vectors $\mathbf{x}, \mathbf{y}$ and numbers $c$:
+
+1. $\lVert\mathbf{x}\rVert \ge 0$, with equality only for $\mathbf{x} = \mathbf{0}$ (*positivity*);
+2. $\lVert c\,\mathbf{x}\rVert = |c|\,\lVert\mathbf{x}\rVert$ (*scaling*);
+3. $\lVert\mathbf{x} + \mathbf{y}\rVert \le \lVert\mathbf{x}\rVert + \lVert\mathbf{y}\rVert$ (*triangle inequality*).
+:::
+
+The **Lp norms** $\lVert\mathbf{x}\rVert_p = \big(\sum_j |x_j|^p\big)^{1/p}$ satisfy these rules for $p \ge 1$, and $\lVert\mathbf{x}\rVert_\infty = \max_j |x_j|$ is the limit as $p \to \infty$. For $0 < p < 1$ the triangle inequality fails: the "unit ball" is no longer convex, which is why the lasso uses $p = 1$, the smallest $p$ that still gives a norm.
+
+::: {.callout-note title="Theorem B.2 — Comparing norms"}
+For every $\mathbf{x} \in \mathbb{R}^p$,
+$$
+\lVert\mathbf{x}\rVert_\infty \le \lVert\mathbf{x}\rVert_2 \le \lVert\mathbf{x}\rVert_1 \le \sqrt{p}\,\lVert\mathbf{x}\rVert_2 .
+$$
+:::
+
+*Proof.* The first inequality holds because $\max_j x_j^2 \le \sum_j x_j^2$. For the second, $\big(\sum_j |x_j|\big)^2 = \sum_j x_j^2 + \sum_{j \ne k} |x_j||x_k| \ge \sum_j x_j^2$. The third is the Cauchy–Schwarz inequality (Theorem B.4) applied to $(|x_1|, \dots, |x_p|)$ and $(1, \dots, 1)$. $\square$
+
+In the pictures: the square contains the circle, which contains the diamond.
+
+::: {.callout-note title="Definition B.3 — Inner product"}
+An **inner product** on $\mathbb{R}^p$ is a function $\langle\mathbf{x}, \mathbf{y}\rangle$ that is
+
+1. *symmetric*: $\langle\mathbf{x}, \mathbf{y}\rangle = \langle\mathbf{y}, \mathbf{x}\rangle$;
+2. *linear* in each argument: $\langle c\mathbf{x} + \mathbf{z}, \mathbf{y}\rangle = c\langle\mathbf{x}, \mathbf{y}\rangle + \langle\mathbf{z}, \mathbf{y}\rangle$;
+3. *positive definite*: $\langle\mathbf{x}, \mathbf{x}\rangle > 0$ for $\mathbf{x} \ne \mathbf{0}$.
+
+Every inner product defines a norm, $\lVert\mathbf{x}\rVert = \sqrt{\langle\mathbf{x}, \mathbf{x}\rangle}$. The standard inner product is $\mathbf{x}^\top\mathbf{y}$.
+:::
+
+The L2 norm comes from an inner product; the L1 and L∞ norms do not. That is why only L2 has angles and projections.
+
+::: {.callout-note title="Theorem B.4 — Cauchy–Schwarz inequality"}
+For every inner product, $|\langle\mathbf{x}, \mathbf{y}\rangle| \le \lVert\mathbf{x}\rVert\,\lVert\mathbf{y}\rVert$, with equality exactly when one vector is a multiple of the other.
+:::
+
+*Proof.* If $\mathbf{y} = \mathbf{0}$ both sides are zero. Otherwise, for every number $t$,
+$$
+0 \le \lVert\mathbf{x} - t\mathbf{y}\rVert^2 = \lVert\mathbf{x}\rVert^2 - 2t\langle\mathbf{x}, \mathbf{y}\rangle + t^2\lVert\mathbf{y}\rVert^2 .
+$$
+Choose $t = \langle\mathbf{x}, \mathbf{y}\rangle / \lVert\mathbf{y}\rVert^2$, the coefficient of the projection of $\mathbf{x}$ onto $\mathbf{y}$. Then the right-hand side is $\lVert\mathbf{x}\rVert^2 - \langle\mathbf{x}, \mathbf{y}\rangle^2 / \lVert\mathbf{y}\rVert^2$, and rearranging gives the inequality. Equality means $\mathbf{x} - t\mathbf{y} = \mathbf{0}$. $\square$
+
+The proof is the picture of the shadow: the residual of a projection has non-negative length. The theorem guarantees that $\cos\theta = \langle\mathbf{x}, \mathbf{y}\rangle / (\lVert\mathbf{x}\rVert\lVert\mathbf{y}\rVert)$ lies between $-1$ and $1$, so angles, cosine similarities and correlations are well defined.
+
+::: {.callout-note title="Theorem B.5 — Triangle inequality"}
+For a norm that comes from an inner product, $\lVert\mathbf{x} + \mathbf{y}\rVert \le \lVert\mathbf{x}\rVert + \lVert\mathbf{y}\rVert$.
+:::
+
+*Proof.* $\lVert\mathbf{x} + \mathbf{y}\rVert^2 = \lVert\mathbf{x}\rVert^2 + 2\langle\mathbf{x}, \mathbf{y}\rangle + \lVert\mathbf{y}\rVert^2 \le \lVert\mathbf{x}\rVert^2 + 2\lVert\mathbf{x}\rVert\lVert\mathbf{y}\rVert + \lVert\mathbf{y}\rVert^2 = (\lVert\mathbf{x}\rVert + \lVert\mathbf{y}\rVert)^2$, using Cauchy–Schwarz. $\square$
+
+## The A-inner product
+
+::: {.callout-note title="Definition B.6 — Positive definite matrix"}
+A symmetric $p \times p$ matrix $\mathbf{A}$ is **positive definite** if $\mathbf{x}^\top\mathbf{A}\mathbf{x} > 0$ for every $\mathbf{x} \ne \mathbf{0}$, and **positive semi-definite** if $\mathbf{x}^\top\mathbf{A}\mathbf{x} \ge 0$.
+:::
+
+::: {.callout-note title="Theorem B.7 — The A-inner product"}
+If $\mathbf{A}$ is positive definite, then $\langle\mathbf{x}, \mathbf{y}\rangle_{\mathbf{A}} = \mathbf{x}^\top\mathbf{A}\mathbf{y}$ is an inner product. Conversely, every inner product on $\mathbb{R}^p$ has this form for some positive definite $\mathbf{A}$, namely $a_{jk} = \langle\mathbf{e}_j, \mathbf{e}_k\rangle$.
+:::
+
+*Proof.* Symmetry follows from $\mathbf{A}^\top = \mathbf{A}$, linearity from the rules of matrix multiplication, and positivity is the definition of positive definite. For the converse, write $\mathbf{x} = \sum_j x_j\mathbf{e}_j$ and $\mathbf{y} = \sum_k y_k\mathbf{e}_k$ and use linearity: $\langle\mathbf{x}, \mathbf{y}\rangle = \sum_{j,k} x_j y_k \langle\mathbf{e}_j, \mathbf{e}_k\rangle = \mathbf{x}^\top\mathbf{A}\mathbf{y}$. $\square$
+
+::: {.callout-note title="Theorem B.8 — Which matrices are positive definite"}
+For a symmetric matrix $\mathbf{A}$ the following are equivalent:
+
+1. $\mathbf{A}$ is positive definite;
+2. all eigenvalues of $\mathbf{A}$ are positive;
+3. $\mathbf{A} = \mathbf{M}^\top\mathbf{M}$ for some invertible matrix $\mathbf{M}$.
+
+For a $2 \times 2$ matrix, (1) holds exactly when $a_{11} > 0$ and $\det\mathbf{A} > 0$.
+:::
+
+*Proof sketch.* (3 ⇒ 1): $\mathbf{x}^\top\mathbf{M}^\top\mathbf{M}\mathbf{x} = \lVert\mathbf{M}\mathbf{x}\rVert^2 > 0$ for $\mathbf{x} \ne \mathbf{0}$, because $\mathbf{M}$ is invertible. (1 ⇒ 2): for a unit eigenvector, $\lambda = \mathbf{v}^\top\mathbf{A}\mathbf{v} > 0$. (2 ⇒ 3): with the spectral theorem (B.11), $\mathbf{A} = \mathbf{V}\boldsymbol\Lambda\mathbf{V}^\top$; take $\mathbf{M} = \boldsymbol\Lambda^{1/2}\mathbf{V}^\top$. $\square$
+
+The matrix $\mathbf{M}$ in (3) is not unique. Software uses the **Cholesky factorisation**, in which $\mathbf{M}$ is upper triangular; R computes it with `chol()`. The chapter's matrix $\mathbf{A} = \begin{bmatrix} 4 & 2 \\ 2 & 5 \end{bmatrix}$ has $a_{11} = 4 > 0$ and $\det\mathbf{A} = 16 > 0$, and its Cholesky factor is exactly the $\mathbf{M}$ of the chapter:
+
+```{r chol}
+A <- matrix(c(4, 2, 2, 5), 2)
+chol(A)
+eigen(A)$values
+```
+
+Consequences used in the course:
+
+- $\mathbf{X}^\top\mathbf{X}$ is always positive semi-definite, and positive definite exactly when the columns of $\mathbf{X}$ are linearly independent. Least squares has a unique solution precisely then.
+- $\mathbf{X}^\top\mathbf{X} + \lambda\mathbf{I}$ has eigenvalues $d_j^2 + \lambda > 0$, so it is positive definite for every $\lambda > 0$. That is why ridge regression always has a unique solution (Day 9).
+- A covariance matrix $\mathbf{S}$ is positive semi-definite, because $\mathbf{w}^\top\mathbf{S}\mathbf{w}$ is a variance. If it is positive definite, $\mathbf{S}^{-1}$ is too, and $\sqrt{(\mathbf{x} - \mathbf{y})^\top\mathbf{S}^{-1}(\mathbf{x} - \mathbf{y})}$ is the **Mahalanobis distance** (Day 5).
+
+## Projection
+
+::: {.callout-note title="Theorem B.9 — Projection onto a column space"}
+Let $\mathbf{X}$ be $n \times p$ with linearly independent columns. For every $\mathbf{y} \in \mathbb{R}^n$ there is exactly one vector $\hat{\mathbf{y}} = \mathbf{X}\hat{\boldsymbol\beta}$ in the column space of $\mathbf{X}$ that is closest to $\mathbf{y}$. It is characterised by the **normal equations**
+$$
+\mathbf{X}^\top(\mathbf{y} - \mathbf{X}\hat{\boldsymbol\beta}) = \mathbf{0}
+\quad\Longleftrightarrow\quad
+\hat{\boldsymbol\beta} = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y} .
+$$
+:::
+
+*Proof.* Let $\hat{\boldsymbol\beta}$ satisfy the normal equations and let $\mathbf{X}\boldsymbol\beta$ be any other point of the column space. The residual $\mathbf{r} = \mathbf{y} - \mathbf{X}\hat{\boldsymbol\beta}$ is perpendicular to every column, hence to $\mathbf{X}(\hat{\boldsymbol\beta} - \boldsymbol\beta)$. By Pythagoras,
+$$
+\lVert\mathbf{y} - \mathbf{X}\boldsymbol\beta\rVert^2 = \lVert\mathbf{r}\rVert^2 + \lVert\mathbf{X}(\hat{\boldsymbol\beta} - \boldsymbol\beta)\rVert^2 \ge \lVert\mathbf{r}\rVert^2 ,
+$$
+with equality only when $\mathbf{X}(\hat{\boldsymbol\beta} - \boldsymbol\beta) = \mathbf{0}$, that is $\boldsymbol\beta = \hat{\boldsymbol\beta}$. The matrix $\mathbf{X}^\top\mathbf{X}$ is invertible by Theorem B.8. $\square$
+
+The rest of this section uses a real regression to check the theory.
+
+```{r ols}
+fit <- lm(mpg ~ wt + hp, data = mtcars)
+X   <- model.matrix(fit)
+y   <- mtcars$mpg
+
+beta <- solve(t(X) %*% X, t(X) %*% y)
+cbind(by_hand = drop(beta), lm = coef(fit))
+round(t(X) %*% resid(fit), 8)   # the residuals are orthogonal to every column
+```
+
+### The hat matrix
+
+Substituting $\hat{\boldsymbol\beta}$ shows that the fitted values are a linear function of the observations:
+
+$$
+\hat{\mathbf{y}} = \underbrace{\mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top}_{\mathbf{H}}\,\mathbf{y} .
+$$
+
+::: {.callout-note title="Theorem B.10 — Properties of the hat matrix"}
+The **hat matrix** $\mathbf{H}$, the projection onto the column space of $\mathbf{X}$, satisfies
+
+1. $\mathbf{H}^\top = \mathbf{H}$ and $\mathbf{H}\mathbf{H} = \mathbf{H}$: projecting twice changes nothing;
+2. $\operatorname{tr}(\mathbf{H}) = p$, the number of columns;
+3. $0 \le h_{ii} \le 1$; the diagonal element $h_{ii}$ is the **leverage** of observation $i$, how strongly it determines its own fitted value.
+:::
+
+*Proof of 2.* Using $\operatorname{tr}(\mathbf{BC}) = \operatorname{tr}(\mathbf{CB})$: $\operatorname{tr}(\mathbf{H}) = \operatorname{tr}\big((\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{X}\big) = \operatorname{tr}(\mathbf{I}_p) = p$. $\square$
+
+```{r hat}
+H <- X %*% solve(t(X) %*% X) %*% t(X)
+c(trace        = sum(diag(H)),
+  HH_minus_H   = max(abs(H %*% H - H)),
+  vs_hatvalues = max(abs(diag(H) - hatvalues(fit))))
+```
+
+::: column-margin
+**↪** Day 6 uses $\operatorname{tr}(\mathbf{H}) = p$ to explain the penalty in AIC; Day 7 uses the leverages $h_{ii}$ for a shortcut to leave-one-out cross-validation; Day 9 uses the trace to define the *effective* degrees of freedom of ridge regression.
+:::
+
+### How `lm` computes: the QR decomposition
+
+The formula $(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}$ is how least squares is *derived*, not how it is *computed*. Forming $\mathbf{X}^\top\mathbf{X}$ squares the **condition number**, the ratio of the largest to the smallest singular value, which measures how strongly rounding errors are amplified.
+
+```{r kappa}
+c(kappa_X = kappa(X, exact = TRUE), kappa_XtX = kappa(t(X) %*% X, exact = TRUE))
+```
+
+`lm` factorises $\mathbf{X} = \mathbf{Q}\mathbf{R}$, with orthonormal columns in $\mathbf{Q}$ and an upper-triangular $\mathbf{R}$. The normal equations then collapse to
+
+$$
+\mathbf{R}^\top\mathbf{R}\hat{\boldsymbol\beta} = \mathbf{R}^\top\mathbf{Q}^\top\mathbf{y}
+\;\Longrightarrow\;
+\mathbf{R}\hat{\boldsymbol\beta} = \mathbf{Q}^\top\mathbf{y} ,
+$$
+
+a triangular system solved by back-substitution. The **Gram–Schmidt** algorithm builds $\mathbf{Q}$ one column at a time with the projections of Chapter 3: from each column of $\mathbf{X}$, subtract its shadows on the columns already processed, then scale what is left to length one.
+
+```{r gram-schmidt}
+gram_schmidt <- function(X) {
+  Q <- X
+  R <- matrix(0, ncol(X), ncol(X))
+  for (j in seq_len(ncol(X))) {
+    v <- X[, j]
+    for (i in seq_len(j - 1)) {
+      R[i, j] <- sum(Q[, i] * v)        # shadow on an earlier direction
+      v <- v - R[i, j] * Q[, i]         # remove that projection
+    }
+    R[j, j] <- sqrt(sum(v^2))
+    Q[, j]  <- v / R[j, j]              # normalise the residual
+  }
+  list(Q = Q, R = R)
+}
+
+qr_X <- gram_schmidt(X)
+round(t(qr_X$Q) %*% qr_X$Q, 10)       # orthonormal columns
+cbind(qr = drop(backsolve(qr_X$R, t(qr_X$Q) %*% y)), lm = coef(fit))
+```
+
+::: column-margin
+**DEF** — Column $j$ of $\mathbf{Q}$ is the residual of predictor $j$ after projecting onto the earlier predictors. That is why a regression coefficient measures the effect of a predictor *after adjusting for the others*.
+:::
+
+Production code uses Householder reflections, a numerically more stable route to the same factorisation.
+
+### Least squares by gradient descent
+
+A third route needs no factorisation, and it is the route machine learning takes when a problem has no formula. The residual sum of squares $\text{RSS}(\boldsymbol\beta) = \lVert\mathbf{y} - \mathbf{X}\boldsymbol\beta\rVert^2$ has gradient $-2\,\mathbf{X}^\top(\mathbf{y} - \mathbf{X}\boldsymbol\beta)$, and **gradient descent** repeatedly takes a small step downhill:
+
+$$
+\boldsymbol\beta \leftarrow \boldsymbol\beta + \eta\,\mathbf{X}^\top(\mathbf{y} - \mathbf{X}\boldsymbol\beta).
+$$
+
+The iteration converges only if $\eta < 2/\lambda_{\max}$, with $\lambda_{\max}$ the largest eigenvalue of $\mathbf{X}^\top\mathbf{X}$, and it converges slowly when the eigenvalues are very unequal, that is when the RSS ellipses of Chapter 3 are long and narrow.
+
+```{r gradient-descent}
+Zs <- cbind(1, scale(mtcars[, c("wt", "hp")]))    # standardised predictors
+
+grad_descent <- function(Z, y, eta, iters) {
+  b <- rep(0, ncol(Z))
+  for (i in seq_len(iters)) b <- b + eta * drop(t(Z) %*% (y - Z %*% b))
+  b
+}
+l_max <- max(eigen(t(Zs) %*% Zs)$values)
+
+rbind(after_10    = grad_descent(Zs, y, 1 / l_max, 10),
+      after_200   = grad_descent(Zs, y, 1 / l_max, 200),
+      exact       = coef(lm(y ~ Zs - 1)),
+      eta_too_big = grad_descent(Zs, y, 2.1 / l_max, 50))
+```
+
+With a suitable step the iteration reaches the least-squares solution; with a step slightly too large it diverges. Standardising the predictors makes the eigenvalues more equal and the ellipses rounder, which speeds convergence: one reason machine-learning methods so often require scaled inputs.
+
+::: column-margin
+**↪** Day 6 fits logistic regression with Newton's method, a close relative. Day 11 shows that boosting is gradient descent in a space of functions.
+:::
+
+## Symmetric matrices and eigenvectors
+
+::: {.callout-note title="Theorem B.11 — Spectral theorem"}
+A real symmetric matrix $\mathbf{S}$ has real eigenvalues, and its eigenvectors can be chosen perpendicular and of unit length. With the eigenvectors as the columns of $\mathbf{V}$ and the eigenvalues on the diagonal of $\boldsymbol\Lambda$,
+$$
+\mathbf{S} = \mathbf{V}\boldsymbol\Lambda\mathbf{V}^\top, \qquad \mathbf{V}^\top\mathbf{V} = \mathbf{I} .
+$$
+:::
+
+*Why the eigenvectors are perpendicular.* If $\mathbf{S}\mathbf{v}_1 = \lambda_1\mathbf{v}_1$ and $\mathbf{S}\mathbf{v}_2 = \lambda_2\mathbf{v}_2$ with $\lambda_1 \ne \lambda_2$, then
+$\lambda_1\mathbf{v}_1^\top\mathbf{v}_2 = (\mathbf{S}\mathbf{v}_1)^\top\mathbf{v}_2 = \mathbf{v}_1^\top\mathbf{S}\mathbf{v}_2 = \lambda_2\mathbf{v}_1^\top\mathbf{v}_2$, so $(\lambda_1 - \lambda_2)\,\mathbf{v}_1^\top\mathbf{v}_2 = 0$ and $\mathbf{v}_1^\top\mathbf{v}_2 = 0$. $\square$
+
+For a $2 \times 2$ matrix the eigenvalues solve the characteristic equation $\lambda^2 - \operatorname{tr}(\mathbf{A})\lambda + \det(\mathbf{A}) = 0$. For the chapter's $\mathbf{A}$ this is $\lambda^2 - 9\lambda + 16 = 0$, so $\lambda = (9 \pm \sqrt{17})/2 \approx 6.56$ and $2.44$.
+
+::: {.callout-note title="Theorem B.12 — Eigenvectors maximise variance (Rayleigh quotient)"}
+Let $\mathbf{S}$ be symmetric with eigenvalues $\lambda_1 \ge \dots \ge \lambda_p$. Over all unit vectors $\mathbf{w}$,
+$$
+\max_{\lVert\mathbf{w}\rVert = 1} \mathbf{w}^\top\mathbf{S}\mathbf{w} = \lambda_1 ,
+\qquad
+\min_{\lVert\mathbf{w}\rVert = 1} \mathbf{w}^\top\mathbf{S}\mathbf{w} = \lambda_p ,
+$$
+attained at the corresponding eigenvectors.
+:::
+
+*Proof.* Write $\mathbf{w} = \sum_j c_j\mathbf{v}_j$ in the orthonormal eigenvector basis; then $\sum_j c_j^2 = 1$ and $\mathbf{w}^\top\mathbf{S}\mathbf{w} = \sum_j \lambda_j c_j^2$, a weighted average of the eigenvalues. A weighted average is at most the largest and at least the smallest value, with equality when all weight is on one eigenvector. $\square$
+
+This is the variance-as-the-direction-turns curve of Chapter 3, and the theorem behind PCA (Day 4).
+
+```{r eig-cov}
+Xc <- scale(as.matrix(iris[, 1:4]), center = TRUE, scale = FALSE)
+S  <- t(Xc) %*% Xc / (nrow(Xc) - 1)
+e  <- eigen(S)
+Z  <- Xc %*% e$vectors           # rotate the data onto the eigenvectors
+
+round(cov(Z), 4)                 # the covariances have gone
+c(trace = sum(diag(S)), sum_eigenvalues = sum(e$values))
+```
+
+### Computing eigenvectors: power iteration
+
+The characteristic equation is a hand method for $2 \times 2$ matrices. For twenty thousand genes software works iteratively. The simplest algorithm is **power iteration**: start from any vector, multiply by $\mathbf{S}$, rescale to length one, and repeat. Writing the start as $\mathbf{v} = c_1\mathbf{v}_1 + \dots + c_p\mathbf{v}_p$,
+
+$$
+\mathbf{S}^t\mathbf{v} = \lambda_1^t\Big(c_1\mathbf{v}_1 + c_2\big(\tfrac{\lambda_2}{\lambda_1}\big)^t\mathbf{v}_2 + \dots\Big),
+$$
+
+and since $\lambda_2/\lambda_1 < 1$, every term except the first dies out. In the picture of Chapter 3: each multiplication turns every direction a little further towards the long axis of the ellipse.
+
+```{r power-iteration}
+power_iteration <- function(S, iters = 100) {
+  v <- rep(1, ncol(S)) / sqrt(ncol(S))
+  for (i in seq_len(iters)) {
+    v <- S %*% v
+    v <- v / sqrt(sum(v^2))
+  }
+  list(vector = drop(v), value = drop(t(v) %*% S %*% v))
+}
+
+p1 <- power_iteration(S)
+rbind(power_iteration = c(p1$value, p1$vector),
+      eigen           = c(e$values[1], e$vectors[, 1]))
+```
+
+The first column is the eigenvalue, the others the eigenvector (a sign flip would describe the same direction). The next eigenvector is found by **deflation**: remove the direction just found, and iterate again.
+
+```{r deflation}
+S_deflated <- S - p1$value * p1$vector %*% t(p1$vector)
+c(power_iteration = power_iteration(S_deflated)$value, eigen = e$values[2])
+```
+
+::: column-margin
+**KEY** — The leading eigenvector of a covariance matrix can be found with nothing but repeated matrix–vector multiplication. That is why PCA remains feasible on very large data.
+:::
+
+## The singular value decomposition
+
+::: {.callout-note title="Theorem B.13 — Singular value decomposition"}
+Every $n \times p$ matrix $\mathbf{X}$ can be written as $\mathbf{X} = \mathbf{U}\mathbf{D}\mathbf{V}^\top$, with $\mathbf{U}$ ($n \times r$) and $\mathbf{V}$ ($p \times r$) having orthonormal columns and $\mathbf{D}$ diagonal with $d_1 \ge \dots \ge d_r > 0$. Then $\mathbf{X}^\top\mathbf{X} = \mathbf{V}\mathbf{D}^2\mathbf{V}^\top$: the columns of $\mathbf{V}$ are its eigenvectors and the $d_j^2$ its non-zero eigenvalues.
+:::
+
+::: {.callout-note title="Theorem B.14 — Ridge regression in SVD coordinates"}
+With $\mathbf{X} = \mathbf{U}\mathbf{D}\mathbf{V}^\top$, the ridge fit is
+$$
+\hat{\mathbf{y}}_\lambda = \mathbf{X}(\mathbf{X}^\top\mathbf{X} + \lambda\mathbf{I})^{-1}\mathbf{X}^\top\mathbf{y} = \sum_j \mathbf{u}_j\,\frac{d_j^2}{d_j^2 + \lambda}\,\mathbf{u}_j^\top\mathbf{y} .
+$$
+For $\lambda = 0$ this is the least-squares projection. The **effective degrees of freedom** are $\operatorname{tr}(\mathbf{H}_\lambda) = \sum_j d_j^2/(d_j^2 + \lambda)$.
+:::
+
+*Proof.* $\mathbf{X}^\top\mathbf{X} + \lambda\mathbf{I} = \mathbf{V}(\mathbf{D}^2 + \lambda\mathbf{I})\mathbf{V}^\top$ (for $p \le n$ with full rank, $\mathbf{V}$ square), whose inverse is $\mathbf{V}(\mathbf{D}^2 + \lambda\mathbf{I})^{-1}\mathbf{V}^\top$. Multiply out: $\mathbf{U}\mathbf{D}\mathbf{V}^\top\mathbf{V}(\mathbf{D}^2 + \lambda\mathbf{I})^{-1}\mathbf{V}^\top\mathbf{V}\mathbf{D}\mathbf{U}^\top = \mathbf{U}\,\mathbf{D}^2(\mathbf{D}^2 + \lambda\mathbf{I})^{-1}\,\mathbf{U}^\top$. $\square$
+
+```{r ridge-svd}
+Xs <- scale(mtcars[, c("wt", "hp", "disp")]); yc <- mtcars$mpg - mean(mtcars$mpg)
+s  <- svd(Xs); lambda <- 5
+H_ridge <- Xs %*% solve(t(Xs) %*% Xs + lambda * diag(3)) %*% t(Xs)
+c(df_trace = sum(diag(H_ridge)), df_svd = sum(s$d^2 / (s$d^2 + lambda)))
+```
+
+## Further reading
+
+Deisenroth, Faisal and Ong, *Mathematics for Machine Learning* (Cambridge University Press, 2020), Chapters 2 to 4, cover this material in more depth and are freely available online. Strang, *Introduction to Linear Algebra*, is a good reference for the geometric view.

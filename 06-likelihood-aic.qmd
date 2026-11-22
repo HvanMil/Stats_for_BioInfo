@@ -209,7 +209,7 @@ which is the formula for a *weighted* least-squares regression of $\mathbf{z}$ o
 
 #### Why not plain gradient ascent?
 
-Day 3 introduced gradient descent. Here it would climb instead: $\boldsymbol\beta \leftarrow \boldsymbol\beta + \eta\,\mathbf{X}^\top(\mathbf{y} - \mathbf{p})$. Since $p_i(1-p_i) \le \tfrac14$, the curvature is never larger than $\lambda_{\max}(\mathbf{X}^\top\mathbf{X})/4$, and a step size of $\eta = 4/\lambda_{\max}$ is guaranteed to converge.
+Appendix B introduces gradient descent for least squares. Here it would climb instead: $\boldsymbol\beta \leftarrow \boldsymbol\beta + \eta\,\mathbf{X}^\top(\mathbf{y} - \mathbf{p})$. Since $p_i(1-p_i) \le \tfrac14$, the curvature is never larger than $\lambda_{\max}(\mathbf{X}^\top\mathbf{X})/4$, and a step size of $\eta = 4/\lambda_{\max}$ is guaranteed to converge.
 
 ```{r gradient-ascent}
 eta  <- 4 / max(eigen(t(X) %*% X)$values)
@@ -231,33 +231,31 @@ Gradient ascent reaches the same answer in the end, but after seven iterations i
 **⚠** If a predictor separates the two classes perfectly, the likelihood keeps rising as $\beta \to \infty$ and `glm` warns that fitted probabilities of 0 or 1 occurred. With more genes than samples this is almost guaranteed. Day 9 provides the remedy.
 :::
 
-### The same model in Python
+### Not every fit maximises the likelihood
 
-A popular Python library shows why it pays to know what is being maximised.
+Software defaults do not always do what their names suggest. A widely used Python library, scikit-learn, fits logistic regression *with a penalty* unless told otherwise: it maximises the log-likelihood minus $\tfrac{1}{2}\lVert\boldsymbol\beta\rVert^2$, with the intercept left unpenalised. That objective is easy to write down in R and maximise with `optim`, which also shows what the penalty does.
 
-```{r py-export}
-logit_dat <- dat[, c("cpg1", "cpg2", "cpg3", "tumour")]
+```{r penalised-logit}
+X_mat <- cbind(1, as.matrix(dat[, c("cpg1", "cpg2", "cpg3")]))
+penalised_loglik <- function(beta, lambda) {
+  eta <- drop(X_mat %*% beta)
+  sum(dat$tumour * eta - log1p(exp(eta))) - lambda / 2 * sum(beta[-1]^2)
+}
+fit_penalised <- function(lambda)
+  optim(rep(0, 4), function(b) -penalised_loglik(b, lambda), method = "BFGS",
+        control = list(reltol = 1e-12))$par
+
+out <- cbind(glm               = coef(fit_glm),
+             lambda_0          = fit_penalised(0),
+             lambda_1_sklearn  = fit_penalised(1),
+             lambda_50         = fit_penalised(50))
+round(out, 3)
 ```
 
-```{python}
-import numpy as np
-from sklearn.linear_model import LogisticRegression
-
-d = r.logit_dat
-X = d[["cpg1", "cpg2", "cpg3"]].to_numpy()
-y = d["tumour"].to_numpy().astype(int)
-
-default = LogisticRegression().fit(X, y)
-unpenalised = LogisticRegression(C=1e10, max_iter=1000).fit(X, y)
-
-print("scikit-learn default:", np.round(default.coef_[0], 3))
-print("effectively no penalty:", np.round(unpenalised.coef_[0], 3))
-```
-
-The second line reproduces `glm`. The first does not, because scikit-learn adds a ridge penalty by default. Its default is not maximum likelihood.
+With $\lambda = 0$ the objective is the log-likelihood, and the result is that of `glm`. With $\lambda = 1$, scikit-learn's default, the slopes are pulled slightly towards zero; with 400 samples the effect is small, but with fewer samples or more predictors it is not. With $\lambda = 50$ the shrinkage is obvious. A penalised fit is not wrong, but it is not maximum likelihood, and its coefficients, standard errors and AIC must not be read as if it were.
 
 ::: column-margin
-**↪** Day 9 explains what that penalty does.
+**↪** Day 9 explains what the penalty does and how $\lambda$ is chosen.
 :::
 
 ### Two routes to a linear boundary
@@ -400,7 +398,7 @@ The optimism, the gap between $-2\ell$ on new data and on the training data, is 
 
 ### Where the $2k$ comes from
 
-For the linear model the size of the optimism can be derived exactly, with the hat matrix of Day 3. Suppose the model is correct, $\mathbf{y} = \boldsymbol\mu + \boldsymbol\varepsilon$ with $\boldsymbol\mu = \mathbf{X}\boldsymbol\beta$, and $\sigma^2$ is known. The fitted values are $\hat{\mathbf{y}} = \mathbf{H}\mathbf{y}$, and because $\mathbf{H}\boldsymbol\mu = \boldsymbol\mu$,
+For the linear model the size of the optimism can be derived exactly, with the hat matrix of Appendix B. Suppose the model is correct, $\mathbf{y} = \boldsymbol\mu + \boldsymbol\varepsilon$ with $\boldsymbol\mu = \mathbf{X}\boldsymbol\beta$, and $\sigma^2$ is known. The fitted values are $\hat{\mathbf{y}} = \mathbf{H}\mathbf{y}$, and because $\mathbf{H}\boldsymbol\mu = \boldsymbol\mu$,
 
 $$
 \hat{\mathbf{y}} - \boldsymbol\mu = \mathbf{H}\boldsymbol\varepsilon,

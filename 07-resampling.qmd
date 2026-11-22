@@ -1037,7 +1037,7 @@ right amount. The shortcut is specific to linear models fitted by least squares;
 for anything else the $n$ fits must actually be performed.
 
 ::: {.callout-note collapse="true" title="Why the shortcut is exact"}
-Write $\hat y_{(i)}$ for the prediction of observation $i$ from the model fitted *without* it, and recall from Day 3 that the fitted values are $\hat{\mathbf{y}} = \mathbf{H}\mathbf{y}$, so that $\hat y_i = \sum_j h_{ij}\,y_j$.
+Write $\hat y_{(i)}$ for the prediction of observation $i$ from the model fitted *without* it, and recall from Appendix B that the fitted values are $\hat{\mathbf{y}} = \mathbf{H}\mathbf{y}$, so that $\hat y_i = \sum_j h_{ij}\,y_j$.
 
 Now imagine replacing the observed $y_i$ by $\hat y_{(i)}$ and refitting on all $n$ points. The new point lies exactly on the leave-one-out line, so it adds nothing to that line's sum of squares: the leave-one-out fit is also the least-squares fit of the modified data. Applying the hat matrix to the modified data therefore returns $\hat y_{(i)}$ itself:
 
@@ -1305,6 +1305,10 @@ has used up the held-out data, which is therefore no longer held out.
 **⚠** Any choice informed by the data is part of the modelling procedure —
 tuning parameters, variable screening, and the choice of transformation
 included. All of it must sit inside the loop whose error is being estimated.
+:::
+
+::: {.column-margin}
+**↪** Exercise 2.2 (Day 2) showed the extreme case: selecting genes on all samples before splitting gave 94% accuracy on labels that carried no information.
 :::
 
 ### The nested scheme

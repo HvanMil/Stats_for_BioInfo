@@ -33,6 +33,10 @@ Notice what is missing from today's methods compared to the models of Day 1: the
 **KEY** A clustering algorithm always returns clusters, meaningful or not. The output is a proposal, not a test result.
 :::
 
+::: column-margin
+**↪** Exercise 2.1 (Day 2): clusters found in pure noise, "confirmed" by *t*-tests on the same data, and the honest check on a validation half.
+:::
+
 ## Distance
 
 ### Distance between two points in space

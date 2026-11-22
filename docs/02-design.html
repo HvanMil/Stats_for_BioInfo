@@ -54,7 +54,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -178,13 +198,13 @@ window.Quarto = {
 </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
  <span class="menu-text">Day 1. Why statistics?</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./01-why-statistics.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Why statistics?</span></a>
@@ -220,29 +240,29 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
  <span class="menu-text">Day 3. Linear algebra</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./03-linear-algebra.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear algebra refresher</span></a>
+  <a href="./03-linear-algebra.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear algebra: the geometry of data</span></a>
   </div>
 </li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
  <span class="menu-text">Day 4. Directions</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04-pca.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Principal component analysis</span></a>
@@ -252,13 +272,13 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
  <span class="menu-text">Day 5. Groups</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./05-clustering.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Cluster analysis</span></a>
@@ -268,13 +288,13 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
  <span class="menu-text">Day 6. Likelihood</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06-likelihood-aic.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Likelihood, information and AIC</span></a>
@@ -284,13 +304,13 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
  <span class="menu-text">Day 7. Resampling</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./07-resampling.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Resampling: The Bootstrap and Cross-Validation</span></a>
@@ -300,13 +320,13 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
  <span class="menu-text">Day 8. Classifiers</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./08-classifiers-knn-svm.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Evaluating classifiers, KNN and SVM</span></a>
@@ -316,13 +336,13 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
  <span class="menu-text">Day 9. Regularisation</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./09-regularisation.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Regularisation</span></a>
@@ -332,13 +352,13 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false">
  <span class="menu-text">Day 10. Trees</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./10-trees-forests.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Trees, bagging and random forests</span></a>
@@ -348,13 +368,13 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false">
  <span class="menu-text">Day 11. Boosting</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./11-boosting-comparison.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Boosting and an honest comparison</span></a>
@@ -370,61 +390,49 @@ window.Quarto = {
 </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
  <span class="menu-text">Appendices</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./a-linear-models.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear models: a worked reference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./b-linear-algebra-details.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear algebra: definitions, proofs and algorithms</span></a>
   </div>
 </li>
       </ul>
   </li>
     </ul>
     </div>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
-<!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Table of contents</h2>
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
    
-  <ul>
+  <ul class="collapse">
   <li><a href="#obtaining-good-data-and-anticipating-what-will-go-wrong-before-it-does" id="toc-obtaining-good-data-and-anticipating-what-will-go-wrong-before-it-does" class="nav-link active" data-scroll-target="#obtaining-good-data-and-anticipating-what-will-go-wrong-before-it-does">Obtaining good data, and anticipating what will go wrong before it does</a></li>
   <li><a href="#where-this-chapter-fits" id="toc-where-this-chapter-fits" class="nav-link" data-scroll-target="#where-this-chapter-fits">Where this chapter fits</a></li>
+  <li><a href="#three-kinds-of-question" id="toc-three-kinds-of-question" class="nav-link" data-scroll-target="#three-kinds-of-question">Three kinds of question</a></li>
   <li><a href="#from-data-to-facts" id="toc-from-data-to-facts" class="nav-link" data-scroll-target="#from-data-to-facts">From data to facts</a></li>
   <li><a href="#a-model-is-where-experimental-design-begins" id="toc-a-model-is-where-experimental-design-begins" class="nav-link" data-scroll-target="#a-model-is-where-experimental-design-begins">A model is where experimental design begins</a></li>
   <li><a href="#where-does-the-variation-come-from" id="toc-where-does-the-variation-come-from" class="nav-link" data-scroll-target="#where-does-the-variation-come-from">Where does the variation come from?</a></li>
   <li><a href="#what-must-be-considered-before-starting" id="toc-what-must-be-considered-before-starting" class="nav-link" data-scroll-target="#what-must-be-considered-before-starting">What must be considered before starting</a></li>
-  <li><a href="#the-four-levers-control-randomisation-replication-blocking" id="toc-the-four-levers-control-randomisation-replication-blocking" class="nav-link" data-scroll-target="#the-four-levers-control-randomisation-replication-blocking">The four levers: control, randomisation, replication, blocking</a>
-  <ul class="collapse">
-  <li><a href="#control" id="toc-control" class="nav-link" data-scroll-target="#control">Control</a></li>
-  <li><a href="#randomisation" id="toc-randomisation" class="nav-link" data-scroll-target="#randomisation">Randomisation</a></li>
-  <li><a href="#a-worked-picture-the-shaded-field" id="toc-a-worked-picture-the-shaded-field" class="nav-link" data-scroll-target="#a-worked-picture-the-shaded-field">A worked picture: the shaded field</a></li>
-  <li><a href="#unconscious-bias" id="toc-unconscious-bias" class="nav-link" data-scroll-target="#unconscious-bias">Unconscious bias</a></li>
-  <li><a href="#a-subtle-case-spatial-confounders" id="toc-a-subtle-case-spatial-confounders" class="nav-link" data-scroll-target="#a-subtle-case-spatial-confounders">A subtle case: spatial confounders</a></li>
-  <li><a href="#replication-and-the-experimental-unit" id="toc-replication-and-the-experimental-unit" class="nav-link" data-scroll-target="#replication-and-the-experimental-unit">Replication — and the experimental unit</a></li>
-  <li><a href="#blocking" id="toc-blocking" class="nav-link" data-scroll-target="#blocking">Blocking</a></li>
-  <li><a href="#integration-the-four-levers-as-one-strategy" id="toc-integration-the-four-levers-as-one-strategy" class="nav-link" data-scroll-target="#integration-the-four-levers-as-one-strategy">Integration: the four levers as one strategy</a></li>
-  </ul></li>
-  <li><a href="#type-i-and-type-ii-error-and-power" id="toc-type-i-and-type-ii-error-and-power" class="nav-link" data-scroll-target="#type-i-and-type-ii-error-and-power">Type I and type II error, and power</a>
-  <ul class="collapse">
-  <li><a href="#what-drives-power" id="toc-what-drives-power" class="nav-link" data-scroll-target="#what-drives-power">What drives power</a></li>
-  <li><a href="#power-as-overlapping-curves" id="toc-power-as-overlapping-curves" class="nav-link" data-scroll-target="#power-as-overlapping-curves">Power as overlapping curves</a></li>
-  <li><a href="#computing-power-in-r" id="toc-computing-power-in-r" class="nav-link" data-scroll-target="#computing-power-in-r">Computing power in R</a></li>
-  <li><a href="#where-the-required-sample-size-comes-from" id="toc-where-the-required-sample-size-comes-from" class="nav-link" data-scroll-target="#where-the-required-sample-size-comes-from">Where the required sample size comes from</a></li>
-  <li><a href="#power-without-a-formula-simulation" id="toc-power-without-a-formula-simulation" class="nav-link" data-scroll-target="#power-without-a-formula-simulation">Power without a formula: simulation</a></li>
-  <li><a href="#the-power-curve" id="toc-the-power-curve" class="nav-link" data-scroll-target="#the-power-curve">The power curve</a></li>
-  <li><a href="#integration-power-as-the-summary-of-design" id="toc-integration-power-as-the-summary-of-design" class="nav-link" data-scroll-target="#integration-power-as-the-summary-of-design">Integration: power as the summary of design</a></li>
-  </ul></li>
+  <li><a href="#the-four-levers-control-randomisation-replication-blocking" id="toc-the-four-levers-control-randomisation-replication-blocking" class="nav-link" data-scroll-target="#the-four-levers-control-randomisation-replication-blocking">The four levers: control, randomisation, replication, blocking</a></li>
+  <li><a href="#type-i-and-type-ii-error-and-power" id="toc-type-i-and-type-ii-error-and-power" class="nav-link" data-scroll-target="#type-i-and-type-ii-error-and-power">Type I and type II error, and power</a></li>
+  <li><a href="#sec-data-first" id="toc-sec-data-first" class="nav-link" data-scroll-target="#sec-data-first">When the data come first</a></li>
   <li><a href="#key-takeaways" id="toc-key-takeaways" class="nav-link" data-scroll-target="#key-takeaways">Key takeaways</a></li>
   <li><a href="#looking-ahead" id="toc-looking-ahead" class="nav-link" data-scroll-target="#looking-ahead">Looking ahead</a></li>
   </ul>
 </nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
 <main class="content page-columns page-full" id="quarto-document-content">
@@ -467,11 +475,93 @@ window.Quarto = {
 <p>Some of what follows may appear almost too simple. That is intentional. These “obvious” ideas are exactly the ones whose quiet violation produces the subtle failures that the remainder of the course is devoted to detecting and correcting.</p>
 <p>Four principles underlie the whole lecture:</p>
 <ul>
-<li>A statistical method is motivated by the hypothesis, not the reverse (but also see machine learning chapters).</li>
+<li>In confirmatory research the hypothesis chooses the method and the data. In exploratory research and in prediction the order is reversed, and the design must protect against that reversal.</li>
 <li>A good method or model yields an <strong>unambiguous</strong> decision about the hypothesis.</li>
 <li>Any statement about a hypothesis is a statement about random variables — a statement in terms of <em>probability</em>, never certainty.</li>
 <li>Errors propagate forward. A poor research question cannot be repaired by good statistics, and poor data cannot be repaired by a clever model.</li>
 </ul>
+</section>
+<section id="three-kinds-of-question" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="three-kinds-of-question">Three kinds of question</h2>
+<p>Before any design decision, one question has to be answered: <em>what kind of question is this study asking?</em> The course meets three kinds, and they differ in the order in which hypothesis and data arrive.</p>
+<ul>
+<li><strong>Confirming a hypothesis.</strong> The hypothesis comes first and chooses the data: what to measure, on whom, how many. The study ends with a test, and a well-designed, randomised study may say that the treatment <em>causes</em> the effect. This is the world of Day 1 and of most of this chapter.</li>
+<li><strong>Exploring data to generate hypotheses.</strong> The data come first, often measured on thousands of genes at once, and the analysis looks for structure: groups of patients, directions of variation, modules of co-expressed genes. What comes out is a <em>hypothesis</em>, not a conclusion. This is the world of PCA and clustering (Days 4 and 5).</li>
+<li><strong>Predicting an outcome.</strong> The aim is neither to test nor to explain, but to predict a label or a value for new cases: tumour or normal, responder or not. Success is measured by the error on cases the model has never seen, and nothing is claimed about mechanism. This is the world of Days 6 to 11.</li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — <strong>Hypothesis-driven</strong> (confirmatory) research lets the hypothesis select the data. <strong>Data-driven</strong> (exploratory) research lets the data select the hypothesis.</p>
+</div></div><div class="cell">
+<details class="code-fold">
+<summary>Code for the diagram</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>box <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y, label, <span class="at">fill =</span> <span class="st">"white"</span>, <span class="at">border =</span> <span class="st">"grey30"</span>) {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rect</span>(x <span class="sc">-</span> <span class="fl">0.7</span>, y <span class="sc">-</span> <span class="fl">0.28</span>, x <span class="sc">+</span> <span class="fl">0.7</span>, y <span class="sc">+</span> <span class="fl">0.28</span>, <span class="at">col =</span> fill, <span class="at">border =</span> border, <span class="at">lwd =</span> <span class="fl">1.5</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">text</span>(x, y, label, <span class="at">cex =</span> <span class="fl">0.8</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>chain <span class="ot">&lt;-</span> <span class="cf">function</span>(y, labels, fills, title) {</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  xs <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fl">1.5</span>, <span class="at">by =</span> <span class="fl">1.8</span>, <span class="at">length.out =</span> <span class="fu">length</span>(labels))</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">text</span>(<span class="dv">0</span>, y, title, <span class="at">adj =</span> <span class="dv">0</span>, <span class="at">font =</span> <span class="dv">2</span>, <span class="at">cex =</span> <span class="fl">0.85</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="fu">seq_along</span>(labels)) <span class="fu">box</span>(xs[k], y, labels[k], fills[k])</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(xs) <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="fu">arrows</span>(xs[<span class="sc">-</span><span class="fu">length</span>(xs)] <span class="sc">+</span> <span class="fl">0.72</span>, y, xs[<span class="sc">-</span><span class="dv">1</span>] <span class="sc">-</span> <span class="fl">0.72</span>, y, <span class="at">length =</span> <span class="fl">0.07</span>, <span class="at">lwd =</span> <span class="fl">1.5</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>new <span class="ot">&lt;-</span> <span class="st">"#F6D7C3"</span>; plain <span class="ot">&lt;-</span> <span class="st">"white"</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>))</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">9.6</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="fl">0.4</span>, <span class="fl">3.6</span>), <span class="at">axes =</span> <span class="cn">FALSE</span>, <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">chain</span>(<span class="fl">3.1</span>, <span class="fu">c</span>(<span class="st">"hypothesis"</span>, <span class="st">"design"</span>, <span class="st">"new data"</span>, <span class="st">"test"</span>), <span class="fu">c</span>(plain, plain, new, plain), <span class="st">"Confirm"</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">chain</span>(<span class="fl">2.0</span>, <span class="fu">c</span>(<span class="st">"data"</span>, <span class="st">"pattern"</span>, <span class="st">"hypothesis"</span>, <span class="st">"new data"</span>, <span class="st">"test"</span>), <span class="fu">c</span>(plain, plain, plain, new, plain), <span class="st">"Explore"</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">chain</span>(<span class="fl">0.9</span>, <span class="fu">c</span>(<span class="st">"data"</span>, <span class="st">"model"</span>, <span class="st">"new data"</span>, <span class="st">"error"</span>), <span class="fu">c</span>(plain, plain, new, plain), <span class="st">"Predict"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-three-questions" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-three-questions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="02-design_files/figure-html/fig-three-questions-1.png" class="img-fluid figure-img" width="816">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-three-questions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.1: Three kinds of question, read from left to right. The orange box marks where data that played no part in forming the hypothesis or building the model enter. In confirmatory research these are the data of the study itself, because the hypothesis was fixed beforehand. In exploration and prediction they have to be new data, and that has to be designed in.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The diagram shows why the distinction matters for design. A <em>p</em>-value, a confidence interval or an error rate is only honest when it is computed on data that played no part in choosing what is being tested. In confirmatory research this is guaranteed by the order of events: the hypothesis was fixed before the data existed. In exploration and prediction the order is reversed. A pattern found in a data set will always look convincing <em>in that data set</em>, because that is why it was found. The independent data have to come from somewhere else, and that “somewhere else” must be planned before the study starts.</p>
+<p>The three kinds of question also license different claims. A randomised experiment may claim a cause; an exploratory analysis may claim only that something is worth testing; a predictive model may claim an error rate on a stated population, and nothing about why it works <span class="citation" data-cites="Shmueli2010 Breiman2001">(<a href="references.html#ref-Shmueli2010" role="doc-biblioref">Shmueli 2010</a>; <a href="references.html#ref-Breiman2001" role="doc-biblioref">Breiman 2001</a>)</span>.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — A hypothesis cannot be tested on the data that suggested it. Exploration and prediction are as dependent on design as a confirmatory test; the design simply has to provide something else.</p>
+</div></div><p>Most of this chapter treats the confirmatory case, because its vocabulary (experimental unit, randomisation, blocking, power) is needed for everything else. The section <a href="#sec-data-first">When the data come first</a> then shows what changes, and what does not, when the data come before the hypothesis.</p>
+<div class="callout callout-style-default callout-caution callout-titled" title="Check yourself">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check yourself
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Classify each study as confirmatory, exploratory or predictive. (a) RNA-seq of 200 breast tumours, to find out whether there are subtypes not yet described. (b) A randomised trial of a drug against placebo, with blood pressure after eight weeks as the outcome. (c) A model that uses methylation at 500 CpG sites to tell whether a biopsy contains tumour cells.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Answer">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="a">
+<li>is exploratory: the subtypes are the result, and they are hypotheses until confirmed in other tumours. (b) is confirmatory: the hypothesis was fixed in advance, the treatment is randomised, and the trial ends in a test. (c) is predictive: the question is how often the model is right on new biopsies, not which CpG sites cause cancer. Real projects often combine the three; the design must say which part answers which kind of question.</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+</div>
 </section>
 <section id="from-data-to-facts" class="level2">
 <h2 class="anchored" data-anchor-id="from-data-to-facts">From data to facts</h2>
@@ -489,7 +579,7 @@ window.Quarto = {
 </section>
 <section id="a-model-is-where-experimental-design-begins" class="level2">
 <h2 class="anchored" data-anchor-id="a-model-is-where-experimental-design-begins">A model is where experimental design begins</h2>
-<p>The idea that connects this lecture to the first one is the following: before any pipette or field is touched, the hypothesis of interest is translated into a model to be fitted. For a study of blood pressure, for example:</p>
+<p>For a confirmatory study, the idea that connects this lecture to the first one is the following: before any pipette or field is touched, the hypothesis of interest is translated into a model to be fitted. For a study of blood pressure, for example:</p>
 <p><span class="math display">\[\text{Bloodpressure} \sim \text{Gender} + \text{Concentration} + \text{Time of day}\]</span></p>
 <p>This single line is already a design document. Read carefully, it conveys a surprising amount:</p>
 <ul>
@@ -578,7 +668,7 @@ window.Quarto = {
 <img src="Figs/field.png" class="img-fluid figure-img" style="width:70.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-field-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2.1: A systematic layout: treatments assigned in neat columns. The grey area is shade, which falls disproportionately on treatments 1 and 3.
+Figure&nbsp;2.2: A systematic layout: treatments assigned in neat columns. The grey area is shade, which falls disproportionately on treatments 1 and 3.
 </figcaption>
 </figure>
 </div>
@@ -589,7 +679,7 @@ Figure&nbsp;2.1: A systematic layout: treatments assigned in neat columns. The g
 <img src="Figs/fieldR.png" class="img-fluid figure-img" style="width:70.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-field-random-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2.2: The same field after randomising treatments to plots. The shade is now shared across all four treatments rather than confounded with two of them.
+Figure&nbsp;2.3: The same field after randomising treatments to plots. The shade is now shared across all four treatments rather than confounded with two of them.
 </figcaption>
 </figure>
 </div>
@@ -612,20 +702,20 @@ Figure&nbsp;2.2: The same field after randomising treatments to plots. The shade
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Code for plot below</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">234</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">50</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">50</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">1</span>))</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, y, <span class="at">col =</span> <span class="st">"blue"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">main =</span> <span class="st">"Points dropped 'at random'"</span>,</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, y, <span class="at">type =</span> <span class="st">"n"</span>, <span class="at">main =</span> <span class="st">"...but trees are not uniform"</span>,</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.5</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>), <span class="fu">c</span>(<span class="dv">10</span>, <span class="fl">8.2</span>, <span class="dv">8</span>, <span class="fl">9.3</span>, <span class="dv">10</span>), <span class="at">col =</span> <span class="st">"lightblue"</span>, <span class="at">lwd =</span> <span class="dv">1</span>)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(<span class="fl">5.4</span>, <span class="fl">6.0</span>, <span class="fl">6.1</span>, <span class="fl">5.8</span>), <span class="fu">c</span>(<span class="dv">3</span>, <span class="fl">3.3</span>, <span class="dv">4</span>, <span class="fl">3.8</span>), <span class="at">col =</span> <span class="st">"lightblue"</span>, <span class="at">lwd =</span> <span class="dv">1</span>)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(x, y, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">234</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">50</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">50</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">1</span>))</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, y, <span class="at">col =</span> <span class="st">"blue"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">main =</span> <span class="st">"Points dropped 'at random'"</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, y, <span class="at">type =</span> <span class="st">"n"</span>, <span class="at">main =</span> <span class="st">"...but trees are not uniform"</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.5</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>), <span class="fu">c</span>(<span class="dv">10</span>, <span class="fl">8.2</span>, <span class="dv">8</span>, <span class="fl">9.3</span>, <span class="dv">10</span>), <span class="at">col =</span> <span class="st">"lightblue"</span>, <span class="at">lwd =</span> <span class="dv">1</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(<span class="fl">5.4</span>, <span class="fl">6.0</span>, <span class="fl">6.1</span>, <span class="fl">5.8</span>), <span class="fu">c</span>(<span class="dv">3</span>, <span class="fl">3.3</span>, <span class="dv">4</span>, <span class="fl">3.8</span>), <span class="at">col =</span> <span class="st">"lightblue"</span>, <span class="at">lwd =</span> <span class="dv">1</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(x, y, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -636,7 +726,7 @@ Figure&nbsp;2.2: The same field after randomising treatments to plots. The shade
 </div>
 <details class="code-fold">
 <summary>Code for plot below</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>In the right-hand panel, a point landing near an isolated tree in the sparse regions selects that lone tree, while a point landing in a dense cluster is shared among many candidates; the isolated trees are therefore systematically over-selected.</p>
@@ -656,7 +746,7 @@ Figure&nbsp;2.2: The same field after randomising treatments to plots. The shade
 <img src="Figs/rats.png" class="img-fluid figure-img" style="width:70.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rats1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2.3: Case 1: each rat is individually injected with placebo (A) or vitamin C (B).
+Figure&nbsp;2.4: Case 1: each rat is individually injected with placebo (A) or vitamin C (B).
 </figcaption>
 </figure>
 </div>
@@ -667,7 +757,7 @@ Figure&nbsp;2.3: Case 1: each rat is individually injected with placebo (A) or v
 <img src="Figs/rats2.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rats2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2.4: Case 2: rats share a box, and each box receives one diet — water or water with vitamin C.
+Figure&nbsp;2.5: Case 2: rats share a box, and each box receives one diet — water or water with vitamin C.
 </figcaption>
 </figure>
 </div>
@@ -678,7 +768,7 @@ Figure&nbsp;2.4: Case 2: rats share a box, and each box receives one diet — wa
 <img src="Figs/rats3.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rats3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2.5: Case 3: two rat strains with known different baseline adrenaline levels.
+Figure&nbsp;2.6: Case 3: two rat strains with known different baseline adrenaline levels.
 </figcaption>
 </figure>
 </div>
@@ -689,7 +779,7 @@ Figure&nbsp;2.5: Case 3: two rat strains with known different baseline adrenalin
 <img src="Figs/rats4.png" class="img-fluid figure-img" style="width:70.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rats4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2.6: Case 4: each rat’s liver is chopped into six pieces for fat-content analysis.
+Figure&nbsp;2.7: Case 4: each rat’s liver is chopped into six pieces for fat-content analysis.
 </figcaption>
 </figure>
 </div>
@@ -704,38 +794,38 @@ Figure&nbsp;2.6: Case 4: each rat’s liver is chopped into six pieces for fat-c
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Plot generating code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">T1 =</span> <span class="st">"#7F77DD"</span>, <span class="at">T2 =</span> <span class="st">"#D85A30"</span>, <span class="at">T3 =</span> <span class="st">"#1D9E75"</span>, <span class="at">T4 =</span> <span class="st">"#BA7517"</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">5.2</span>), <span class="at">axes =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Randomised complete block: the same field, split along the shade"</span>)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># shade gradient: darker (less sun) on the left, fading to the right</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>ng <span class="ot">&lt;-</span> <span class="dv">100</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>ng) {</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rect</span>((i <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="dv">10</span> <span class="sc">/</span> ng, <span class="fl">0.4</span>, i <span class="sc">*</span> <span class="dv">10</span> <span class="sc">/</span> ng, <span class="fl">4.4</span>,</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.37</span>, <span class="fl">0.37</span>, <span class="fl">0.35</span>, <span class="fl">0.40</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> (i <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">/</span> ng)), <span class="at">border =</span> <span class="cn">NA</span>)</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">0.4</span>, <span class="fl">4.8</span>, <span class="st">"Less sun"</span>, <span class="at">adj =</span> <span class="dv">0</span>, <span class="at">cex =</span> <span class="fl">0.9</span>)</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">9.6</span>, <span class="fl">4.8</span>, <span class="st">"More sun"</span>, <span class="at">adj =</span> <span class="dv">1</span>, <span class="at">cex =</span> <span class="fl">0.9</span>)</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co"># the two blocks</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">4.8</span>, <span class="fl">4.3</span>, <span class="at">border =</span> <span class="st">"grey40"</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="fl">1.5</span>)</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="fl">5.2</span>, <span class="fl">0.5</span>, <span class="fl">9.8</span>, <span class="fl">4.3</span>, <span class="at">border =</span> <span class="st">"grey40"</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="fl">1.5</span>)</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">2.5</span>, <span class="fl">4.05</span>, <span class="st">"Block 1 (shaded)"</span>, <span class="at">font =</span> <span class="dv">2</span>, <span class="at">cex =</span> <span class="fl">0.95</span>)</span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">7.5</span>, <span class="fl">4.05</span>, <span class="st">"Block 2 (sunny)"</span>,  <span class="at">font =</span> <span class="dv">2</span>, <span class="at">cex =</span> <span class="fl">0.95</span>)</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co"># helper: draw one plot cell</span></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>cell <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y, tr) {</span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rect</span>(x, y, x <span class="sc">+</span> <span class="dv">2</span>, y <span class="sc">+</span> <span class="fl">1.4</span>, <span class="at">col =</span> cols[tr], <span class="at">border =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">text</span>(x <span class="sc">+</span> <span class="dv">1</span>, y <span class="sc">+</span> <span class="fl">0.7</span>, tr, <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">font =</span> <span class="dv">2</span>, <span class="at">cex =</span> <span class="fl">1.3</span>)</span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co"># each block holds all four treatments, order randomised within the block</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="fu">cell</span>(<span class="fl">0.5</span>, <span class="fl">2.3</span>, <span class="st">"T3"</span>); <span class="fu">cell</span>(<span class="fl">2.7</span>, <span class="fl">2.3</span>, <span class="st">"T1"</span>)</span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="fu">cell</span>(<span class="fl">0.5</span>, <span class="fl">0.7</span>, <span class="st">"T4"</span>); <span class="fu">cell</span>(<span class="fl">2.7</span>, <span class="fl">0.7</span>, <span class="st">"T2"</span>)</span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="fu">cell</span>(<span class="fl">5.5</span>, <span class="fl">2.3</span>, <span class="st">"T2"</span>); <span class="fu">cell</span>(<span class="fl">7.7</span>, <span class="fl">2.3</span>, <span class="st">"T4"</span>)</span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="fu">cell</span>(<span class="fl">5.5</span>, <span class="fl">0.7</span>, <span class="st">"T1"</span>); <span class="fu">cell</span>(<span class="fl">7.7</span>, <span class="fl">0.7</span>, <span class="st">"T3"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">T1 =</span> <span class="st">"#7F77DD"</span>, <span class="at">T2 =</span> <span class="st">"#D85A30"</span>, <span class="at">T3 =</span> <span class="st">"#1D9E75"</span>, <span class="at">T4 =</span> <span class="st">"#BA7517"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">5.2</span>), <span class="at">axes =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Randomised complete block: the same field, split along the shade"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># shade gradient: darker (less sun) on the left, fading to the right</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>ng <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>ng) {</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rect</span>((i <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="dv">10</span> <span class="sc">/</span> ng, <span class="fl">0.4</span>, i <span class="sc">*</span> <span class="dv">10</span> <span class="sc">/</span> ng, <span class="fl">4.4</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.37</span>, <span class="fl">0.37</span>, <span class="fl">0.35</span>, <span class="fl">0.40</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> (i <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">/</span> ng)), <span class="at">border =</span> <span class="cn">NA</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">0.4</span>, <span class="fl">4.8</span>, <span class="st">"Less sun"</span>, <span class="at">adj =</span> <span class="dv">0</span>, <span class="at">cex =</span> <span class="fl">0.9</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">9.6</span>, <span class="fl">4.8</span>, <span class="st">"More sun"</span>, <span class="at">adj =</span> <span class="dv">1</span>, <span class="at">cex =</span> <span class="fl">0.9</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co"># the two blocks</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">4.8</span>, <span class="fl">4.3</span>, <span class="at">border =</span> <span class="st">"grey40"</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="fl">1.5</span>)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="fl">5.2</span>, <span class="fl">0.5</span>, <span class="fl">9.8</span>, <span class="fl">4.3</span>, <span class="at">border =</span> <span class="st">"grey40"</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="fl">1.5</span>)</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">2.5</span>, <span class="fl">4.05</span>, <span class="st">"Block 1 (shaded)"</span>, <span class="at">font =</span> <span class="dv">2</span>, <span class="at">cex =</span> <span class="fl">0.95</span>)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">7.5</span>, <span class="fl">4.05</span>, <span class="st">"Block 2 (sunny)"</span>,  <span class="at">font =</span> <span class="dv">2</span>, <span class="at">cex =</span> <span class="fl">0.95</span>)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co"># helper: draw one plot cell</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>cell <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y, tr) {</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rect</span>(x, y, x <span class="sc">+</span> <span class="dv">2</span>, y <span class="sc">+</span> <span class="fl">1.4</span>, <span class="at">col =</span> cols[tr], <span class="at">border =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">text</span>(x <span class="sc">+</span> <span class="dv">1</span>, y <span class="sc">+</span> <span class="fl">0.7</span>, tr, <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">font =</span> <span class="dv">2</span>, <span class="at">cex =</span> <span class="fl">1.3</span>)</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="co"># each block holds all four treatments, order randomised within the block</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="fu">cell</span>(<span class="fl">0.5</span>, <span class="fl">2.3</span>, <span class="st">"T3"</span>); <span class="fu">cell</span>(<span class="fl">2.7</span>, <span class="fl">2.3</span>, <span class="st">"T1"</span>)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="fu">cell</span>(<span class="fl">0.5</span>, <span class="fl">0.7</span>, <span class="st">"T4"</span>); <span class="fu">cell</span>(<span class="fl">2.7</span>, <span class="fl">0.7</span>, <span class="st">"T2"</span>)</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="fu">cell</span>(<span class="fl">5.5</span>, <span class="fl">2.3</span>, <span class="st">"T2"</span>); <span class="fu">cell</span>(<span class="fl">7.7</span>, <span class="fl">2.3</span>, <span class="st">"T4"</span>)</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="fu">cell</span>(<span class="fl">5.5</span>, <span class="fl">0.7</span>, <span class="st">"T1"</span>); <span class="fu">cell</span>(<span class="fl">7.7</span>, <span class="fl">0.7</span>, <span class="st">"T3"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -775,33 +865,33 @@ Figure&nbsp;2.6: Case 4: each rat’s liver is chopped into six pieces for fat-c
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Code plot below</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Length_M <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">8</span>, <span class="dv">26</span>, <span class="fl">0.01</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>Density  <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(Length_M, <span class="dv">18</span>, <span class="dv">2</span>)   <span class="co"># distribution under H0 (mean 18)</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>Density2 <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(Length_M, <span class="dv">15</span>, <span class="dv">2</span>)   <span class="co"># distribution under HA (mean 15)</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># critical value from the H0 curve</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>Critm <span class="ot">&lt;-</span> <span class="dv">18</span> <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fl">2.048</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Density2 <span class="sc">~</span> Length_M, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">lwd =</span> <span class="dv">3</span>,</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"Density"</span>, <span class="at">xlab =</span> <span class="st">"Sample mean"</span>,</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Two distributions of the mean: power as non-overlap"</span>)</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co"># beta: the part of the HA curve in the non-rejection region (right of critical value)</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>cord.x <span class="ot">&lt;-</span> <span class="fu">c</span>(Critm, <span class="fu">seq</span>(Critm, <span class="dv">25</span>, <span class="fl">0.01</span>), <span class="dv">25</span>)</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>cord.y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">dnorm</span>(<span class="fu">seq</span>(Critm, <span class="dv">25</span>, <span class="fl">0.01</span>), <span class="dv">15</span>, <span class="dv">2</span>), <span class="dv">0</span>)</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(cord.x, cord.y, <span class="at">col =</span> <span class="st">"red"</span>)</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co"># power: the part of the HA curve past the critical value (left tail here)</span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>cord.x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">8</span>, <span class="fu">seq</span>(<span class="dv">8</span>, Critm, <span class="fl">0.01</span>), Critm)</span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>cord.y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">dnorm</span>(<span class="fu">seq</span>(<span class="dv">8</span>, Critm, <span class="fl">0.01</span>), <span class="dv">15</span>, <span class="dv">2</span>), <span class="dv">0</span>)</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(cord.x, cord.y, <span class="at">col =</span> <span class="st">"darkgreen"</span>)</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="fu">arrows</span>(Critm, <span class="fl">0.06</span>, Critm, <span class="fl">0.02</span>, <span class="at">lwd =</span> <span class="dv">3</span>)</span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(Critm, <span class="fl">0.07</span>, <span class="st">"critical value"</span>)</span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">16</span>, <span class="fl">0.05</span>, <span class="fu">expression</span>(beta), <span class="at">cex =</span> <span class="dv">3</span>)</span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(Density <span class="sc">~</span> Length_M, <span class="at">col =</span> <span class="st">"blue"</span>, <span class="at">lwd =</span> <span class="dv">3</span>)  <span class="co"># H0 for reference</span></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">0</span>); <span class="fu">segments</span>(<span class="dv">15</span>, <span class="dv">0</span>, <span class="dv">15</span>, <span class="fu">dnorm</span>(<span class="dv">15</span>, <span class="dv">15</span>, <span class="dv">2</span>), <span class="at">lty =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Length_M <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">8</span>, <span class="dv">26</span>, <span class="fl">0.01</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>Density  <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(Length_M, <span class="dv">18</span>, <span class="dv">2</span>)   <span class="co"># distribution under H0 (mean 18)</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>Density2 <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(Length_M, <span class="dv">15</span>, <span class="dv">2</span>)   <span class="co"># distribution under HA (mean 15)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># critical value from the H0 curve</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>Critm <span class="ot">&lt;-</span> <span class="dv">18</span> <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fl">2.048</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Density2 <span class="sc">~</span> Length_M, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">lwd =</span> <span class="dv">3</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"Density"</span>, <span class="at">xlab =</span> <span class="st">"Sample mean"</span>,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Two distributions of the mean: power as non-overlap"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co"># beta: the part of the HA curve in the non-rejection region (right of critical value)</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>cord.x <span class="ot">&lt;-</span> <span class="fu">c</span>(Critm, <span class="fu">seq</span>(Critm, <span class="dv">25</span>, <span class="fl">0.01</span>), <span class="dv">25</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>cord.y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">dnorm</span>(<span class="fu">seq</span>(Critm, <span class="dv">25</span>, <span class="fl">0.01</span>), <span class="dv">15</span>, <span class="dv">2</span>), <span class="dv">0</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(cord.x, cord.y, <span class="at">col =</span> <span class="st">"red"</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co"># power: the part of the HA curve past the critical value (left tail here)</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>cord.x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">8</span>, <span class="fu">seq</span>(<span class="dv">8</span>, Critm, <span class="fl">0.01</span>), Critm)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>cord.y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">dnorm</span>(<span class="fu">seq</span>(<span class="dv">8</span>, Critm, <span class="fl">0.01</span>), <span class="dv">15</span>, <span class="dv">2</span>), <span class="dv">0</span>)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(cord.x, cord.y, <span class="at">col =</span> <span class="st">"darkgreen"</span>)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="fu">arrows</span>(Critm, <span class="fl">0.06</span>, Critm, <span class="fl">0.02</span>, <span class="at">lwd =</span> <span class="dv">3</span>)</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(Critm, <span class="fl">0.07</span>, <span class="st">"critical value"</span>)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">16</span>, <span class="fl">0.05</span>, <span class="fu">expression</span>(beta), <span class="at">cex =</span> <span class="dv">3</span>)</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(Density <span class="sc">~</span> Length_M, <span class="at">col =</span> <span class="st">"blue"</span>, <span class="at">lwd =</span> <span class="dv">3</span>)  <span class="co"># H0 for reference</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">0</span>); <span class="fu">segments</span>(<span class="dv">15</span>, <span class="dv">0</span>, <span class="dv">15</span>, <span class="fu">dnorm</span>(<span class="dv">15</span>, <span class="dv">15</span>, <span class="dv">2</span>), <span class="at">lty =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -818,8 +908,8 @@ Figure&nbsp;2.6: Case 4: each rat’s liver is chopped into six pieces for fat-c
 <p>R reduces all of this to a one-line calculation for the two-sample <span class="math inline">\(t\)</span>-test, and the same function answers two different questions depending on which argument is left unspecified.</p>
 <p><strong>Post-hoc: the study has been run — what power did it have?</strong> With <span class="math inline">\(n\)</span> and the effect size fixed, the power is requested. This is a check after the fact, and its legitimate use is to inform the next study, not to excuse a null result.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">power.t.test</span>(<span class="at">n =</span> <span class="dv">15</span>, <span class="at">delta =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">2</span>, <span class="at">sig.level =</span> <span class="fl">0.05</span>,</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">alternative =</span> <span class="st">"two.sided"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">power.t.test</span>(<span class="at">n =</span> <span class="dv">15</span>, <span class="at">delta =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">2</span>, <span class="at">sig.level =</span> <span class="fl">0.05</span>,</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">alternative =</span> <span class="st">"two.sided"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; 
 #&gt;      Two-sample t test power calculation 
@@ -837,8 +927,8 @@ Figure&nbsp;2.6: Case 4: each rat’s liver is chopped into six pieces for fat-c
 <p>With 15 observations per group, a true difference of 1 and a standard deviation of 2, the power is approximately 0.26: a real effect of this size would be detected in roughly one study in four. A null result from such a study is uninformative.</p>
 <p><strong>A priori: the study is being planned — how many replicates are needed?</strong> The desired power (0.8 is the usual minimum), the effect size and <span class="math inline">\(\sigma\)</span> are fixed, and <span class="math inline">\(n\)</span> is solved for. This is the calculation that should precede the experiment, and it is the whole point of Fisher’s warning.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">power.t.test</span>(<span class="at">power =</span> <span class="fl">0.8</span>, <span class="at">delta =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">2</span>, <span class="at">sig.level =</span> <span class="fl">0.05</span>,</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">alternative =</span> <span class="st">"two.sided"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">power.t.test</span>(<span class="at">power =</span> <span class="fl">0.8</span>, <span class="at">delta =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">2</span>, <span class="at">sig.level =</span> <span class="fl">0.05</span>,</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">alternative =</span> <span class="st">"two.sided"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; 
 #&gt;      Two-sample t test power calculation 
@@ -862,9 +952,18 @@ Figure&nbsp;2.6: Case 4: each rat’s liver is chopped into six pieces for fat-c
 <li>Obtain a defensible estimate of <span class="math inline">\(\sigma\)</span> — from the literature, a similar experiment, or a pilot study.</li>
 </ol>
 <p>With those four numbers, an a priori analysis returns the required <span class="math inline">\(n\)</span>. After the study, a post-hoc analysis reports the power that was actually attained.</p>
-</section>
-<section id="where-the-required-sample-size-comes-from" class="level3">
-<h3 class="anchored" data-anchor-id="where-the-required-sample-size-comes-from">Where the required sample size comes from</h3>
+<div class="callout callout-style-default callout-note callout-titled" title="Where the number 64 comes from">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Where the number 64 comes from
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
 <p>The number 64 is not magic, and a short derivation shows where it comes from. Take two groups of <span class="math inline">\(n\)</span> observations with a true difference <span class="math inline">\(\delta\)</span> and a known standard deviation <span class="math inline">\(\sigma\)</span>. The difference of the two sample means is normally distributed,</p>
 <p><span class="math display">\[\bar x_1 - \bar x_2 \sim N\!\left(\delta,\ \frac{2\sigma^2}{n}\right),\]</span></p>
 <p>so the test statistic <span class="math inline">\(z = (\bar x_1 - \bar x_2)\big/\big(\sigma\sqrt{2/n}\big)\)</span> is standard normal under <span class="math inline">\(H_0\)</span> and is shifted by <span class="math inline">\(\delta\big/\big(\sigma\sqrt{2/n}\big)\)</span> under <span class="math inline">\(H_A\)</span>. The null hypothesis is rejected when <span class="math inline">\(|z| &gt; z_{1-\alpha/2}\)</span>. Ignoring the negligible chance of rejecting in the wrong direction,</p>
@@ -872,38 +971,41 @@ Figure&nbsp;2.6: Case 4: each rat’s liver is chopped into six pieces for fat-c
 <p>Requiring this to equal <span class="math inline">\(1 - \beta\)</span> means that the shift must be <span class="math inline">\(z_{1-\alpha/2} + z_{1-\beta}\)</span>, and solving for <span class="math inline">\(n\)</span> gives</p>
 <p><span class="math display">\[n = \frac{2\,(z_{1-\alpha/2} + z_{1-\beta})^2\,\sigma^2}{\delta^2} \quad\text{per group.}\]</span></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>delta <span class="ot">&lt;-</span> <span class="dv">1</span>; sigma <span class="ot">&lt;-</span> <span class="dv">2</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">normal_formula =</span> <span class="dv">2</span> <span class="sc">*</span> (<span class="fu">qnorm</span>(<span class="fl">0.975</span>) <span class="sc">+</span> <span class="fu">qnorm</span>(<span class="fl">0.80</span>))<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> sigma<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> delta<span class="sc">^</span><span class="dv">2</span>,</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">power.t.test   =</span> <span class="fu">power.t.test</span>(<span class="at">power =</span> <span class="fl">0.8</span>, <span class="at">delta =</span> delta, <span class="at">sd =</span> sigma)<span class="sc">$</span>n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>delta <span class="ot">&lt;-</span> <span class="dv">1</span>; sigma <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">normal_formula =</span> <span class="dv">2</span> <span class="sc">*</span> (<span class="fu">qnorm</span>(<span class="fl">0.975</span>) <span class="sc">+</span> <span class="fu">qnorm</span>(<span class="fl">0.80</span>))<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> sigma<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> delta<span class="sc">^</span><span class="dv">2</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">power.t.test   =</span> <span class="fu">power.t.test</span>(<span class="at">power =</span> <span class="fl">0.8</span>, <span class="at">delta =</span> delta, <span class="at">sd =</span> sigma)<span class="sc">$</span>n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; normal_formula   power.t.test 
 #&gt;       62.79104       63.76576</code></pre>
 </div>
 </div>
 <p>The formula gives 62.8, and <code>power.t.test</code> gives one more, because it uses the <span class="math inline">\(t\)</span> distribution: <span class="math inline">\(\sigma\)</span> has to be estimated, which costs a little power. The formula also makes the heuristic of the previous section exact. Power depends on the data only through <span class="math inline">\(\delta\sqrt{n}/\sigma\)</span>. Halving the effect size, or doubling the noise, therefore <em>quadruples</em> the number of units required.</p>
+</div>
+</div>
+</div>
 </section>
 <section id="power-without-a-formula-simulation" class="level3">
 <h3 class="anchored" data-anchor-id="power-without-a-formula-simulation">Power without a formula: simulation</h3>
 <p><code>power.t.test</code> has a formula behind it, but there is a more transparent way to determine power that generalises to any design, however complex — <em>simulate the whole experiment many times and count how often it succeeds.</em> This is worth doing at least once explicitly, because it demystifies power completely and because the practicals rely on exactly this skill.</p>
 <p>A single simulated experiment comes first. Fifteen “males” are drawn from a normal distribution with mean length 18 and SD 2, fifteen “females” with mean 17 and SD 2, and one <span class="math inline">\(t\)</span>-test is run.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>Males   <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">15</span>, <span class="at">mean =</span> <span class="dv">18</span>, <span class="at">sd =</span> <span class="dv">2</span>)</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>Females <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">15</span>, <span class="at">mean =</span> <span class="dv">17</span>, <span class="at">sd =</span> <span class="dv">2</span>)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(Males, Females)<span class="sc">$</span>p.value</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>Males   <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">15</span>, <span class="at">mean =</span> <span class="dv">18</span>, <span class="at">sd =</span> <span class="dv">2</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>Females <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">15</span>, <span class="at">mean =</span> <span class="dv">17</span>, <span class="at">sd =</span> <span class="dv">2</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(Males, Females)<span class="sc">$</span>p.value</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 0.1295293</code></pre>
 </div>
 </div>
 <p>That single p-value is one draw from a random process; it is not, on its own, informative about power. Power is a long-run frequency, so the whole experiment is repeated 10,000 times and the fraction of runs in which the effect was correctly detected (<span class="math inline">\(p &lt; 0.05\)</span>) is recorded. That fraction <em>is</em> the power.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>pval <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="dv">10000</span>)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10000</span>) {</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  A <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">18</span>, <span class="dv">2</span>)   <span class="co"># true difference is 1, SD is 2</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  B <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">17</span>, <span class="dv">2</span>)</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  pval[i] <span class="ot">&lt;-</span> <span class="fu">t.test</span>(A, B)<span class="sc">$</span>p.value</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(pval <span class="sc">&lt;</span> <span class="fl">0.05</span>) <span class="sc">/</span> <span class="dv">10000</span>   <span class="co"># estimated power at n = 20</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pval <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="dv">10000</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10000</span>) {</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  A <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">18</span>, <span class="dv">2</span>)   <span class="co"># true difference is 1, SD is 2</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  B <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">17</span>, <span class="dv">2</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  pval[i] <span class="ot">&lt;-</span> <span class="fu">t.test</span>(A, B)<span class="sc">$</span>p.value</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(pval <span class="sc">&lt;</span> <span class="fl">0.05</span>) <span class="sc">/</span> <span class="dv">10000</span>   <span class="co"># estimated power at n = 20</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 0.3409</code></pre>
 </div>
@@ -914,15 +1016,15 @@ Figure&nbsp;2.6: Case 4: each rat’s liver is chopped into six pieces for fat-c
 <h3 class="anchored" data-anchor-id="the-power-curve">The power curve</h3>
 <p>Sweeping <span class="math inline">\(n\)</span> across a range and plotting the resulting power traces a <strong>power curve</strong>, the single most useful object for planning. Reading off where the curve crosses 0.8 gives the required sample size. The analytic version is a smooth line; the simulated version is the same curve, scattered by Monte Carlo noise. Their agreement is the point: the formula and the simulation compute the same quantity in two different ways.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>NN    <span class="ot">&lt;-</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">200</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>Power <span class="ot">&lt;-</span> <span class="fu">power.t.test</span>(<span class="at">n =</span> NN, <span class="at">delta =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">2</span>, <span class="at">sig.level =</span> <span class="fl">0.05</span>,</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">type =</span> <span class="st">"two.sample"</span>, <span class="at">alternative =</span> <span class="st">"two.sided"</span>)<span class="sc">$</span>power</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Power <span class="sc">~</span> NN, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Power curve for the two-sample t-test"</span>,</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"n per group"</span>, <span class="at">ylab =</span> <span class="st">"Power"</span>)</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="fl">0.8</span>, <span class="dv">64</span>, <span class="fl">0.8</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="fu">arrows</span>(<span class="dv">64</span>, <span class="fl">0.8</span>, <span class="dv">64</span>, <span class="fl">0.05</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">64</span>, <span class="fl">0.02</span>, <span class="st">"n = 64"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>NN    <span class="ot">&lt;-</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">200</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>Power <span class="ot">&lt;-</span> <span class="fu">power.t.test</span>(<span class="at">n =</span> NN, <span class="at">delta =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">2</span>, <span class="at">sig.level =</span> <span class="fl">0.05</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">type =</span> <span class="st">"two.sample"</span>, <span class="at">alternative =</span> <span class="st">"two.sided"</span>)<span class="sc">$</span>power</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Power <span class="sc">~</span> NN, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Power curve for the two-sample t-test"</span>,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"n per group"</span>, <span class="at">ylab =</span> <span class="st">"Power"</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="fl">0.8</span>, <span class="dv">64</span>, <span class="fl">0.8</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="fu">arrows</span>(<span class="dv">64</span>, <span class="fl">0.8</span>, <span class="dv">64</span>, <span class="fl">0.05</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">64</span>, <span class="fl">0.02</span>, <span class="st">"n = 64"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -938,24 +1040,517 @@ Figure&nbsp;2.6: Case 4: each rat’s liver is chopped into six pieces for fat-c
 <p>The three computations of this section — the analytic post-hoc and a priori calls, the simulation, and the power curve — are three views of one quantity. Each shows that power is determined jointly by the effect size, the residual standard deviation, the significance level and the sample size, and that the sample size in question is the number of experimental units. The design decisions of the first half of the chapter enter through <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(n\)</span>: blocking and control reduce <span class="math inline">\(\sigma\)</span>, correct identification of the experimental unit determines the true <span class="math inline">\(n\)</span>, and randomisation ensures that what remains in <span class="math inline">\(\sigma\)</span> is noise rather than bias. A power calculation performed before the experiment is therefore the point at which every earlier design decision is tested against the effect the study aims to detect.</p>
 </section>
 </section>
+<section id="sec-data-first" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="sec-data-first">When the data come first</h2>
+<p>Everything so far assumed that the hypothesis was fixed before the data existed. From Day 4 onwards that is rarely the case. PCA and clustering search the data for structure; classifiers search them for whatever separates the labels. Experimental design does not become irrelevant there. Some of its ideas carry over unchanged, some change their meaning, and one new requirement appears: an honest check on independent data has to be planned before the study starts.</p>
+<section id="a-pattern-found-in-the-data-will-be-confirmed-by-the-same-data" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="a-pattern-found-in-the-data-will-be-confirmed-by-the-same-data">A pattern found in the data will be confirmed by the same data</h3>
+<p>Suppose 100 patients are measured on a panel of 50 genes, and the patients are clustered into two groups. A natural next step is to ask which genes differ between the two groups, with a <em>t</em>-test per gene. The tests will find differences, even if the patients were all the same: the clustering algorithm chose the split that makes the groups as different as possible, and the tests then ask whether the groups are different. The question has been answered before it was asked. This is called <strong>circular analysis</strong> or <strong>double dipping</strong> <span class="citation" data-cites="Kriegeskorte2009">(<a href="references.html#ref-Kriegeskorte2009" role="doc-biblioref">Kriegeskorte et al. 2009</a>)</span>, and it is one of the most common errors in genomics.</p>
+<p>The same trap exists for prediction. If the genes that best separate tumour from normal are selected using <em>all</em> samples, and a classifier built on those genes is then evaluated on part of the same samples, the evaluation is no longer independent of the selection. Accuracies of 90% are then easily obtained from pure noise <span class="citation" data-cites="Ambroise2002">(<a href="references.html#ref-Ambroise2002" role="doc-biblioref">Ambroise and McLachlan 2002</a>)</span>. Exercises 2.1 and 2.2 below let you produce both effects yourself.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — <strong>Double dipping</strong>: using the same data first to choose a hypothesis (a split, a set of genes, a model) and then to test or evaluate it.</p>
+</div></div><p>The remedy is a design decision, not an analysis trick: <strong>split the data, or the study, before looking.</strong></p>
+<ul>
+<li>Set aside a <strong>validation set</strong> (or test set) at random, and do not touch it until every choice has been made on the other part, the <strong>discovery set</strong> (or training set).</li>
+<li>Better still, plan an <strong>independent replication cohort</strong>: other patients, another hospital, another time. Genome-wide association studies have long required this, which is one reason why their findings replicate far better than those of the earlier candidate-gene studies, many of which did not replicate at all.</li>
+<li>Decide the split in advance, and size <em>both</em> parts. A validation set of ten samples cannot confirm anything.</li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>↪</strong> Day 7 develops this into cross-validation, where every sample takes a turn in the validation set, and into nested cross-validation, where every data-driven choice is kept inside the loop.</p>
+</div></div><div class="callout callout-style-default callout-note callout-titled" title="Exercise 2.1 — Clusters from nothing">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Exercise 2.1 — Clusters from nothing
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Simulate a study in which there is nothing to find: 100 patients, measured on a panel of 50 genes, all values independent standard normal.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">100</span>; p <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> p), <span class="at">nrow =</span> n, <span class="at">ncol =</span> p)   <span class="co"># patients in rows, genes in columns</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="a">
+<li>Cluster the patients into two groups with <code>kmeans(X, centers = 2, nstart = 20)</code>. How large are the groups?</li>
+<li>Test every gene for a difference between the two clusters with a <em>t</em>-test. How many genes have <span class="math inline">\(p &lt; 0.05\)</span>, and how many would you expect if there were no structure? How many survive a false-discovery-rate correction, <code>p.adjust(p_values, method = "BH")</code>?</li>
+<li>Explain the result of (b) in one or two sentences.</li>
+<li>Now do it honestly. Before clustering, split the patients at random into a discovery half and a validation half. Cluster each half separately. Then assign every validation patient to the <em>nearest discovery centre</em> and compare this assignment with the clustering of the validation half itself. Use the helper functions below. Repeat for a few different random splits.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># for every row of Xnew: the number of the nearest centre</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>nearest <span class="ot">&lt;-</span> <span class="cf">function</span>(Xnew, centers)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">apply</span>(Xnew, <span class="dv">1</span>, <span class="cf">function</span>(x) <span class="fu">which.min</span>(<span class="fu">colSums</span>((<span class="fu">t</span>(centers) <span class="sc">-</span> x)<span class="sc">^</span><span class="dv">2</span>)))</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># fraction of patients on which two partitions agree (labels are arbitrary)</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>agree <span class="ot">&lt;-</span> <span class="cf">function</span>(a, b) <span class="fu">max</span>(<span class="fu">mean</span>(a <span class="sc">==</span> b), <span class="fu">mean</span>(a <span class="sc">!=</span> b))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol start="5" type="a">
+<li>Give the patients a real subtype: add 1 to genes 1 to 10 for patients 51 to 100. Repeat (d). How does the agreement compare with that for pure noise?</li>
+<li>You are planning a study to discover subtypes in 100 patients. Which decisions about discovery and validation should be written down before the samples are collected, and what does the split cost?</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Hints">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Hints
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>For (b), loop over the columns: <code>sapply(1:p, function(j) t.test(X[cl == 1, j], X[cl == 2, j])$p.value)</code>. For (d), <code>disc &lt;- sample(n, n / 2)</code> and <code>val &lt;- setdiff(1:n, disc)</code> give the two halves; the centres of a clustering are in <code>km$centers</code>. An agreement of 0.5 means that the two partitions have nothing to do with each other; 1 means they are identical.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">100</span>; p <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>X  <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> p), <span class="at">nrow =</span> n, <span class="at">ncol =</span> p)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co"># (a) and (b): cluster, then test the clusters</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>cl <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(X, <span class="at">centers =</span> <span class="dv">2</span>, <span class="at">nstart =</span> <span class="dv">20</span>)<span class="sc">$</span>cluster</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span>p, <span class="cf">function</span>(j) <span class="fu">t.test</span>(X[cl <span class="sc">==</span> <span class="dv">1</span>, j], X[cl <span class="sc">==</span> <span class="dv">2</span>, j])<span class="sc">$</span>p.value)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">cluster_sizes =</span> <span class="fu">table</span>(cl), <span class="at">p_below_0.05 =</span> <span class="fu">sum</span>(p_values <span class="sc">&lt;</span> <span class="fl">0.05</span>),</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">expected =</span> <span class="fl">0.05</span> <span class="sc">*</span> p, <span class="at">after_BH =</span> <span class="fu">sum</span>(<span class="fu">p.adjust</span>(p_values, <span class="at">method =</span> <span class="st">"BH"</span>) <span class="sc">&lt;</span> <span class="fl">0.05</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; cluster_sizes.1 cluster_sizes.2    p_below_0.05        expected        after_BH 
+#&gt;            50.0            50.0            18.0             2.5            10.0</code></pre>
+</div>
+</div>
+<ol start="3" type="a">
+<li>There is no structure in these data, yet about a third of the genes “differ” between the clusters, and several survive the false-discovery-rate correction. The clustering chose the split that separates the patients as much as possible along some combination of genes; the <em>t</em>-tests then confirm that this split separates the patients. The <em>p</em>-values assume that the groups were defined independently of the data, and they were not.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>nearest <span class="ot">&lt;-</span> <span class="cf">function</span>(Xnew, centers)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">apply</span>(Xnew, <span class="dv">1</span>, <span class="cf">function</span>(x) <span class="fu">which.min</span>(<span class="fu">colSums</span>((<span class="fu">t</span>(centers) <span class="sc">-</span> x)<span class="sc">^</span><span class="dv">2</span>)))</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>agree <span class="ot">&lt;-</span> <span class="cf">function</span>(a, b) <span class="fu">max</span>(<span class="fu">mean</span>(a <span class="sc">==</span> b), <span class="fu">mean</span>(a <span class="sc">!=</span> b))</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>replicate_split <span class="ot">&lt;-</span> <span class="cf">function</span>(X, seed) {</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(seed)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  disc <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">nrow</span>(X), <span class="fu">nrow</span>(X) <span class="sc">/</span> <span class="dv">2</span>); val <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">seq_len</span>(<span class="fu">nrow</span>(X)), disc)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  km_disc <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(X[disc, ], <span class="at">centers =</span> <span class="dv">2</span>, <span class="at">nstart =</span> <span class="dv">20</span>)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  km_val  <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(X[val, ],  <span class="at">centers =</span> <span class="dv">2</span>, <span class="at">nstart =</span> <span class="dv">20</span>)</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">agree</span>(<span class="fu">nearest</span>(X[val, ], km_disc<span class="sc">$</span>centers), km_val<span class="sc">$</span>cluster)</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> X</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>Y[<span class="dv">51</span><span class="sc">:</span><span class="dv">100</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>] <span class="ot">&lt;-</span> Y[<span class="dv">51</span><span class="sc">:</span><span class="dv">100</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>] <span class="sc">+</span> <span class="dv">1</span>          <span class="co"># (e) a real subtype</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">pure_noise   =</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>, <span class="cf">function</span>(s) <span class="fu">replicate_split</span>(X, s)),</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">real_subtype =</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>, <span class="cf">function</span>(s) <span class="fu">replicate_split</span>(Y, s)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;              [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]
+#&gt; pure_noise   0.54 0.62 0.58 0.52 0.50 0.54 0.60 0.64
+#&gt; real_subtype 0.90 0.74 0.84 0.82 0.78 0.88 0.86 0.86</code></pre>
+</div>
+</div>
+<p>(d, e) For pure noise the agreement stays close to 0.5: the discovery clustering found a split, but a different split appears in new patients. With a real subtype the agreement is clearly higher, because the same structure is present in both halves. It is not perfect, because 50 patients are not many for finding a difference spread over 10 of 50 genes.</p>
+<ol start="6" type="a">
+<li>Before collecting samples: how the patients will be divided (random, and stratified by hospital or batch if these exist), the size of each part, that the validation part will not be looked at until the discovery analysis is finished, and what counts as a successful replication. The cost is that each analysis has only half the patients, so a weaker structure may be missed in discovery, as the imperfect agreement in (e) shows. Sizing the study must take both halves into account, or plan an independent cohort.</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Exercise 2.2 — Selecting genes before testing a classifier">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Exercise 2.2 — Selecting genes before testing a classifier
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Simulate 40 samples on 1,000 genes of pure noise, and give them labels: 20 “tumour” and 20 “normal”. The labels carry no information. A <strong>nearest-centroid classifier</strong> assigns a new sample to the class whose mean profile is closest; it is given below, together with a fast <em>t</em>-test for every column of a matrix.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>nearest_centroid_accuracy <span class="ot">&lt;-</span> <span class="cf">function</span>(X_train, y_train, X_test, y_test) {</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  m1 <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(X_train[y_train <span class="sc">==</span> <span class="dv">1</span>, , <span class="at">drop =</span> <span class="cn">FALSE</span>])</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  m2 <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(X_train[y_train <span class="sc">==</span> <span class="dv">2</span>, , <span class="at">drop =</span> <span class="cn">FALSE</span>])</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  d1 <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(<span class="fu">sweep</span>(X_test, <span class="dv">2</span>, m1)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  d2 <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(<span class="fu">sweep</span>(X_test, <span class="dv">2</span>, m2)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="fu">ifelse</span>(d1 <span class="sc">&lt;</span> d2, <span class="dv">1</span>, <span class="dv">2</span>) <span class="sc">==</span> y_test)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="co"># two-sample t-test for every column of X at once</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>column_t_pvalues <span class="ot">&lt;-</span> <span class="cf">function</span>(X, y) {</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  a <span class="ot">&lt;-</span> X[y <span class="sc">==</span> <span class="dv">1</span>, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]; b <span class="ot">&lt;-</span> X[y <span class="sc">==</span> <span class="dv">2</span>, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  ss_a <span class="ot">&lt;-</span> <span class="fu">colSums</span>(<span class="fu">sweep</span>(a, <span class="dv">2</span>, <span class="fu">colMeans</span>(a))<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  ss_b <span class="ot">&lt;-</span> <span class="fu">colSums</span>(<span class="fu">sweep</span>(b, <span class="dv">2</span>, <span class="fu">colMeans</span>(b))<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>  s2 <span class="ot">&lt;-</span> (ss_a <span class="sc">+</span> ss_b) <span class="sc">/</span> (<span class="fu">nrow</span>(a) <span class="sc">+</span> <span class="fu">nrow</span>(b) <span class="sc">-</span> <span class="dv">2</span>)</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>  t <span class="ot">&lt;-</span> (<span class="fu">colMeans</span>(a) <span class="sc">-</span> <span class="fu">colMeans</span>(b)) <span class="sc">/</span> <span class="fu">sqrt</span>(s2 <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">/</span> <span class="fu">nrow</span>(a) <span class="sc">+</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">nrow</span>(b)))</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span> <span class="sc">*</span> <span class="fu">pt</span>(<span class="sc">-</span><span class="fu">abs</span>(t), <span class="fu">nrow</span>(a) <span class="sc">+</span> <span class="fu">nrow</span>(b) <span class="sc">-</span> <span class="dv">2</span>)</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="a">
+<li>Using all 40 samples, select the 20 genes with the smallest <em>p</em>-values. Then split the samples into a training half and a test half (10 of each class in each half), build the classifier on the training half with the selected genes, and compute its accuracy on the test half.</li>
+<li>Repeat, but now select the 20 genes using the training half only.</li>
+<li>Repeat (a) and (b) 100 times with new data, and report the average accuracy of each.</li>
+<li>Which of the two numbers would you expect to see in a paper, and why is this a problem of design rather than of analysis?</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>one_study <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">40</span> <span class="sc">*</span> <span class="dv">1000</span>), <span class="at">nrow =</span> <span class="dv">40</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="at">each =</span> <span class="dv">20</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  train <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, <span class="dv">10</span>), <span class="fu">sample</span>(<span class="dv">21</span><span class="sc">:</span><span class="dv">40</span>, <span class="dv">10</span>)); test <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">40</span>, train)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  genes_all   <span class="ot">&lt;-</span> <span class="fu">order</span>(<span class="fu">column_t_pvalues</span>(X, y))[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>]                     <span class="co"># (a)</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  genes_train <span class="ot">&lt;-</span> <span class="fu">order</span>(<span class="fu">column_t_pvalues</span>(X[train, ], y[train]))[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>]     <span class="co"># (b)</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  acc_all   <span class="ot">&lt;-</span> <span class="fu">nearest_centroid_accuracy</span>(X[train, genes_all], y[train],</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>                                         X[test, genes_all], y[test])</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  acc_train <span class="ot">&lt;-</span> <span class="fu">nearest_centroid_accuracy</span>(X[train, genes_train], y[train],</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>                                         X[test, genes_train], y[test])</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">selected_on_all_samples =</span> acc_all, <span class="at">selected_on_training_only =</span> acc_train)</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="fu">rowMeans</span>(<span class="fu">replicate</span>(<span class="dv">100</span>, <span class="fu">one_study</span>()))                                     <span class="co"># (c)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;   selected_on_all_samples selected_on_training_only 
+#&gt;                    0.9385                    0.5065</code></pre>
+</div>
+</div>
+<ol start="4" type="a">
+<li>Selecting on all samples gives an accuracy above 90% for labels that carry no information; selecting on the training half gives the honest 50%. The first number is the one that looks publishable, and versions of it have been published <span class="citation" data-cites="Ambroise2002">(<a href="references.html#ref-Ambroise2002" role="doc-biblioref">Ambroise and McLachlan 2002</a>)</span>. The test samples took part in choosing the genes, so they were no longer independent of the model. No later analysis can repair this: the remedy is to lock the test set away <em>before</em> the first data-driven decision, which is a matter of how the study is organised.</li>
+</ol>
+</div>
+</div>
+</div>
+</section>
+<section id="collect-the-variation-and-record-it" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="collect-the-variation-and-record-it">Collect the variation, and record it</h3>
+<p>A confirmatory design keeps nuisance variation small, because every bit of it costs power. Exploration needs almost the opposite. Subtypes can only be discovered in a sample that contains them, so the sample should span the variation that might matter: disease stages, ages, both sexes, several hospitals. A homogeneous sample is efficient for a test but blind for discovery.</p>
+<p>The price is that this variation must be <strong>recorded</strong>. In exploration nobody knows in advance which variable will turn out to explain a cluster or a principal component, so every piece of metadata should be kept: age, sex, tissue, RNA quality, date of extraction, operator, sequencing run, position on the plate. A cluster that coincides with the extraction date is a finding about the laboratory, not about the disease, and it can only be recognised as such if the date was written down.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — Confirmatory design minimises nuisance variation. Exploratory design samples the variation broadly and records its sources.</p>
+</div></div></section>
+<section id="batches-the-four-levers-still-apply" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="batches-the-four-levers-still-apply">Batches: the four levers still apply</h3>
+<p>The levers of this chapter return almost unchanged in the laboratory part of a data-driven study, and they matter even more, because an exploratory method will find <em>any</em> strong source of variation, including the technical ones <span class="citation" data-cites="Leek2010">(<a href="references.html#ref-Leek2010" role="doc-biblioref">Leek et al. 2010</a>)</span>. Consider 24 samples, 12 tumour and 12 normal, sequenced in two runs of 12. Suppose there is no biological difference at all, but the second run reads 100 of the 500 genes slightly higher. The figure compares two ways of filling the runs.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code for the figure</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">24</span>; p <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>group    <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"tumour"</span>, <span class="st">"normal"</span>), <span class="at">each =</span> <span class="dv">12</span>)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>run_conf <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(group <span class="sc">==</span> <span class="st">"tumour"</span>, <span class="st">"run 1"</span>, <span class="st">"run 2"</span>)          <span class="co"># confounded design</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>run_bal  <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"run 1"</span>, <span class="st">"run 2"</span>), <span class="at">each =</span> <span class="dv">6</span>), <span class="dv">2</span>)           <span class="co"># balanced design</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>simulate <span class="ot">&lt;-</span> <span class="cf">function</span>(run) {</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> p), n, p)</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  X[run <span class="sc">==</span> <span class="st">"run 2"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>] <span class="ot">&lt;-</span> X[run <span class="sc">==</span> <span class="st">"run 2"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>] <span class="sc">+</span> <span class="dv">1</span>       <span class="co"># technical effect only</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  X</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>X_conf <span class="ot">&lt;-</span> <span class="fu">simulate</span>(run_conf); X_bal <span class="ot">&lt;-</span> <span class="fu">simulate</span>(run_bal)</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>draw <span class="ot">&lt;-</span> <span class="cf">function</span>(X, run, main) {</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>  pc <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(X)<span class="sc">$</span>x</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(pc[, <span class="dv">1</span>], pc[, <span class="dv">2</span>], <span class="at">pch =</span> <span class="fu">ifelse</span>(run <span class="sc">==</span> <span class="st">"run 1"</span>, <span class="dv">19</span>, <span class="dv">17</span>), <span class="at">cex =</span> <span class="fl">1.4</span>,</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">ifelse</span>(group <span class="sc">==</span> <span class="st">"tumour"</span>, <span class="st">"#D35400"</span>, <span class="st">"#1F4E79"</span>), <span class="at">las =</span> <span class="dv">1</span>,</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>       <span class="at">xlab =</span> <span class="st">"first principal component"</span>, <span class="at">ylab =</span> <span class="st">"second principal component"</span>, <span class="at">main =</span> main)</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="fl">2.5</span>, <span class="dv">1</span>))</span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a><span class="fu">draw</span>(X_conf, run_conf, <span class="st">"confounded: group = run"</span>)</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"top"</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">pch =</span> <span class="fu">c</span>(<span class="dv">19</span>, <span class="dv">19</span>, <span class="dv">19</span>, <span class="dv">17</span>),</span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"#D35400"</span>, <span class="st">"#1F4E79"</span>, <span class="st">"grey40"</span>, <span class="st">"grey40"</span>),</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"tumour"</span>, <span class="st">"normal"</span>, <span class="st">"run 1"</span>, <span class="st">"run 2"</span>))</span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a><span class="fu">draw</span>(X_bal, run_bal, <span class="st">"balanced: both groups in each run"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-batch" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-batch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="02-design_files/figure-html/fig-batch-1.png" class="img-fluid figure-img" width="816">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-batch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.8: The same technical batch effect, and no biological difference, in two designs. The samples are drawn by principal component analysis (Day 4), which places them along the directions in which they differ most. Left: all tumours were sequenced in run 1 and all normals in run 2. The two groups separate perfectly, and nothing in the data can show that this is the run. Right: each run contains six tumours and six normals. The first component now separates the runs, and within each run tumours and normals are mixed: there is no biological signal, and the run effect can be estimated and removed.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># genes declared "differentially expressed" at a false discovery rate of 5%</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>p_conf <span class="ot">&lt;-</span> <span class="fu">apply</span>(X_conf, <span class="dv">2</span>, <span class="cf">function</span>(g) <span class="fu">t.test</span>(g <span class="sc">~</span> group)<span class="sc">$</span>p.value)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>p_bal  <span class="ot">&lt;-</span> <span class="fu">apply</span>(X_bal,  <span class="dv">2</span>, <span class="cf">function</span>(g) <span class="fu">anova</span>(<span class="fu">lm</span>(g <span class="sc">~</span> run_bal <span class="sc">+</span> group))[<span class="st">"group"</span>, <span class="st">"Pr(&gt;F)"</span>])</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">confounded =</span> <span class="fu">sum</span>(<span class="fu">p.adjust</span>(p_conf, <span class="st">"BH"</span>) <span class="sc">&lt;</span> <span class="fl">0.05</span>),</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">balanced_with_run_in_model =</span> <span class="fu">sum</span>(<span class="fu">p.adjust</span>(p_bal, <span class="st">"BH"</span>) <span class="sc">&lt;</span> <span class="fl">0.05</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;                 confounded balanced_with_run_in_model 
+#&gt;                         22                          0</code></pre>
+</div>
+</div>
+<p>In the confounded design, the analysis reports a clean separation and a list of “differentially expressed” genes, none of which is real. In the balanced design, the run is a block: it can be put in the model, and the false discoveries disappear. The levers translate directly:</p>
+<ul>
+<li><strong>Blocking and randomisation</strong> → spread the biological groups evenly over runs, plates, extraction days and technicians, and randomise the positions within each.</li>
+<li><strong>Control</strong> → include technical replicates, reference samples or pooled quality-control samples in every run; they measure the variation added by the measurement itself (SSM).</li>
+<li><strong>The experimental unit</strong> → know which samples come from the same patient, mouse or culture. Several biopsies per patient form clusters that are simply patients, and on Day 7 they decide how the data may be split.</li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> A batch that is confounded with the biological groups cannot be corrected afterwards. Batch-correction methods need both groups present in every batch.</p>
+</div></div><div class="callout callout-style-default callout-caution callout-titled" title="Check yourself">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check yourself
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A colleague has 48 RNA samples, 24 from responders and 24 from non-responders, and a sequencer that takes 16 samples per run. She proposes to sequence the responders first, because their samples arrived first. What would you advise, and what should be recorded?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Answer">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Use three runs, each with 8 responders and 8 non-responders, with the positions within each run randomised. Sequencing the responders first would confound response with run, and possibly with storage time as well. Record the run, the position, the extraction date and the arrival date for every sample, so that any of these can be checked or put in the model later.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="how-many-samples-when-there-is-no-hypothesis-to-power" class="level3">
+<h3 class="anchored" data-anchor-id="how-many-samples-when-there-is-no-hypothesis-to-power">How many samples, when there is no hypothesis to power?</h3>
+<p>There is no effect size to plug into <code>power.t.test</code> when the question is “are there subtypes?”. Sample size still matters, and it can still be reasoned about.</p>
+<ul>
+<li><strong>Rare groups.</strong> A subtype that makes up 5% of patients can only be discovered if enough of its members are in the sample. To have a 90% chance of including at least ten of them requires almost 300 patients (see below).</li>
+<li><strong>Stable structure.</strong> A principal component or a cluster should be a property of the population, not of this sample. Exercise 2.1 showed that 50 patients recovered a real subtype only imperfectly. For PCA there is even a sharp limit, known from random-matrix theory: with many more genes than samples, a direction with a modest amount of extra variance cannot be distinguished from noise at all, however carefully it is measured.</li>
+<li><strong>The precision of an error rate.</strong> An accuracy measured on <span class="math inline">\(n\)</span> test samples has a standard error of about <span class="math inline">\(\sqrt{a(1-a)/n}\)</span>. With 50 test samples and an accuracy of 80%, that is almost six percentage points, more than many of the “improvements” reported between classifiers.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># (1) patients needed for a 90% chance of at least 10 members of a 5% subtype</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>n_try <span class="ot">&lt;-</span> <span class="dv">50</span><span class="sc">:</span><span class="dv">600</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">min</span>(n_try[<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pbinom</span>(<span class="dv">9</span>, n_try, <span class="fl">0.05</span>) <span class="sc">&gt;=</span> <span class="fl">0.9</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 282</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># (3) standard error of an 80% accuracy, and the test size for a 95% interval of +/- 5%</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">se_50_test_samples =</span> <span class="fu">sqrt</span>(<span class="fl">0.8</span> <span class="sc">*</span> <span class="fl">0.2</span> <span class="sc">/</span> <span class="dv">50</span>),</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_for_plus_minus_5 =</span> <span class="fu">ceiling</span>(<span class="fl">0.8</span> <span class="sc">*</span> <span class="fl">0.2</span> <span class="sc">*</span> (<span class="fl">1.96</span> <span class="sc">/</span> <span class="fl">0.05</span>)<span class="sc">^</span><span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; se_50_test_samples n_for_plus_minus_5 
+#&gt;         0.05656854       246.00000000</code></pre>
+</div>
+</div>
+<p>Where no formula applies, a pilot study and a simulation of the planned analysis, in the style of the power simulation above, answer the same question.</p>
+</section>
+<section id="confirming-what-was-found-the-winners-curse" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="confirming-what-was-found-the-winners-curse">Confirming what was found: the winner’s curse</h3>
+<p>Exploration ends with a hypothesis, and testing it is a confirmatory study like any other, with randomisation and a power calculation. There is one trap. The effect size for the power calculation is naturally taken from the discovery data, and that estimate is too large. The genes, clusters or predictors that were carried forward were chosen <em>because</em> they looked strongest, and looking strongest is partly luck. This is the <strong>winner’s curse</strong> <span class="citation" data-cites="Ioannidis2008">(<a href="references.html#ref-Ioannidis2008" role="doc-biblioref">Ioannidis 2008</a>)</span>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code for the figure</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>G <span class="ot">&lt;-</span> <span class="dv">2000</span>; m <span class="ot">&lt;-</span> <span class="dv">20</span>; true_effect <span class="ot">&lt;-</span> <span class="fl">0.3</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>study <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  a <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(m <span class="sc">*</span> G), m); b <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(m <span class="sc">*</span> G, true_effect), m)</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  d <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(b) <span class="sc">-</span> <span class="fu">colMeans</span>(a)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> <span class="fu">sqrt</span>((<span class="fu">apply</span>(a, <span class="dv">2</span>, var) <span class="sc">+</span> <span class="fu">apply</span>(b, <span class="dv">2</span>, var)) <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">effect =</span> d, <span class="at">t =</span> d <span class="sc">/</span> (s <span class="sc">*</span> <span class="fu">sqrt</span>(<span class="dv">2</span> <span class="sc">/</span> m)))</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>discovery <span class="ot">&lt;-</span> <span class="fu">study</span>(); replication <span class="ot">&lt;-</span> <span class="fu">study</span>()</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>top <span class="ot">&lt;-</span> <span class="fu">order</span>(<span class="sc">-</span>discovery<span class="sc">$</span>t)[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>]</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(discovery<span class="sc">$</span>effect, replication<span class="sc">$</span>effect, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.4</span>, <span class="at">col =</span> <span class="st">"grey75"</span>, <span class="at">las =</span> <span class="dv">1</span>, <span class="at">asp =</span> <span class="dv">1</span>,</span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"estimated effect in discovery"</span>, <span class="at">ylab =</span> <span class="st">"estimated effect in replication"</span>)</span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">lty =</span> <span class="dv">2</span>); <span class="fu">abline</span>(<span class="at">h =</span> true_effect, <span class="at">v =</span> true_effect, <span class="at">col =</span> <span class="st">"#1F4E79"</span>, <span class="at">lty =</span> <span class="dv">3</span>)</span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(discovery<span class="sc">$</span>effect[top], replication<span class="sc">$</span>effect[top], <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"#D35400"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-winners-curse" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-winners-curse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="02-design_files/figure-html/fig-winners-curse-1.png" class="img-fluid figure-img" width="576">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-winners-curse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.9: 2,000 genes, all with the same true effect of 0.3 standard deviations, measured in a discovery study and an independent replication with 20 samples per group. The 20 genes with the largest discovery t-statistics (orange) have an estimated effect of about 1 in the discovery data, but about 0.4 in the replication. They were selected partly for their luck, and the luck does not replicate.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">true_effect =</span> true_effect,</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">top20_in_discovery   =</span> <span class="fu">mean</span>(discovery<span class="sc">$</span>effect[top]),</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">top20_in_replication =</span> <span class="fu">mean</span>(replication<span class="sc">$</span>effect[top]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;          true_effect   top20_in_discovery top20_in_replication 
+#&gt;             0.300000             1.051442             0.402163</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># replicates per group for 80% power: on the discovery estimate, and on the truth</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">planned_on_discovery =</span> <span class="fu">power.t.test</span>(<span class="at">power =</span> <span class="fl">0.8</span>, <span class="at">delta =</span> <span class="fu">mean</span>(discovery<span class="sc">$</span>effect[top]))<span class="sc">$</span>n,</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">needed_for_truth     =</span> <span class="fu">power.t.test</span>(<span class="at">power =</span> <span class="fl">0.8</span>, <span class="at">delta =</span> true_effect)<span class="sc">$</span>n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; planned_on_discovery     needed_for_truth 
+#&gt;             15.22211            175.38510</code></pre>
+</div>
+</div>
+<p>A replication powered on the discovery estimate would use about 15 samples per group and have very little power for an effect that is really 0.3. The consequence for design: power a confirmation on a deliberately conservative effect size, and treat a failed replication of an exploratory finding as the expected outcome rather than a surprise.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — Effects chosen because they look largest are overestimated. Plan the confirmation on a smaller effect than the discovery suggests.</p>
+</div><div class="">
+<p><strong>↪</strong> Day 9 meets the same phenomenon after variable selection with the lasso: refitting the selected variables gives <em>p</em>-values that are too small.</p>
+</div></div>
+</section>
+<section id="write-down-the-choices" class="level3">
+<h3 class="anchored" data-anchor-id="write-down-the-choices">Write down the choices</h3>
+<p>An exploratory analysis is allowed to be flexible, but each choice (the normalisation, which genes to filter, the distance measure, the number of clusters, which outliers to drop) is an opportunity to make the result look better. Trying many and reporting the most convincing is multiple testing in disguise, sometimes called the <em>garden of forking paths</em> <span class="citation" data-cites="Gelman2014">(<a href="references.html#ref-Gelman2014" role="doc-biblioref">Gelman and Loken 2014</a>)</span>. Three habits keep this honest: fix the preprocessing before looking at the outcome; keep the validation labels hidden until the analysis plan is final; and keep a log of what was tried, so that the report can say how many paths were explored.</p>
+</section>
+<section id="prediction-design-for-where-the-model-will-be-used" class="level3">
+<h3 class="anchored" data-anchor-id="prediction-design-for-where-the-model-will-be-used">Prediction: design for where the model will be used</h3>
+<p>A predictive model is judged by its error on new cases, so the test data should resemble those cases. A classifier developed on biopsies from one hospital, with half of the patients diseased, will meet a different prevalence, a different scanner or sequencer and a different patient mix when it is used elsewhere. The design questions are therefore about the <strong>target population</strong>: which hospitals, which time period, which prevalence. An <strong>external validation</strong> set from another centre or a later period is the most convincing test. And a model cannot be more accurate than its labels: if the “truth” in the training data comes from a noisy diagnosis, that noise is part of the design too.</p>
+</section>
+<section id="integration-one-design-vocabulary-three-kinds-of-question" class="level3">
+<h3 class="anchored" data-anchor-id="integration-one-design-vocabulary-three-kinds-of-question">Integration: one design vocabulary, three kinds of question</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Design question</th>
+<th style="text-align: left;">Confirm</th>
+<th style="text-align: left;">Explore</th>
+<th style="text-align: left;">Predict</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">What comes first?</td>
+<td style="text-align: left;">the hypothesis</td>
+<td style="text-align: left;">the data</td>
+<td style="text-align: left;">the outcome to predict</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">What makes the conclusion honest?</td>
+<td style="text-align: left;">randomisation, a fixed <span class="math inline">\(\alpha\)</span></td>
+<td style="text-align: left;">replication on independent data</td>
+<td style="text-align: left;">a locked test set, external validation</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Nuisance variation</td>
+<td style="text-align: left;">keep small, block</td>
+<td style="text-align: left;">sample broadly, record</td>
+<td style="text-align: left;">match the target population</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Experimental unit</td>
+<td style="text-align: left;">sets the degrees of freedom</td>
+<td style="text-align: left;">sets the unit of the split</td>
+<td style="text-align: left;">sets the unit of the split</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Batches</td>
+<td style="text-align: left;">block, randomise</td>
+<td style="text-align: left;">balance groups over batches</td>
+<td style="text-align: left;">balance; test on new batches</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Sample size</td>
+<td style="text-align: left;">power for a stated effect</td>
+<td style="text-align: left;">rare groups, stability, a pilot</td>
+<td style="text-align: left;">precision of the error rate</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Allowed claim</td>
+<td style="text-align: left;">“causes” (if randomised)</td>
+<td style="text-align: left;">“suggests”, “worth testing”</td>
+<td style="text-align: left;">“predicts, with this error, here”</td>
+</tr>
+</tbody>
+</table>
+<p>The vocabulary of the first half of the chapter is needed in every column. What changes is what it protects. In a confirmatory study it protects the test from bias; in a data-driven study it protects the patterns from being artefacts, and the honest check from having been used up before it was made.</p>
+</section>
+</section>
 <section id="key-takeaways" class="level2">
 <h2 class="anchored" data-anchor-id="key-takeaways">Key takeaways</h2>
 <ul>
+<li>First decide what kind of question the study asks. In <strong>confirmatory</strong> research the hypothesis selects the data; in <strong>exploratory</strong> research the data select the hypothesis; in <strong>prediction</strong> the aim is a low error on new cases. Each licenses a different claim.</li>
 <li>The leverage over a study is spent before data collection. Design determines quality; analysis can only reveal it.</li>
-<li>Write the model first. It states what is to be measured, in what type, and where variance will enter — and it becomes the spreadsheet header.</li>
+<li>Write the model first. It states what is to be measured, in what type, and where variance will enter, and it becomes the spreadsheet header.</li>
 <li>Partition the variance into named sources. SSH is signal; SSM and SSU are the dangerous terms that can violate assumptions or masquerade as signal.</li>
 <li>Use the four levers deliberately: <strong>control</strong> to make comparisons interpretable, <strong>randomise</strong> what cannot be controlled, <strong>replicate</strong> at the level of the experimental unit, and <strong>block</strong> what can be identified.</li>
 <li>Identify the experimental unit correctly. Counting sample units instead of experimental units is pseudoreplication, and it manufactures false confidence.</li>
-<li>Keep type I and type II error distinct. Fix <span class="math inline">\(\alpha\)</span>; maximise power. Every reduction in <span class="math inline">\(\sigma\)</span> purchases power at no cost.</li>
-<li>Compute the required sample size <em>a priori</em>, either with <code>power.t.test</code> or by simulating the experiment and counting successes.</li>
+<li>Keep type I and type II error distinct. Fix <span class="math inline">\(\alpha\)</span>; maximise power. Every reduction in <span class="math inline">\(\sigma\)</span> purchases power at no cost. Compute the required sample size <em>a priori</em>, with <code>power.t.test</code> or by simulation.</li>
+<li>A hypothesis cannot be tested on the data that suggested it. When the data come first, plan the independent check (a locked validation set or a replication cohort) before the study starts, and size it.</li>
+<li>Balance biological groups over batches, record all metadata, and power a confirmation on a conservative effect size: discovered effects are overestimated.</li>
 </ul>
 </section>
 <section id="looking-ahead" class="level2">
 <h2 class="anchored" data-anchor-id="looking-ahead">Looking ahead</h2>
-<p>The dependencies you learned to <em>recognise</em> in this lecture, rats in boxes, pieces of a liver, treatments nested in strains, are the structures that decide on Day 7 how data may be resampled. Design and resampling are two halves of one skill: identifying correlation, then respecting it.</p>
-<p>The simulation-based power analysis is the more immediate bridge. When a practical asks you to simulate and analyse data, the same loop as the power simulation above is being run — setting a true effect, generating data around it, and observing what the analysis recovers. Two questions organise the whole lecture and should precede every real measurement: <em>has the true experimental unit been identified, and are there enough of them to detect the effect of interest?</em> Answering these in advance is what makes a post mortem unnecessary.</p>
+<p>The dependencies you learned to <em>recognise</em> in this lecture, rats in boxes, pieces of a liver, samples in sequencing runs, are the structures that decide on Day 7 how data may be resampled and split. Design and resampling are two halves of one skill: identifying correlation, then respecting it.</p>
+<p>The three kinds of question organise the rest of the course. Days 4 and 5 explore: PCA and clustering will always return directions and groups, and Exercise 2.1 showed why those are hypotheses rather than results. Day 6 returns to models and likelihood, and from Day 7 onwards the question is prediction, where Exercise 2.2 returns as cross-validation and the rule that every data-driven choice belongs inside the loop. The simulation skill of this chapter is the bridge throughout: set a known truth, generate data around it, and observe what the analysis recovers.</p>
+<p>Two questions should precede every real measurement: <em>has the true experimental unit been identified, and are there enough of them to detect the effect of interest?</em> For a data-driven study a third joins them: <em>where will the independent data come from?</em> Answering these in advance is what makes a post mortem unnecessary.</p>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-Ambroise2002" class="csl-entry" role="listitem">
+Ambroise, Christophe, and Geoffrey J. McLachlan. 2002. <span>“Selection Bias in Gene Extraction on the Basis of Microarray Gene-Expression Data.”</span> <em>Proceedings of the National Academy of Sciences</em> 99 (10): 6562–66.
+</div>
+<div id="ref-Breiman2001" class="csl-entry" role="listitem">
+Breiman, Leo. 2001. <span>“Statistical Modeling: The Two Cultures.”</span> <em>Statistical Science</em> 16 (3): 199–231.
+</div>
+<div id="ref-Gelman2014" class="csl-entry" role="listitem">
+Gelman, Andrew, and Eric Loken. 2014. <span>“The Statistical Crisis in Science.”</span> <em>American Scientist</em> 102 (6): 460–65.
+</div>
+<div id="ref-Ioannidis2008" class="csl-entry" role="listitem">
+Ioannidis, John P. A. 2008. <span>“Why Most Discovered True Associations Are Inflated.”</span> <em>Epidemiology</em> 19 (5): 640–48.
+</div>
+<div id="ref-Kriegeskorte2009" class="csl-entry" role="listitem">
+Kriegeskorte, Nikolaus, W. Kyle Simmons, Patrick S. F. Bellgowan, and Chris I. Baker. 2009. <span>“Circular Analysis in Systems Neuroscience: The Dangers of Double Dipping.”</span> <em>Nature Neuroscience</em> 12 (5): 535–40.
+</div>
+<div id="ref-Leek2010" class="csl-entry" role="listitem">
+Leek, Jeffrey T., Robert B. Scharpf, Héctor Corrada Bravo, David Simcha, Benjamin Langmead, W. Evan Johnson, Donald Geman, Keith Baggerly, and Rafael A. Irizarry. 2010. <span>“Tackling the Widespread and Critical Impact of Batch Effects in High-Throughput Data.”</span> <em>Nature Reviews Genetics</em> 11 (10): 733–39.
+</div>
+<div id="ref-Shmueli2010" class="csl-entry" role="listitem">
+Shmueli, Galit. 2010. <span>“To Explain or to Predict?”</span> <em>Statistical Science</em> 25 (3): 289–310.
+</div>
+</div>
 </section>
 
 </main> <!-- /main -->

@@ -31,7 +31,7 @@ The margin carries four kinds of note:
 - **↪**: a link to another day.
 - **⚠**: a common pitfall.
 
-R is the primary language. Python appears where it adds something, for example where a popular Python library behaves differently from its R counterpart.
+All code in the book is in R. Python versions of the exercises may be added later.
 
 The textbook for the course is *An Introduction to Statistical Learning*, second edition [@James2021], referred to as ISLR. Each chapter ends with a reading guide.
 
@@ -49,4 +49,3 @@ install.packages(c(
 ))
 ```
 
-To run the Python examples you also need the `reticulate` package and a Python installation with `pandas` and `scikit-learn`.

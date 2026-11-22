@@ -11,7 +11,7 @@ The question of why statistics deserves a substantial investment of time is a le
 
 The entire chapter is organised around one proposition, which is stated here before anything else:
 
-> **Statistics arises naturally the moment a complicated process is described with a simple model.** Reality generates data through mechanisms far too intricate to be written as simple relations. When that machinery is replaced by a crude approximation — a straight line, a group mean — everything the approximation fails to capture is pushed into a leftover term, the *residual*. Statistics is the discipline of reasoning about that leftover: how large it is, how it is distributed, and how much it should make us doubt the model. The model itself is partly the hypothesis of interest and partly the semantics of the field in which the question is posed.
+> **Statistics arises naturally the moment a complicated process is described with a simple model.** Reality generates data through mechanisms far too intricate to be written as simple relations. When that machinery is replaced by a crude approximation — a straight line, a group mean — everything the approximation fails to capture is pushed into a single term, the *residual*. Statistics is the discipline of reasoning about the residuals: how large it is, how it is distributed, and how much it should make us doubt the model. The model itself is partly the hypothesis of interest and partly the semantics of the field in which the question is posed.
 
 Everything that follows — the two worked examples, random variables and distributions, degrees of freedom, and the classical tests — serves to make that sentence precise and usable.
 
@@ -499,55 +499,7 @@ That extreme sorts every model into one of three regimes, and the remainder of t
 - $n = p$ — a *saturated* model with as many parameters as data points. Classical inference breaks down (no residual df), although machine learning still has something to say.
 - $n \ll p$ — an *over-parameterised* model with far more parameters than data. Classical methods fail outright; this is where regularisation and machine learning become necessary. High-throughput biology lives here — 10,000 gene expression values measured on 100 samples is the canonical case.
 
-These three regimes answer both "why not simply add more predictors?" and "why is regularisation (Day 9) needed at all?".
-
-### Watching the degrees of freedom run out
-
-The three regimes can be watched in a simulation. The response below is pure noise, and so is every predictor: nothing predicts anything. Predictors are added one at a time to a model for 30 observations, and each model is evaluated twice: on the data used to fit it, and on 2000 new observations from the same process.
-
-```{r df-run-out}
-#| code-fold: false
-set.seed(42)
-n_obs <- 30
-P     <- matrix(rnorm(n_obs * 29), n_obs)       # 29 noise predictors
-resp  <- rnorm(n_obs)                           # a noise response
-
-P_new    <- matrix(rnorm(2000 * 29), 2000)
-resp_new <- rnorm(2000)
-
-R2 <- mse_train <- mse_new <- numeric(29)
-for (k in 1:29) {
-  fit_k <- lm(resp ~ P[, 1:k, drop = FALSE])
-  R2[k]        <- summary(fit_k)$r.squared
-  mse_train[k] <- mean(resid(fit_k)^2)
-  mse_new[k]   <- mean((resp_new - cbind(1, P_new[, 1:k, drop = FALSE]) %*% coef(fit_k))^2)
-}
-
-par(mfrow = c(1, 2))
-plot(1:29, R2, type = "b", pch = 16, ylim = c(0, 1),
-     xlab = "Number of noise predictors", ylab = expression(R^2))
-plot(1:27, mse_new[1:27], type = "b", pch = 16, log = "y",
-     ylim = range(mse_train[1:27], mse_new[1:27]),
-     xlab = "Number of noise predictors", ylab = "Mean squared error")
-lines(1:27, mse_train[1:27], type = "b", col = "steelblue")
-legend("topleft", c("new data", "training data"), col = c("black", "steelblue"),
-       pch = c(16, 1), bty = "n")
-par(mfrow = c(1, 1))
-```
-
-With 29 meaningless predictors and an intercept, 30 parameters fit 30 observations and $R^2$ reaches `r round(R2[29], 2)`: a perfect fit to pure noise. The training error falls with every predictor added, exactly as the degrees-of-freedom argument requires. The error on new data does the opposite and rises steeply as the residual degrees of freedom approach zero.
-
-[**KEY.** Fit to the data in hand always improves with more parameters. Fit to *new* data does not. The gap between the two is the subject of Days 6 and 7.]{.column-margin}
-
-The expected size of the training error can even be predicted. With $p$ parameters, noise variance $\sigma^2 = 1$ and no real effects, the residual sum of squares has expectation $(n - p)\,\sigma^2$, so the training mean squared error is about $(n-p)/n$: each parameter absorbs, on average, one observation's worth of noise.
-
-```{r df-run-out-check}
-#| code-fold: false
-round(rbind(observed = mse_train[c(5, 10, 20, 25)],
-            expected = (n_obs - (c(5, 10, 20, 25) + 1)) / n_obs), 2)
-```
-
-The observed values scatter around the prediction, as a single simulated data set should.
+These three regimes answer both "why not simply add more predictors?" and "why is regularisation (Day 9) needed at all?". What happens to *predictions* when the residual degrees of freedom run out, the phenomenon called overfitting, is worked out on Day 6. Here the concern is inference: what the residual degrees of freedom do for the estimate of the noise.
 
 ### The same accounting in a regression line
 
@@ -580,7 +532,7 @@ Each dotted line passes exactly through the single observation; the data provide
 
 $$84.5 = a + b(0.1), \qquad 85 = a + b(0.2)$$
 
-gives $b = 5$ and $a = 84$, i.e. $BD = 84 + 5\,\text{Conc}$. The fit is perfect, and precisely because it is perfect it conveys *nothing* about noise. There is no leftover variation to inspect, and hence no way to judge whether the line means anything.
+gives $b = 5$ and $a = 84$, i.e. $BD = 84 + 5\,\text{Conc}$. The fit is perfect, and precisely because it is perfect it conveys *nothing* about noise. There is no residual variation to inspect, and hence no way to judge whether the line means anything.
 
 [⚠ **A perfect fit is a warning, not a triumph.** Zero residual df means nothing remains from which to estimate the noise. The same danger reappears as **overfitting** in machine learning.]{.column-margin}
 
@@ -613,7 +565,7 @@ Fit <- fitted(Model)
 for (i in seq_along(Fit)) segments(Conc[i], Fit[i], Conc[i], BP[i], col = "red", lwd = 2)
 ```
 
-The red segments are the residuals — the leftover the model could not reach. With eight points and two parameters the accounts balance as
+The red segments are the residuals: the part of each observation the model could not reach. With eight points and two parameters the accounts balance as
 
 $$n = df_{\text{model}} + df_{\text{residual}} = 2 + 6 = 8.$$
 
@@ -628,9 +580,57 @@ The subtle consequence, and the point to retain from this chapter, is this. Many
 
 A model with more than two predictors — say drug concentration *and* sex, giving two regression lines — carries four model degrees of freedom, and the same accounting applies.
 
+### What the residual degrees of freedom are for
+
+The six residual degrees of freedom of the eight-point fit are not an accounting curiosity. They are the information from which the noise is estimated. The residual standard deviation is
+
+$$\hat\sigma = \sqrt{\frac{\text{RSS}}{n - p}} = \sqrt{\frac{\sum_i (y_i - \hat y_i)^2}{df_{\text{residual}}}},$$
+
+and every standard error, every $t$ value and every p-value in a regression table is built on it. Dividing by $n - p$ rather than by $n$ corrects for the $p$ degrees of freedom the fitted line has already consumed: the residuals of a fitted line are systematically smaller than the true residuals, because the line was chosen to make them small.
+
+How reliable is $\hat\sigma$? A simulation answers it. Straight lines are fitted, many times, to data with a known residual standard deviation $\sigma = 1$, for samples that leave 2, 6, 20 or 100 residual degrees of freedom.
+
+```{r df-sigma-hat}
+#| code-fold: false
+set.seed(310)
+df_res <- c(2, 6, 20, 100)
+
+sigma_hat <- sapply(df_res, function(d) {
+  n <- d + 2                                    # a line has two parameters
+  x <- seq(0, 1, length.out = n)
+  replicate(2000, {
+    y <- 3 + 2 * x + rnorm(n, 0, 1)             # true sigma = 1
+    summary(lm(y ~ x))$sigma
+  })
+})
+colnames(sigma_hat) <- paste("df =", df_res)
+
+boxplot(sigma_hat, ylab = expression(hat(sigma)), col = "lightblue",
+        main = "Estimated residual SD; true value 1")
+abline(h = 1, lty = 2, col = "firebrick", lwd = 2)
+
+round(rbind(mean_of_sigma2_hat = colMeans(sigma_hat^2),
+            sd_of_sigma_hat    = apply(sigma_hat, 2, sd)), 2)
+```
+
+On average $\hat\sigma^2$ is correct for every sample size, which is what the division by $n - p$ achieves. But with two residual degrees of freedom a single estimate can easily be half or twice the true value, and with a hundred it is reliable. The standard error of the slope inherits that uncertainty.
+
+[**KEY.** The residual degrees of freedom measure how much information the data contain about the size of the residuals. Few residual df mean an unreliable $\hat\sigma$, and therefore unreliable standard errors and p-values.]{.column-margin}
+
+Statistical tests account for this, and that is exactly the role of the degrees of freedom in the $t$ distribution of the next section: with few residual degrees of freedom its tails are heavier, so a larger $t$ value is needed before an effect is declared significant.
+
+```{r df-t-critical}
+#| code-fold: false
+crit <- c(qt(0.975, df = df_res), qnorm(0.975))
+names(crit) <- c(paste("df =", df_res), "normal")
+round(crit, 2)        # value |t| must exceed for p < 0.05
+```
+
+With two residual degrees of freedom an estimate must lie more than four standard errors from zero to be significant at the 5 % level; with a hundred, just under two suffice. At zero residual degrees of freedom, the saturated two-point fit, $\hat\sigma$ cannot be computed at all, and no test exists.
+
 ### Integration: what the degrees-of-freedom section establishes
 
-The section has shown, in two settings, that degrees of freedom are the currency in which a model pays for its parameters. In the ten-numbers example, fixing the mean removed the freedom of exactly one value; in the regression example, fixing the intercept and slope removed the freedom of exactly two observations. In both cases the residual degrees of freedom, $n - df_{\text{model}}$, count the observations that remain informative about the noise. When that number reaches zero, as in the saturated two-point fit, the model fits perfectly and says nothing. The three regimes $n \gg p$, $n = p$ and $n \ll p$ are therefore not a technicality: they determine whether classical inference is possible, and they motivate the regularisation methods that appear later in the course.
+The section has shown, in two settings, that degrees of freedom are the currency in which a model pays for its parameters. In the ten-numbers example, fixing the mean removed the freedom of exactly one value; in the regression example, fixing the intercept and slope removed the freedom of exactly two observations. In both cases the residual degrees of freedom, $n - df_{\text{model}}$, count the observations that remain informative about the noise. Those residual degrees of freedom are what the noise is estimated from: with few of them, $\hat\sigma$ is unreliable and tests must demand stronger evidence. When that number reaches zero, as in the saturated two-point fit, the model fits perfectly and says nothing. The three regimes $n \gg p$, $n = p$ and $n \ll p$ are therefore not a technicality: they determine whether classical inference is possible, and they motivate the regularisation methods that appear later in the course.
 
 ## Key concept: statistical tests, revisited
 
@@ -797,7 +797,7 @@ The question posed at the outset can now be answered. The mathematics is not vag
 - **degrees of freedom** govern how much the data can reveal, and a model with too few residual df (the saturated and over-parameterised cases) reveals little or nothing, however perfect its fit;
 - the classical **tests** are this logic specialised to particular statistics, and each carries its own assumptions to be verified.
 
-Statistics appears vague only when these elements are skipped and a p-value is reported as though it were a fact. The rest of this course is, in effect, a survey of what to do when the simplest assumptions do not hold — confounded or dependent observations (Days 2 and 7), responses that are not normal (Day 6), and above all the $n \ll p$ world in which bioinformatics lives (Days 4 to 11). Each is a variation on the single idea with which the chapter began: build a crude model, and take the leftover seriously.
+Statistics appears vague only when these elements are skipped and a p-value is reported as though it were a fact. The rest of this course is, in effect, a survey of what to do when the simplest assumptions do not hold — confounded or dependent observations (Days 2 and 7), responses that are not normal (Day 6), and above all the $n \ll p$ world in which bioinformatics lives (Days 4 to 11). Each is a variation on the single idea with which the chapter began: build a crude model, and take the residuals seriously.
 
 ## Looking ahead to the practical
 

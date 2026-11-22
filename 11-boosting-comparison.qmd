@@ -74,7 +74,7 @@ failing.
 
 ### Boosting is gradient descent in function space
 
-Why fit the *residuals*? The answer connects boosting to the gradient descent of Day 3. Suppose the aim is to minimise a loss summed over the training data,
+Why fit the *residuals*? The answer connects boosting to the gradient descent of Appendix B. Suppose the aim is to minimise a loss summed over the training data,
 
 $$
 \sum_{i=1}^n L\big(y_i,\ f(x_i)\big),

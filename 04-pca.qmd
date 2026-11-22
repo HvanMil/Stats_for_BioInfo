@@ -42,6 +42,10 @@ Principal Component Analysis (PCA) is the oldest and most widely used unsupervis
 
 That last point matters for how you use it: PCA does not test hypotheses. It shows you where the variance lives, and variance — as this whole course has argued — is information.
 
+::: column-margin
+**↪** Day 2: the largest source of variance is not always biology. In the batch example of the design chapter, the first principal component was the sequencing run.
+:::
+
 ## The principle of dimension reduction
 
 ### It's a bottle
@@ -244,7 +248,7 @@ This gives PCA the same bookkeeping structure we met on Day 1. The total varianc
 
 ### Why an eigenvector? The derivation
 
-The claim that the first principal component is an eigenvector of $S$ deserves a derivation, and it is a short one. By Day 3, the variance of the scores $X_c\phi$ is $\phi^\top S\phi$. We maximise it subject to $\phi^\top\phi = 1$ with a Lagrange multiplier $\lambda$:
+The claim that the first principal component is an eigenvector of $S$ deserves a derivation, and it is a short one. By Day 3 (and Theorem B.12 of Appendix B), the variance of the scores $X_c\phi$ is $\phi^\top S\phi$. We maximise it subject to $\phi^\top\phi = 1$ with a Lagrange multiplier $\lambda$:
 
 $$
 \mathcal{L}(\phi, \lambda) = \phi^\top S\,\phi - \lambda\,(\phi^\top\phi - 1).
@@ -271,7 +275,7 @@ The variance attained *is* the eigenvalue, so the maximum is attained at the eig
 :::
 
 ::: column-margin
-**↪** Day 3 showed how such an eigenvector is computed without any formula, by power iteration.
+**↪** Appendix B shows how such an eigenvector is computed without any formula, by power iteration.
 :::
 
 ## PCA step by step
