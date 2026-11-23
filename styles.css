@@ -22,3 +22,16 @@ div.sourceCode {
 table {
   font-size: 0.93rem;
 }
+
+/* Contents list at the top of each chapter (toc-location: left-body): compact */
+#TOC-body h2#toc-title { font-size: 1.05rem; font-weight: 600; border-bottom: none; margin-top: 0.5rem; margin-bottom: 0.3rem; }
+#TOC-body ul { font-size: 0.92rem; margin-bottom: 1.2rem; }
+
+/* Left sidebar: compact, so that "On this page" fits below the list of days on a laptop screen */
+#quarto-sidebar .sidebar-menu-container { padding-top: 0.3rem; }
+#quarto-sidebar .sidebar-menu-container .menu-text { font-size: 0.8rem; line-height: 1.15; }
+#quarto-sidebar .sidebar-item { margin-top: 0.15rem; margin-bottom: 0.05rem; }
+#quarto-sidebar #TOC { margin-top: 0.4rem; padding-top: 0.2rem; }
+#quarto-sidebar #TOC h2#toc-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.2rem; }
+#quarto-sidebar #TOC ul { font-size: 0.8rem; }
+#quarto-sidebar #TOC ul li a { padding-top: 0.08rem; padding-bottom: 0.08rem; line-height: 1.2; }

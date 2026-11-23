@@ -11,7 +11,7 @@ The question of why statistics deserves a substantial investment of time is a le
 
 The entire chapter is organised around one proposition, which is stated here before anything else:
 
-> **Statistics arises naturally the moment a complicated process is described with a simple model.** Reality generates data through mechanisms far too intricate to be written as simple relations. When that machinery is replaced by a crude approximation — a straight line, a group mean — everything the approximation fails to capture is pushed into a single term, the *residual*. Statistics is the discipline of reasoning about the residuals: how large it is, how it is distributed, and how much it should make us doubt the model. The model itself is partly the hypothesis of interest and partly the semantics of the field in which the question is posed.
+> **Statistics arises naturally the moment a complicated process is described with a simple model.** Reality generates data through mechanisms far too intricate to be written as simple relations, and the data therefore vary. Statistics accounts for that variation: how much of it the model *explains*, and how much is left in the *residuals*. When the machinery of reality is replaced by a crude approximation — a straight line, a group mean — the approximation explains part of the variation, and everything it fails to capture is pushed into the residuals. The two parts are judged against each other: an effect counts only if the variation it explains is large relative to the residual variation, and that judgement is only as good as the assumptions about the residuals — their size, their distribution and their independence. The model itself is partly the hypothesis of interest and partly the semantics of the field in which the question is posed.
 
 Everything that follows — the two worked examples, random variables and distributions, degrees of freedom, and the classical tests — serves to make that sentence precise and usable.
 
@@ -61,15 +61,17 @@ The columns should be read from left to right, because each will recur throughou
 - **F value** — the test statistic, named after Ronald Fisher. It is the ratio of the two mean squares: explained dispersion over unexplained dispersion. A large F means the `feed` effect is large *relative to the noise*.
 - **Pr(\>F)** — the p-value, obtained by comparing the F value against the F distribution determined by the two degrees of freedom.
 
-None of these numbers is mysterious. Write $y_{ij}$ for chicken $j$ on feed $i$, $\bar y_i$ for the mean of feed $i$ and $\bar y$ for the overall mean. The deviation of every chicken from the overall mean splits into two parts,
+None of these numbers is mysterious, except perhaps the degrees of freedom: why 5 and 65? The section on degrees of freedom below answers that question. Write $y_{ij}$ for chicken $j$ on feed $i$, $\bar y_i$ for the mean of feed $i$ and $\bar y$ for the overall mean. The deviation of every chicken from the overall mean splits into two parts,
 
 $$y_{ij} - \bar y = (\bar y_i - \bar y) + (y_{ij} - \bar y_i),$$
 
-and when both sides are squared and summed, the cross-term vanishes, because deviations from a group's own mean sum to zero within that group. What remains is the identity on which the whole table rests:
+and when both sides are squared and summed, the cross-term vanishes, because deviations from a group's own mean sum to zero within that group. What remains is the identity on which the whole table rests. It is an *identity* in the mathematical sense: it holds exactly for every data set, whatever the distribution of the data.
 
 $$\underbrace{\sum_{i}\sum_{j} (y_{ij} - \bar y)^2}_{SS_{\text{total}}} = \underbrace{\sum_{i} n_i(\bar y_i - \bar y)^2}_{SS_{\text{between}}} + \underbrace{\sum_{i}\sum_{j} (y_{ij} - \bar y_i)^2}_{SS_{\text{residual}}}.$$
 
-[**KEY.** The variance partition is an identity, not an approximation: the total sum of squares splits *exactly* into an explained and an unexplained part.]{.column-margin}
+The factor $n_i$ in the between-group term appears because all $n_i$ chickens on feed $i$ receive the same group mean, so summing over them gives $\sum_j (\bar y_i - \bar y)^2 = n_i(\bar y_i - \bar y)^2$.
+
+[**KEY.** The variance partition is an identity, not an approximation: the total sum of squares splits *exactly* into an explained and an unexplained part, for every data set. Only the *F*-test that follows needs assumptions.]{.column-margin}
 
 The table can therefore be rebuilt in a few lines.
 
@@ -87,14 +89,21 @@ df_between  <- nlevels(chickwts$feed) - 1
 df_residual <- length(w) - nlevels(chickwts$feed)
 
 F_value <- (SS_between / df_between) / (SS_residual / df_residual)
+p_value <- pf(F_value, df_between, df_residual, lower.tail = FALSE)
 
-c(SS_between = SS_between, SS_residual = SS_residual,
-  identity_check = SS_total - (SS_between + SS_residual),
-  F = F_value,
-  p = pf(F_value, df_between, df_residual, lower.tail = FALSE))
+SS_total - (SS_between + SS_residual)          # the identity: zero up to rounding
+
+by_hand <- data.frame(Df        = c(df_between, df_residual),
+                      "Sum Sq"  = c(SS_between, SS_residual),
+                      "Mean Sq" = c(SS_between / df_between, SS_residual / df_residual),
+                      "F value" = c(F_value, NA),
+                      "Pr(>F)"  = c(p_value, NA),
+                      row.names = c("feed", "Residuals"), check.names = FALSE)
+class(by_hand) <- c("anova", "data.frame")    # print it like an ANOVA table
+by_hand
 ```
 
-The sums of squares, the $F$ value and the p-value agree with the table, and the identity check is zero up to rounding error.
+The table rebuilt by hand agrees with the one from `summary.aov`, number by number, and the identity holds exactly.
 
 Here the p-value is approximately $6\times10^{-10}$: were feed to have no effect, an F value this large would be extremely improbable. The null hypothesis of no feed effect is therefore rejected.
 
@@ -134,7 +143,7 @@ Every point sits exactly on the line, and the fitted (black) and true (blue) lin
 
 The variation is therefore reintroduced as a random term drawn from a normal distribution with mean zero and variance $\sigma^2$; the drawn values are added to or subtracted from the values on the line. This is the modelling choice that creates statistics: weight is declared to equal a **deterministic part** that can be written down plus a **random residual** that can only be described by its distribution.
 
-[**DEF — Residual.** The part of the response that the deterministic model does not capture: $\text{residual} = \text{observed} - \text{fitted}$. Residuals are not modelled value by value; only a *distribution* is assumed for them (here normal, with mean 0 and variance $\sigma^2$).]{.column-margin}
+[**DEF — Residual.** The part of the response that the deterministic model does not capture: $\text{residual} = \text{observed} - \text{fitted}$. Residuals are not modelled value by value; only a *distribution* is assumed for them (here normal, with mean 0 and variance $\sigma^2$). The model also assumes the *form* of the deterministic part, here a straight line; if that form is wrong, the error ends up in the residuals, which then show a pattern.]{.column-margin}
 
 
 ```{r lr-noise-sim}
@@ -172,6 +181,7 @@ Because the data were constructed here, the estimates can be checked against the
 
 - **(Intercept)**: estimated ≈ 177 against a true value of 150 — a sizeable miss.
 - **Weight_feed** (the slope): estimated ≈ 18.3 against a true value of 20 — considerably closer.
+- The two misses are connected. The fitted line always passes through the point of means (shown below), here at a feed value of about 14. The intercept is the predicted weight at feed = 0, an extrapolation far outside the data, so the slope's small error of −1.7, carried 14 units back, already accounts for most of the intercept's error. Measured in their own standard errors (26.9 and 1.9), both estimates are about one standard error from the truth: the intercept is not estimated worse by accident, it is less precisely determined, and its standard error says so.
 - **Residual standard error**: ≈ 14.5 against the 15 that was used. Despite R's label, this quantity is the standard deviation of the residuals, not a standard error in the sampling sense.
 - **Multiple R-squared**: the fraction of the variation in weight that feed explains.
 - **Std. Error** on each estimate: the uncertainty of the intercept and slope relative to their values.
@@ -192,7 +202,7 @@ These two *normal equations* are linear in $a$ and $b$. The first gives $\hat a 
 
 $$\hat b = \frac{\sum_i (x_i - \bar x)(y_i - \bar y)}{\sum_i (x_i - \bar x)^2} = \frac{S_{xy}}{S_{xx}} .$$
 
-[**KEY.** The normal equations say that the residuals sum to zero and are uncorrelated with $x$. Day 3 reads this geometrically: the residual is *orthogonal* to the predictors.]{.column-margin}
+[**KEY.** The normal equations say that the residuals sum to zero and are uncorrelated with $x$. Appendix B reads this geometrically: the residual is *orthogonal* to the predictors.]{.column-margin}
 
 The residual standard deviation is estimated by $\hat\sigma = \sqrt{\text{RSS}/(n-2)}$, where $n - 2$ are the residual degrees of freedom, and the standard error of the slope is
 
@@ -374,7 +384,7 @@ The $\sqrt n$ in the denominator is the same one that appears in every standard 
 This is why the residual term earns its normality assumption. A residual is the sum of many unmeasured influences — genetics, age, micro-environment — so the CLT predicts that it should be roughly normal *even though none of those influences was modelled.*
 :::
 
-[⚠ **When the CLT fails.** Two common cases: (1) the contributions are **not independent** — correlated measurements (repeated, nested) do not average to a normal in the same way, which is why Days 2 and 7 insist on identifying the experimental unit; (2) the effects **multiply** rather than add — a product of many positive factors gives a **log-normal**, not a normal (take logarithms first). Concentrations, rates and abundances are often multiplicative.]{.column-margin}
+[⚠ **When the CLT argument does not apply.** Two common cases: (1) the contributions are **not independent** — correlated measurements (repeated, nested) do not average to a normal in the same way, which is why Days 2 and 7 insist on identifying the experimental unit; (2) the effects **multiply** rather than add — a product of many positive factors is **log-normal**. The CLT then applies to the *logarithm*, which is a sum, so take logarithms first. Concentrations, rates, abundances and gene expression are often multiplicative.]{.column-margin}
 
 This is not an aside; it is the justification for the modelling choice made earlier. When weight was written as *deterministic part + normal residual*, the residual stood in for a large number of small unmeasured effects added together. The CLT is precisely the theorem stating that such a sum should be approximately normal. The normality assumption on residuals is therefore not wishful thinking but what the CLT leads one to expect. Two conditions govern its applicability: the contributions must be approximately **independent**, and they must **add** rather than multiply, with many of them and none dominating. When those conditions fail — correlated effects, or multiplicative ones — normality is exactly what should *not* be assumed.
 
@@ -430,7 +440,7 @@ The point to carry into the rest of the course, and the reason these distributio
 A GLM does **not** approximate a Poisson or binomial by a normal. It keeps each response distribution as it is — Poisson, binomial, and so on — and models the mean on a transformed (link) scale. The distributions introduced here are not merely background: each becomes a *modelling option* in this course. This is why their exact mean–variance relationships are learned rather than dismissed as "roughly normal".
 :::
 
-The distributions surveyed here are therefore exactly the vocabulary required later. The limits (everything tends to normal) explain *why classical methods work as well as they do*; the differences (Poisson, binomial and normal differ away from the limit) explain *why GLMs remain necessary*. Day 6 fits such models by maximum likelihood, with logistic regression as the main example.
+The distributions surveyed here are therefore exactly the vocabulary required later. The limits (everything tends to normal) explain *why classical methods work as well as they do*; the differences (Poisson, binomial and normal differ away from the limit) explain *why GLMs remain necessary*. Day 5 introduces maximum likelihood, and Day 6 uses it to fit such models, with logistic regression as the main example.
 
 ### Integration: what the distribution section establishes
 
@@ -499,7 +509,7 @@ That extreme sorts every model into one of three regimes, and the remainder of t
 - $n = p$ — a *saturated* model with as many parameters as data points. Classical inference breaks down (no residual df), although machine learning still has something to say.
 - $n \ll p$ — an *over-parameterised* model with far more parameters than data. Classical methods fail outright; this is where regularisation and machine learning become necessary. High-throughput biology lives here — 10,000 gene expression values measured on 100 samples is the canonical case.
 
-These three regimes answer both "why not simply add more predictors?" and "why is regularisation (Day 9) needed at all?". What happens to *predictions* when the residual degrees of freedom run out, the phenomenon called overfitting, is worked out on Day 6. Here the concern is inference: what the residual degrees of freedom do for the estimate of the noise.
+These three regimes answer both "why not simply add more predictors?" and "why is regularisation (Day 9) needed at all?". What happens to *predictions* when the residual degrees of freedom run out, the phenomenon called overfitting, is worked out on Day 5. Here the concern is inference: what the residual degrees of freedom do for the estimate of the noise.
 
 ### The same accounting in a regression line
 
@@ -619,15 +629,6 @@ On average $\hat\sigma^2$ is correct for every sample size, which is what the di
 
 Statistical tests account for this, and that is exactly the role of the degrees of freedom in the $t$ distribution of the next section: with few residual degrees of freedom its tails are heavier, so a larger $t$ value is needed before an effect is declared significant.
 
-```{r df-t-critical}
-#| code-fold: false
-crit <- c(qt(0.975, df = df_res), qnorm(0.975))
-names(crit) <- c(paste("df =", df_res), "normal")
-round(crit, 2)        # value |t| must exceed for p < 0.05
-```
-
-With two residual degrees of freedom an estimate must lie more than four standard errors from zero to be significant at the 5 % level; with a hundred, just under two suffice. At zero residual degrees of freedom, the saturated two-point fit, $\hat\sigma$ cannot be computed at all, and no test exists.
-
 ### Integration: what the degrees-of-freedom section establishes
 
 The section has shown, in two settings, that degrees of freedom are the currency in which a model pays for its parameters. In the ten-numbers example, fixing the mean removed the freedom of exactly one value; in the regression example, fixing the intercept and slope removed the freedom of exactly two observations. In both cases the residual degrees of freedom, $n - df_{\text{model}}$, count the observations that remain informative about the noise. Those residual degrees of freedom are what the noise is estimated from: with few of them, $\hat\sigma$ is unreliable and tests must demand stronger evidence. When that number reaches zero, as in the saturated two-point fit, the model fits perfectly and says nothing. The three regimes $n \gg p$, $n = p$ and $n \ll p$ are therefore not a technicality: they determine whether classical inference is possible, and they motivate the regularisation methods that appear later in the course.
@@ -664,6 +665,18 @@ legend("topright", legend = c("df = 4","df = 8","df = 10","df = 100"),
 ```
 
 The curves show that the t-distribution with few degrees of freedom has heavier tails than the one with many; at df = 100 it is almost indistinguishable from the standard normal.
+
+How much heavier, in practice? The value that $|t|$ must exceed for $p < 0.05$ depends on the residual degrees of freedom of the model:
+
+```{r df-t-critical}
+#| code-fold: false
+df_res <- c(2, 6, 20, 100)
+crit <- c(qt(0.975, df = df_res), qnorm(0.975))
+names(crit) <- c(paste("df =", df_res), "normal")
+round(crit, 2)        # value |t| must exceed for p < 0.05
+```
+
+With two residual degrees of freedom an estimate must lie more than four standard errors from zero to be significant at the 5 % level; with a hundred, just under two suffice. At zero residual degrees of freedom, the saturated two-point fit, $\hat\sigma$ cannot be computed at all, and no test exists.
 
 [⚠ **The t-test assumes normality.** It is constructed from a normal variable divided by a $\chi^2$ variable (itself a sum of squared normals). With non-normal data the stated p-value is not trustworthy, and a bootstrap or a GLM is required instead.]{.column-margin}
 
@@ -720,7 +733,7 @@ The statistic has already appeared twice: as the last column of the ANOVA table 
 
 #### One model, three names
 
-The t-test, the ANOVA and the regression are not three methods. With two groups they are the same model, and their statistics are tied by $F = t^2$.
+The t-test, the ANOVA and the regression are not three methods. With two groups they are the same model, and they give exactly the same p-value.
 
 ```{r one-model}
 #| code-fold: false
@@ -729,13 +742,16 @@ two <- droplevels(subset(chickwts, feed %in% c("casein", "horsebean")))
 tt   <- t.test(weight ~ feed, data = two, var.equal = TRUE)
 fit2 <- lm(weight ~ feed, data = two)
 
-c(t_from_t.test = unname(tt$statistic),
-  t_from_lm     = summary(fit2)$coefficients[2, 3],
-  F_from_anova  = anova(fit2)[1, 4],
-  t_squared     = unname(tt$statistic)^2)
+c(t_test = tt$p.value,
+  anova  = anova(fit2)[1, "Pr(>F)"],
+  lm     = summary(fit2)$coefficients[2, "Pr(>|t|)"])
 ```
 
-The two t-values differ only in sign, which depends on which group is subtracted from which. The reason for the agreement is visible in what `lm` actually fits. A categorical predictor is turned into a column of zeros and ones:
+[The test statistics are related too: with two groups, the ANOVA's $F$ is the square of the $t$-statistic, and $F_{1,
+u}$ is the distribution of $t_
+u^2$. This holds only for the equal-variance $t$-test.]{.column-margin}
+
+Three procedures that look different produce one number. The reason for the agreement is visible in what `lm` actually fits. A categorical predictor is turned into a column of zeros and ones:
 
 ```{r model-matrix}
 #| code-fold: false
@@ -744,45 +760,13 @@ model.matrix(fit2)[c(1, 2, 11, 12), ]
 
 The first column is the intercept, the second says "this chicken was fed horsebean". The model is $\mathbf{y} = \mathbf{X}\boldsymbol\beta + \boldsymbol\varepsilon$ whatever mix of continuous and categorical predictors the matrix $\mathbf{X}$ contains; the coefficient of the second column is the difference between the two group means.
 
-[↪ **Day 3** treats $\mathbf{X}$ as a matrix and derives the least-squares solution for any number of columns. Appendix A works through the full `lm` workflow.]{.column-margin}
+[↪ **Appendix B** treats $\mathbf{X}$ as a matrix and derives the least-squares solution for any number of columns. Appendix A works through the full `lm` workflow.]{.column-margin}
 
-### Thousands of tests at once
+### Many tests at once
 
-Bioinformatics adds a problem that a single experiment does not have. An expression study tests every gene. Suppose 10,000 genes are measured in two groups of five samples and *no gene differs at all*.
+Everything so far concerned a single test. A study that runs one test per gene, for thousands of genes, meets a new problem: even when nothing is going on, some tests will come out "significant".
 
-```{r many-tests}
-#| code-fold: false
-set.seed(2026)
-m     <- 10000
-n_per <- 5
-expr  <- matrix(rnorm(m * 2 * n_per), nrow = m)   # rows are genes; no real differences
-A     <- expr[, 1:n_per]
-B     <- expr[, n_per + 1:n_per]
-
-# a two-sample t-test for every gene at once
-s2    <- (apply(A, 1, var) + apply(B, 1, var)) / 2
-tstat <- (rowMeans(A) - rowMeans(B)) / sqrt(s2 * 2 / n_per)
-pval  <- 2 * pt(-abs(tstat), df = 2 * n_per - 2)
-
-hist(pval, breaks = 20, col = "lightblue", main = "",
-     xlab = "p-value (no gene truly differs)")
-```
-
-The histogram is flat, and that is a theorem, not an accident: when the null hypothesis is true, a p-value is *uniformly distributed* between 0 and 1, because $P(p \le u) = u$ is precisely what a p-value is constructed to satisfy. Testing $m$ true null hypotheses at level $\alpha$ therefore yields about $\alpha m$ "significant" results.
-
-```{r many-tests-count}
-#| code-fold: false
-c(significant_at_0.05 = sum(pval < 0.05),
-  expected            = 0.05 * m,
-  bonferroni          = sum(pval < 0.05 / m),
-  benjamini_hochberg  = sum(p.adjust(pval, method = "BH") < 0.05))
-```
-
-[**DEF — Bonferroni.** Test each hypothesis at level $\alpha/m$. The probability of *any* false positive is then at most $m \cdot \alpha/m = \alpha$.]{.column-margin}
-
-[**DEF — Benjamini–Hochberg.** Sort the p-values, $p_{(1)} \le \dots \le p_{(m)}$, find the largest $k$ with $p_{(k)} \le \frac{k}{m}\alpha$, and reject the $k$ smallest. This controls the *false discovery rate*: the expected fraction of false positives among the rejections.]{.column-margin}
-
-Roughly five hundred genes pass the uncorrected threshold although none differs. The two standard corrections remove them. Bonferroni guards against even a single false positive and is strict; the Benjamini–Hochberg procedure accepts that a controlled fraction of the discoveries is false and is the usual choice in genomics. Either way, a p-value means nothing until one knows how many tests were run.
+[↪ **Day 2** shows how many, and how to correct for it. **Day 11** returns to it for gene sets.]{.column-margin}
 
 ### Integration: what the tests section establishes
 
@@ -792,12 +776,12 @@ Each classical test follows the same construction: a statistic is formed from th
 
 The question posed at the outset can now be answered. The mathematics is not vague: given clean data and a verified residual assumption, the machinery delivers exactly what it promises. What *is* fragile is the bridge from data to facts — $P(\text{Data}\mid H) \equiv P(\text{Fact}\mid H)$ — and everything in this chapter has concerned the load-bearing elements of that bridge:
 
-- a model is a **crude, deliberate approximation**, and the residual is the price of the approximation, not a nuisance to be ignored;
+- a model is a **crude, deliberate approximation** that explains part of the variation in the data; the residual is the variation it leaves, and it is the yardstick against which the explained part is judged, not a nuisance to be ignored;
 - that residual has an **assumed distribution**, which must be *checked* rather than taken on faith — and checking becomes harder as data become scarcer;
 - **degrees of freedom** govern how much the data can reveal, and a model with too few residual df (the saturated and over-parameterised cases) reveals little or nothing, however perfect its fit;
 - the classical **tests** are this logic specialised to particular statistics, and each carries its own assumptions to be verified.
 
-Statistics appears vague only when these elements are skipped and a p-value is reported as though it were a fact. The rest of this course is, in effect, a survey of what to do when the simplest assumptions do not hold — confounded or dependent observations (Days 2 and 7), responses that are not normal (Day 6), and above all the $n \ll p$ world in which bioinformatics lives (Days 4 to 11). Each is a variation on the single idea with which the chapter began: build a crude model, and take the residuals seriously.
+Statistics appears vague only when these elements are skipped and a p-value is reported as though it were a fact. The rest of this course is, in effect, a survey of what to do when the simplest assumptions do not hold — confounded or dependent observations (Days 2 and 7), responses that are not normal (Days 5 and 6), and above all the $n \ll p$ world in which bioinformatics lives (Days 3 to 11). Each is a variation on the single idea with which the chapter began: explain the variation with a crude model, and judge what it explains against the residuals.
 
 ## Looking ahead to the practical
 
@@ -809,4 +793,4 @@ The practicals of this course repeatedly ask for data to be **simulated** and th
 |:--|:--|
 | What statistical learning is; flexibility against accuracy | §2.1, §2.2 |
 | Simple and multiple linear regression | §3.1, §3.2 |
-| Hypothesis tests and multiple testing | §13.1 to §13.4 |
+| Hypothesis tests | §13.1 |

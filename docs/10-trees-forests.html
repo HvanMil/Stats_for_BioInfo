@@ -2,13 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.42">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Trees, bagging and random forests – Statistics for Machine Learning</title>
+<title>Trees, forests and boosting – Statistics for Machine Learning</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -21,8 +24,9 @@ ul.task-list li input[type="checkbox"] {
   vertical-align: middle;
 }
 /* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -33,7 +37,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -64,17 +68,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./11-boosting-comparison.html" rel="next">
+<link href="./11-gene-set-enrichment.html" rel="next">
 <link href="./09-regularisation.html" rel="prev">
-<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-143c0eed703e8b865dd62e6df5846b82.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-ec8eff129d6f50c8392963982e963180.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -104,7 +109,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -117,7 +122,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -136,7 +141,7 @@ window.Quarto = {
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-sidebar floating slimcontent">
+<body class="nav-sidebar floating slimcontent quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -145,7 +150,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./10-trees-forests.html">Day 10. Trees</a></li><li class="breadcrumb-item"><a href="./10-trees-forests.html"><span class="chapter-title">Trees, bagging and random forests</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./10-trees-forests.html">Day 10. Trees, forests and boosting</a></li><li class="breadcrumb-item"><a href="./10-trees-forests.html"><span class="chapter-title">Trees, forests and boosting</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -221,7 +226,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
- <span class="menu-text">Day 3. Linear algebra</span></a>
+ <span class="menu-text">Day 3. Directions</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -229,7 +234,7 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./03-linear-algebra.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear algebra: the geometry of data</span></a>
+  <a href="./03-pca.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Principal component analysis</span></a>
   </div>
 </li>
       </ul>
@@ -237,7 +242,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
- <span class="menu-text">Day 4. Directions</span></a>
+ <span class="menu-text">Day 4. Groups</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -245,7 +250,7 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./04-pca.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Principal component analysis</span></a>
+  <a href="./04-clustering.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Cluster analysis</span></a>
   </div>
 </li>
       </ul>
@@ -253,7 +258,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
- <span class="menu-text">Day 5. Groups</span></a>
+ <span class="menu-text">Day 5. Likelihood</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -261,7 +266,7 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./05-clustering.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Cluster analysis</span></a>
+  <a href="./05-likelihood-aic.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Likelihood, information and AIC</span></a>
   </div>
 </li>
       </ul>
@@ -269,7 +274,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
- <span class="menu-text">Day 6. Likelihood</span></a>
+ <span class="menu-text">Day 6. Generalised linear models</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -277,7 +282,7 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./06-likelihood-aic.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Likelihood, information and AIC</span></a>
+  <a href="./06-glm-logistic.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Generalised linear models: logistic regression</span></a>
   </div>
 </li>
       </ul>
@@ -333,7 +338,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
- <span class="menu-text">Day 10. Trees</span></a>
+ <span class="menu-text">Day 10. Trees, forests and boosting</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -341,7 +346,7 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./10-trees-forests.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Trees, bagging and random forests</span></a>
+  <a href="./10-trees-forests.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Trees, forests and boosting</span></a>
   </div>
 </li>
       </ul>
@@ -349,7 +354,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false">
- <span class="menu-text">Day 11. Boosting</span></a>
+ <span class="menu-text">Day 11. Gene set enrichment</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -357,7 +362,7 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./11-boosting-comparison.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Boosting and an honest comparison</span></a>
+  <a href="./11-gene-set-enrichment.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Gene set enrichment analysis</span></a>
   </div>
 </li>
       </ul>
@@ -384,7 +389,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./b-linear-algebra-details.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear algebra: definitions, proofs and algorithms</span></a>
+  <a href="./b-linear-algebra.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear algebra: the geometry of data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./c-linear-algebra-details.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear algebra: definitions, proofs and algorithms</span></a>
   </div>
 </li>
       </ul>
@@ -402,6 +412,10 @@ window.Quarto = {
   <li><a href="#a-single-tree-is-a-weak-learner" id="toc-a-single-tree-is-a-weak-learner" class="nav-link" data-scroll-target="#a-single-tree-is-a-weak-learner">A single tree is a weak learner</a></li>
   <li><a href="#bagging" id="toc-bagging" class="nav-link" data-scroll-target="#bagging">Bagging</a></li>
   <li><a href="#random-forests" id="toc-random-forests" class="nav-link" data-scroll-target="#random-forests">Random forests</a></li>
+  <li><a href="#boosting" id="toc-boosting" class="nav-link" data-scroll-target="#boosting">Boosting</a></li>
+  <li><a href="#bias-variance-and-which-method-attacks-which" id="toc-bias-variance-and-which-method-attacks-which" class="nav-link" data-scroll-target="#bias-variance-and-which-method-attacks-which">Bias, variance, and which method attacks which</a></li>
+  <li><a href="#an-honest-comparison" id="toc-an-honest-comparison" class="nav-link" data-scroll-target="#an-honest-comparison">An honest comparison</a></li>
+  <li><a href="#reading-in-islr" id="toc-reading-in-islr" class="nav-link" data-scroll-target="#reading-in-islr">Reading in ISLR</a></li>
   <li><a href="#where-this-leads" id="toc-where-this-leads" class="nav-link" data-scroll-target="#where-this-leads">Where this leads</a></li>
   </ul>
 </nav>
@@ -413,9 +427,9 @@ window.Quarto = {
 <!-- main -->
 <main class="content page-columns page-full" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./10-trees-forests.html">Day 10. Trees</a></li><li class="breadcrumb-item"><a href="./10-trees-forests.html"><span class="chapter-title">Trees, bagging and random forests</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./10-trees-forests.html">Day 10. Trees, forests and boosting</a></li><li class="breadcrumb-item"><a href="./10-trees-forests.html"><span class="chapter-title">Trees, forests and boosting</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-title">Trees, bagging and random forests</span></h1>
+<h1 class="title"><span class="chapter-title">Trees, forests and boosting</span></h1>
 </div>
 
 
@@ -431,7 +445,24 @@ window.Quarto = {
 
 </header>
 
-
+<nav id="TOC-body" role="doc-toc">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#where-this-chapter-fits" id="toc-where-this-chapter-fits">Where this chapter fits</a></li>
+  <li><a href="#explaining-variance-by-splitting" id="toc-explaining-variance-by-splitting">Explaining variance by splitting</a></li>
+  <li><a href="#growing-and-pruning" id="toc-growing-and-pruning">Growing and pruning</a></li>
+  <li><a href="#classification-trees" id="toc-classification-trees">Classification trees</a></li>
+  <li><a href="#a-single-tree-is-a-weak-learner" id="toc-a-single-tree-is-a-weak-learner">A single tree is a weak learner</a></li>
+  <li><a href="#bagging" id="toc-bagging">Bagging</a></li>
+  <li><a href="#random-forests" id="toc-random-forests">Random forests</a></li>
+  <li><a href="#boosting" id="toc-boosting">Boosting</a></li>
+  <li><a href="#bias-variance-and-which-method-attacks-which" id="toc-bias-variance-and-which-method-attacks-which">Bias, variance, and which method attacks which</a></li>
+  <li><a href="#an-honest-comparison" id="toc-an-honest-comparison">An honest comparison</a></li>
+  <li><a href="#reading-in-islr" id="toc-reading-in-islr">Reading in ISLR</a></li>
+  <li><a href="#where-this-leads" id="toc-where-this-leads">Where this leads</a></li>
+  </ul>
+</nav>
 
 <div class="no-row-height column-margin column-container"><div class="">
 <p><strong>Margin legend</strong></p>
@@ -449,7 +480,7 @@ window.Quarto = {
 </div></div><p>The arc runs from a single tree, through its weaknesses, to three distinct repairs. Bagging averages many trees grown on bootstrap resamples. Random forests improve on bagging by making the trees less alike. Boosting abandons averaging altogether and grows trees in sequence, each one correcting its predecessors. The three differ in what part of the error they attack, and that difference is the organising idea of the second half.</p>
 
 <div class="no-row-height column-margin column-container"><div class="">
-<p><strong>↪</strong> ISLR Chapter 8 covers the same ground. A reading guide with figure and page numbers is given at the end of Day 11.</p>
+<p><strong>↪</strong> ISLR Chapter 8 covers the same ground. A reading guide with figure and page numbers is given at the end of this chapter.</p>
 </div></div></section>
 <section id="explaining-variance-by-splitting" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="explaining-variance-by-splitting">Explaining variance by splitting</h2>
@@ -468,7 +499,7 @@ window.Quarto = {
 <h3 class="anchored" data-anchor-id="a-simulated-forest-floor-survey">A simulated forest-floor survey</h3>
 <p>We simulate a survey of understorey vegetation in 400 forest plots. The predictors are canopy openness, soil moisture, soil pH and litter depth, plus two variables that carry no signal at all and are included so that we can see what each method does with them.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">8</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">8</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">400</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>plots <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
@@ -489,7 +520,7 @@ window.Quarto = {
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>plots<span class="sc">$</span>cover <span class="ot">&lt;-</span> mu <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="dv">6</span>)   <span class="co"># herb cover (%)</span></span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(plots<span class="sc">$</span>cover)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(plots<span class="sc">$</span>cover)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 #&gt;  0.3449 16.2407 24.4531 25.6474 34.5900 64.0183</code></pre>
@@ -500,7 +531,7 @@ window.Quarto = {
 <div class="no-row-height column-margin column-container"><div class="">
 <p><strong>KEY</strong> — Two of the three structures — an interaction and a threshold — are exactly what a rectangular partition represents naturally and an additive linear model represents badly.</p>
 </div></div><div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>eta <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">1.8</span> <span class="sc">+</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>eta <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">1.8</span> <span class="sc">+</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>       <span class="fl">4.0</span> <span class="sc">*</span> plots<span class="sc">$</span>light <span class="sc">*</span> wet <span class="sc">+</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>       <span class="fl">1.2</span> <span class="sc">*</span> (plots<span class="sc">$</span>pH <span class="sc">&gt;</span> <span class="fl">5.5</span>) <span class="sc">+</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>       <span class="sc">-</span><span class="fl">0.15</span> <span class="sc">*</span> plots<span class="sc">$</span>litter</span>
@@ -508,7 +539,7 @@ window.Quarto = {
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>plots<span class="sc">$</span>p_true <span class="ot">&lt;-</span> <span class="fu">plogis</span>(eta)</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>plots<span class="sc">$</span>moss   <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">rbinom</span>(n, <span class="dv">1</span>, plots<span class="sc">$</span>p_true), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"absent"</span>, <span class="st">"present"</span>))</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(plots<span class="sc">$</span>moss)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(plots<span class="sc">$</span>moss)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; 
 #&gt;  absent present 
@@ -520,15 +551,15 @@ window.Quarto = {
 <div class="no-row-height column-margin column-container"><div class="">
 <p><strong>⚠</strong> <code>p_true</code> is in the data frame, so a formula written as <code>moss ~ .</code> would include the true probability as a predictor and produce a flawless classifier that has learned nothing. Every model below uses an explicit formula. Leakage of this kind is rarely so obvious in real data — an identifier correlated with treatment, or a variable measured after the outcome, does the same damage quietly.</p>
 </div></div><div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>f_reg <span class="ot">&lt;-</span> cover <span class="sc">~</span> light <span class="sc">+</span> moisture <span class="sc">+</span> pH <span class="sc">+</span> litter <span class="sc">+</span> noise1 <span class="sc">+</span> noise2</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>f_cls <span class="ot">&lt;-</span> moss  <span class="sc">~</span> light <span class="sc">+</span> moisture <span class="sc">+</span> pH <span class="sc">+</span> litter <span class="sc">+</span> noise1 <span class="sc">+</span> noise2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>f_reg <span class="ot">&lt;-</span> cover <span class="sc">~</span> light <span class="sc">+</span> moisture <span class="sc">+</span> pH <span class="sc">+</span> litter <span class="sc">+</span> noise1 <span class="sc">+</span> noise2</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>f_cls <span class="ot">&lt;-</span> moss  <span class="sc">~</span> light <span class="sc">+</span> moisture <span class="sc">+</span> pH <span class="sc">+</span> litter <span class="sc">+</span> noise1 <span class="sc">+</span> noise2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="what-the-linear-model-can-and-cannot-say" class="level3">
 <h3 class="anchored" data-anchor-id="what-the-linear-model-can-and-cannot-say">What the linear model can and cannot say</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>lm_add <span class="ot">&lt;-</span> <span class="fu">lm</span>(f_reg, <span class="at">data =</span> plots)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm_add)<span class="sc">$</span>coefficients</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>lm_add <span class="ot">&lt;-</span> <span class="fu">lm</span>(f_reg, <span class="at">data =</span> plots)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm_add)<span class="sc">$</span>coefficients</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt;                Estimate Std. Error    t value     Pr(&gt;|t|)
 #&gt; (Intercept) -20.6470809 3.06217070 -6.7426290 5.570210e-11
@@ -539,7 +570,7 @@ window.Quarto = {
 #&gt; noise1        0.3927497 1.53730421  0.2554795 7.984864e-01
 #&gt; noise2        0.3417601 0.44895002  0.7612431 4.469684e-01</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">summary</span>(lm_add)<span class="sc">$</span>r.squared, <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">summary</span>(lm_add)<span class="sc">$</span>r.squared, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 0.538</code></pre>
 </div>
@@ -565,7 +596,7 @@ window.Quarto = {
 </div></div><div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="do">## the partition</span></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">45</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.8</span>),</span>
@@ -589,7 +620,7 @@ window.Quarto = {
 <span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">9.2</span>, <span class="fl">3.9</span>, <span class="fu">expression</span>(R[<span class="dv">3</span>]), <span class="at">cex =</span> <span class="fl">1.2</span>)</span>
 <span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">3.4</span>, <span class="fl">8.3</span>, <span class="st">"yes"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">col =</span> <span class="st">"grey40"</span>)</span>
 <span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">6.6</span>, <span class="fl">8.3</span>, <span class="st">"no"</span>,  <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">col =</span> <span class="st">"grey40"</span>)</span>
-<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-partition" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -609,12 +640,12 @@ Figure&nbsp;12.1: Left: a rectangular partition of two predictors, with the mean
 <section id="fitting-and-reading-a-tree" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="fitting-and-reading-a-tree">Fitting and reading a tree</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rpart)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rpart)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>tree_full <span class="ot">&lt;-</span> <span class="fu">rpart</span>(f_reg, <span class="at">data =</span> plots, <span class="at">method =</span> <span class="st">"anova"</span>,</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                   <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="fl">0.002</span>, <span class="at">minsplit =</span> <span class="dv">10</span>, <span class="at">xval =</span> <span class="dv">10</span>))</span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(tree_full, <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(tree_full, <span class="at">digits =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; n= 400 
 #&gt; 
@@ -696,7 +727,7 @@ Figure&nbsp;12.1: Left: a rectangular partition of two predictors, with the mean
 </div>
 <p>Each line of the printed output is a node. It gives the node number, the split that defines it, the number of observations reaching it, the deviance (the within-node sum of squares), and the predicted value, which for a regression tree is the node mean. An asterisk marks a terminal node, or leaf. The indentation records the hierarchy: node 2 and node 3 are the children of the root, nodes 4 and 5 the children of node 2.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>draw_tree <span class="ot">&lt;-</span> <span class="cf">function</span>(fit, ...) {</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>draw_tree <span class="ot">&lt;-</span> <span class="cf">function</span>(fit, ...) {</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"rpart.plot"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    rpart.plot<span class="sc">::</span><span class="fu">rpart.plot</span>(fit, ...)</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
@@ -706,7 +737,7 @@ Figure&nbsp;12.1: Left: a rectangular partition of two predictors, with the mean
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="fu">draw_tree</span>(tree_full, <span class="at">type =</span> <span class="dv">2</span>, <span class="at">extra =</span> <span class="dv">101</span>, <span class="at">tweak =</span> <span class="fl">0.9</span>,</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>           <span class="at">box.palette =</span> <span class="st">"Blues"</span>, <span class="at">main =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>           <span class="at">box.palette =</span> <span class="st">"Blues"</span>, <span class="at">main =</span> <span class="st">""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -729,7 +760,7 @@ Figure&nbsp;12.1: Left: a rectangular partition of two predictors, with the mean
 \]</span></p>
 <p>This is the between-group sum of squares of Day 1 for two groups. The gain is large when the two means differ strongly <em>and</em> both parts are reasonably large; the factor <span class="math inline">\(n_Ln_R/n\)</span> is what discourages splitting off a single extreme point. Only the two means are needed, and after sorting the predictor once they are available for every cut-point from a running sum.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>best_split <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y) {</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>best_split <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y) {</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  o <span class="ot">&lt;-</span> <span class="fu">order</span>(x); x <span class="ot">&lt;-</span> x[o]; y <span class="ot">&lt;-</span> y[o]</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  n  <span class="ot">&lt;-</span> <span class="fu">length</span>(y)</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  nL <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>(n <span class="sc">-</span> <span class="dv">1</span>); nR <span class="ot">&lt;-</span> n <span class="sc">-</span> nL                  <span class="co"># sizes for every possible cut</span></span>
@@ -741,7 +772,7 @@ Figure&nbsp;12.1: Left: a rectangular partition of two predictors, with the mean
 <span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">all.vars</span>(f_reg)[<span class="sc">-</span><span class="dv">1</span>]</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">t</span>(<span class="fu">sapply</span>(plots[vars], best_split, <span class="at">y =</span> plots<span class="sc">$</span>cover)), <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">t</span>(<span class="fu">sapply</span>(plots[vars], best_split, <span class="at">y =</span> plots<span class="sc">$</span>cover)), <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt;            cut     gain
 #&gt; light     0.54  5694.98
@@ -754,13 +785,13 @@ Figure&nbsp;12.1: Left: a rectangular partition of two predictors, with the mean
 </div>
 <p>Each row is the best cut for one predictor at the root. Moisture wins by a wide margin, at a cut-point next to the true threshold of 25, and the two noise variables offer the smallest gains. <code>rpart</code> made the same choice:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>tree_full<span class="sc">$</span>splits[<span class="dv">1</span>, <span class="fu">c</span>(<span class="st">"count"</span>, <span class="st">"index"</span>, <span class="st">"improve"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>tree_full<span class="sc">$</span>splits[<span class="dv">1</span>, <span class="fu">c</span>(<span class="st">"count"</span>, <span class="st">"index"</span>, <span class="st">"improve"</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt;       count       index     improve 
 #&gt; 400.0000000  25.0282449   0.3214055</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>total_ss <span class="ot">&lt;-</span> <span class="fu">sum</span>((plots<span class="sc">$</span>cover <span class="sc">-</span> <span class="fu">mean</span>(plots<span class="sc">$</span>cover))<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">gain_as_fraction_of_total =</span> <span class="fu">unname</span>(<span class="fu">best_split</span>(plots<span class="sc">$</span>moisture, plots<span class="sc">$</span>cover)[<span class="st">"gain"</span>]) <span class="sc">/</span> total_ss)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>total_ss <span class="ot">&lt;-</span> <span class="fu">sum</span>((plots<span class="sc">$</span>cover <span class="sc">-</span> <span class="fu">mean</span>(plots<span class="sc">$</span>cover))<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">gain_as_fraction_of_total =</span> <span class="fu">unname</span>(<span class="fu">best_split</span>(plots<span class="sc">$</span>moisture, plots<span class="sc">$</span>cover)[<span class="st">"gain"</span>]) <span class="sc">/</span> total_ss)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; gain_as_fraction_of_total 
 #&gt;                 0.3214055</code></pre>
@@ -797,7 +828,7 @@ R_\alpha(T) = R(T) + \alpha \, |T|,
 <section id="choosing-the-complexity-parameter-by-cross-validation" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="choosing-the-complexity-parameter-by-cross-validation">Choosing the complexity parameter by cross-validation</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">printcp</span>(tree_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">printcp</span>(tree_full)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; 
 #&gt; Regression tree:
@@ -850,7 +881,7 @@ R_\alpha(T) = R(T) + \alpha \, |T|,
 </div>
 <p>The table has one row per value of <code>cp</code> in the pruning sequence. <code>rel error</code> is the training error, which falls monotonically; <code>xerror</code> is the ten-fold cross-validated error, computed internally by <code>rpart</code> because <code>xval = 10</code> was set; and <code>xstd</code> is its standard error across folds. The cross-validated column is the one to read. It falls and then rises, and the size of the tree at its minimum is the size supported by the data.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotcp</span>(tree_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotcp</span>(tree_full)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -864,7 +895,7 @@ R_\alpha(T) = R(T) + \alpha \, |T|,
 <div class="no-row-height column-margin column-container"><div class="">
 <p><strong>↪</strong> This is the cross-validation of Day 7, run inside <code>rpart</code> rather than written out by hand. The folds are drawn on the training data, and the selected <code>cp</code> is a tuning parameter chosen in an inner loop.</p>
 </div></div><div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>cp_tab <span class="ot">&lt;-</span> tree_full<span class="sc">$</span>cptable</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>cp_tab <span class="ot">&lt;-</span> tree_full<span class="sc">$</span>cptable</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>i_min  <span class="ot">&lt;-</span> <span class="fu">which.min</span>(cp_tab[, <span class="st">"xerror"</span>])</span>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>cp_min <span class="ot">&lt;-</span> cp_tab[i_min, <span class="st">"CP"</span>]</span>
@@ -874,7 +905,7 @@ R_\alpha(T) = R(T) + \alpha \, |T|,
 <span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>cp_1se <span class="ot">&lt;-</span> cp_tab[i_1se, <span class="st">"CP"</span>]</span>
 <span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">minimum   =</span> <span class="fu">c</span>(<span class="at">cp =</span> cp_min, <span class="at">size =</span> cp_tab[i_min, <span class="st">"nsplit"</span>] <span class="sc">+</span> <span class="dv">1</span>),</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">one_se    =</span> <span class="fu">c</span>(<span class="at">cp =</span> cp_1se, <span class="at">size =</span> cp_tab[i_1se, <span class="st">"nsplit"</span>] <span class="sc">+</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">one_se    =</span> <span class="fu">c</span>(<span class="at">cp =</span> cp_1se, <span class="at">size =</span> cp_tab[i_1se, <span class="st">"nsplit"</span>] <span class="sc">+</span> <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt;                  cp size
 #&gt; minimum 0.005874789   16
@@ -886,10 +917,10 @@ R_\alpha(T) = R(T) + \alpha \, |T|,
 <div class="no-row-height column-margin column-container"><div class="">
 <p><strong>KEY</strong> — The one-standard-error rule is a general device, not a tree-specific one. It was introduced on Day 7 and also chose <span class="math inline">\(\lambda\)</span> on Day 9.</p>
 </div></div><div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>tree_pruned <span class="ot">&lt;-</span> <span class="fu">prune</span>(tree_full, <span class="at">cp =</span> cp_1se)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>tree_pruned <span class="ot">&lt;-</span> <span class="fu">prune</span>(tree_full, <span class="at">cp =</span> cp_1se)</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">draw_tree</span>(tree_pruned, <span class="at">type =</span> <span class="dv">2</span>, <span class="at">extra =</span> <span class="dv">101</span>, <span class="at">tweak =</span> <span class="fl">0.9</span>,</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">box.palette =</span> <span class="st">"Blues"</span>, <span class="at">main =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">box.palette =</span> <span class="st">"Blues"</span>, <span class="at">main =</span> <span class="st">""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -916,11 +947,11 @@ R_\alpha(T) = R(T) + \alpha \, |T|,
 \]</span></p>
 
 <div class="no-row-height column-margin column-container"><div class="">
-<p><strong>↪</strong> Cross-entropy is the Shannon entropy of the class distribution within the node. Day 6 introduced it and connected it to deviance and AIC.</p>
+<p><strong>↪</strong> Cross-entropy is the Shannon entropy of the class distribution within the node. Day 5 introduced it and connected it to deviance and AIC.</p>
 </div></div><div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fl">0.0005</span>, <span class="fl">0.9995</span>, <span class="at">length.out =</span> <span class="dv">600</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fl">0.0005</span>, <span class="fl">0.9995</span>, <span class="at">length.out =</span> <span class="dv">600</span>)</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>gini <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p)</span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>ent  <span class="ot">&lt;-</span> <span class="sc">-</span>(p <span class="sc">*</span> <span class="fu">log2</span>(p) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> p) <span class="sc">*</span> <span class="fu">log2</span>(<span class="dv">1</span> <span class="sc">-</span> p)) <span class="sc">/</span> <span class="dv">2</span></span>
@@ -933,7 +964,7 @@ R_\alpha(T) = R(T) + \alpha \, |T|,
 <span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">1</span>),</span>
 <span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"grey35"</span>, <span class="st">"steelblue"</span>, <span class="st">"firebrick"</span>),</span>
 <span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"misclassification error"</span>, <span class="st">"Gini index"</span>,</span>
-<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"cross-entropy (halved)"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"cross-entropy (halved)"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-impurity" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -951,11 +982,11 @@ Figure&nbsp;12.2: The three node-impurity measures for a two-class node, as a fu
 <p>The figure explains why trees are grown with Gini or entropy rather than with the error rate. All three are zero at a pure node and maximal at an even split, but the error rate is piecewise linear: splitting a node with proportions <span class="math inline">\((0.8, 0.2)\)</span> into two children with proportions <span class="math inline">\((0.9, 0.1)\)</span> and <span class="math inline">\((0.7, 0.3)\)</span> leaves the total error rate unchanged, so the split appears worthless. Gini and entropy are strictly concave and reward the increase in purity. The error rate is nevertheless the right criterion for <em>pruning</em>, where predictive accuracy is the target.</p>
 <p>The claim about the <span class="math inline">\((0.8, 0.2)\)</span> node is easily checked. The split produces two children of equal size.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>gini_2 <span class="ot">&lt;-</span> <span class="cf">function</span>(p) <span class="dv">2</span> <span class="sc">*</span> p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>gini_2 <span class="ot">&lt;-</span> <span class="cf">function</span>(p) <span class="dv">2</span> <span class="sc">*</span> p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p)</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>err_2  <span class="ot">&lt;-</span> <span class="cf">function</span>(p) <span class="fu">pmin</span>(p, <span class="dv">1</span> <span class="sc">-</span> p)</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">error_before =</span> <span class="fu">err_2</span>(<span class="fl">0.8</span>),  <span class="at">error_after =</span> <span class="fu">mean</span>(<span class="fu">err_2</span>(<span class="fu">c</span>(<span class="fl">0.9</span>, <span class="fl">0.7</span>))),</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">gini_before  =</span> <span class="fu">gini_2</span>(<span class="fl">0.8</span>), <span class="at">gini_after  =</span> <span class="fu">mean</span>(<span class="fu">gini_2</span>(<span class="fu">c</span>(<span class="fl">0.9</span>, <span class="fl">0.7</span>))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">gini_before  =</span> <span class="fu">gini_2</span>(<span class="fl">0.8</span>), <span class="at">gini_after  =</span> <span class="fu">mean</span>(<span class="fu">gini_2</span>(<span class="fu">c</span>(<span class="fl">0.9</span>, <span class="fl">0.7</span>))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; error_before  error_after  gini_before   gini_after 
 #&gt;         0.20         0.20         0.32         0.30</code></pre>
@@ -966,11 +997,11 @@ Figure&nbsp;12.2: The three node-impurity measures for a two-class node, as a fu
 <section id="fitting" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="fitting">Fitting</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>tree_cls <span class="ot">&lt;-</span> <span class="fu">rpart</span>(f_cls, <span class="at">data =</span> plots, <span class="at">method =</span> <span class="st">"class"</span>,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>tree_cls <span class="ot">&lt;-</span> <span class="fu">rpart</span>(f_cls, <span class="at">data =</span> plots, <span class="at">method =</span> <span class="st">"class"</span>,</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">parms =</span> <span class="fu">list</span>(<span class="at">split =</span> <span class="st">"gini"</span>),</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="fl">0.005</span>, <span class="at">xval =</span> <span class="dv">10</span>))</span>
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(tree_cls, <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(tree_cls, <span class="at">digits =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; n= 400 
 #&gt; 
@@ -1000,8 +1031,8 @@ Figure&nbsp;12.2: The three node-impurity measures for a two-class node, as a fu
 </div>
 <p>The printed output has one extra column compared with the regression case. After the node size comes the <strong>loss</strong> — the number of observations in the node not belonging to the predicted class — followed by the predicted class and the class probabilities in parentheses. A node reading <code>120 18 present (0.15 0.85)</code> contains 120 plots of which 18 are not moss-present, and predicts presence with probability 0.85.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">draw_tree</span>(tree_cls, <span class="at">type =</span> <span class="dv">2</span>, <span class="at">extra =</span> <span class="dv">104</span>, <span class="at">tweak =</span> <span class="fl">0.9</span>,</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">box.palette =</span> <span class="st">"BuGn"</span>, <span class="at">main =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">draw_tree</span>(tree_cls, <span class="at">type =</span> <span class="dv">2</span>, <span class="at">extra =</span> <span class="dv">104</span>, <span class="at">tweak =</span> <span class="fl">0.9</span>,</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">box.palette =</span> <span class="st">"BuGn"</span>, <span class="at">main =</span> <span class="st">""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1012,12 +1043,12 @@ Figure&nbsp;12.2: The three node-impurity measures for a two-class node, as a fu
 </div>
 <p><code>extra = 104</code> displays the fitted class probabilities together with the percentage of observations at each node, which is the most informative layout for a classification tree: the predicted class alone conceals the difference between a leaf that is 51% present and one that is 98% present.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>cp_cls  <span class="ot">&lt;-</span> tree_cls<span class="sc">$</span>cptable</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>cp_cls  <span class="ot">&lt;-</span> tree_cls<span class="sc">$</span>cptable</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>i_min_c <span class="ot">&lt;-</span> <span class="fu">which.min</span>(cp_cls[, <span class="st">"xerror"</span>])</span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>tree_cls_p <span class="ot">&lt;-</span> <span class="fu">prune</span>(tree_cls, <span class="at">cp =</span> cp_cls[i_min_c, <span class="st">"CP"</span>])</span>
 <span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">leaves_before =</span> <span class="fu">sum</span>(tree_cls<span class="sc">$</span>frame<span class="sc">$</span>var <span class="sc">==</span> <span class="st">"&lt;leaf&gt;"</span>),</span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">leaves_after  =</span> <span class="fu">sum</span>(tree_cls_p<span class="sc">$</span>frame<span class="sc">$</span>var <span class="sc">==</span> <span class="st">"&lt;leaf&gt;"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">leaves_after  =</span> <span class="fu">sum</span>(tree_cls_p<span class="sc">$</span>frame<span class="sc">$</span>var <span class="sc">==</span> <span class="st">"&lt;leaf&gt;"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; leaves_before  leaves_after 
 #&gt;            10             4</code></pre>
@@ -1038,7 +1069,7 @@ Figure&nbsp;12.2: The three node-impurity measures for a two-class node, as a fu
 <div class="no-row-height column-margin column-container"><div class="">
 <p><strong>DEF</strong> — A <strong>weak learner</strong> performs only slightly better than a trivial baseline: better than chance for classification, better than the intercept-only model for regression. Weakness is not a disqualification; it is the input to an ensemble.</p>
 </div></div><div class="cell">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">562</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">562</span>)</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>))</span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (b <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>) {</span>
@@ -1047,7 +1078,7 @@ Figure&nbsp;12.2: The three node-impurity measures for a two-class node, as a fu
 <span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>                  <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="fl">0.03</span>))</span>
 <span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">draw_tree</span>(tree_b, <span class="at">type =</span> <span class="dv">2</span>, <span class="at">extra =</span> <span class="dv">0</span>, <span class="at">tweak =</span> <span class="fl">1.1</span>,</span>
 <span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>             <span class="at">box.palette =</span> <span class="st">"Blues"</span>, <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"resample"</span>, b))</span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1055,7 +1086,7 @@ Figure&nbsp;12.2: The three node-impurity measures for a two-class node, as a fu
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The four trees are fitted to data sets that differ only through resampling, and yet they differ in which variable is split first, where the split points fall, and sometimes in which variables appear at all. The greedy search is the cause: once the root split changes, everything beneath it is fitted to different subsets, so a small perturbation near the top propagates into a completely different structure.</p>
 
@@ -1100,7 +1131,7 @@ Figure&nbsp;12.2: The three node-impurity measures for a two-class node, as a fu
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>B_seq <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">200</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>B_seq <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">200</span></span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>rhos  <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>)</span>
 <span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>cols  <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"grey25"</span>, <span class="st">"steelblue"</span>, <span class="st">"darkorange3"</span>, <span class="st">"firebrick"</span>)</span>
 <span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -1111,7 +1142,7 @@ Figure&nbsp;12.2: The three node-impurity measures for a two-class node, as a fu
 <span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>(<span class="at">h =</span> rhos[i], <span class="at">lty =</span> <span class="dv">3</span>, <span class="at">col =</span> cols[i])</span>
 <span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> cols,</span>
-<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">paste</span>(<span class="st">"rho ="</span>, rhos))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">paste</span>(<span class="st">"rho ="</span>, rhos))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-bagvar" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -1132,12 +1163,12 @@ Figure&nbsp;12.3: Variance of an ensemble average, relative to the variance of a
 <section id="out-of-bag-error" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="out-of-bag-error">Out-of-bag error</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">101</span>)</span>
 <span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>bag_fit <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(f_reg, <span class="at">data =</span> plots, <span class="at">mtry =</span> <span class="dv">6</span>, <span class="at">ntree =</span> <span class="dv">500</span>,</span>
 <span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>                        <span class="at">importance =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>bag_fit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>bag_fit</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; 
 #&gt; Call:
@@ -1156,7 +1187,7 @@ Figure&nbsp;12.3: Variance of an ensemble average, relative to the variance of a
 <div class="no-row-height column-margin column-container"><div class="">
 <p><strong>KEY</strong> — Out-of-bag error is cross-validation that costs nothing. It comes free with the resampling that bagging performs anyway, and for large <span class="math inline">\(B\)</span> it is close to the leave-one-out cross-validated error.</p>
 </div></div><div class="cell">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bag_fit, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">main =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bag_fit, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">main =</span> <span class="st">""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1186,13 +1217,13 @@ Figure&nbsp;12.3: Variance of an ensemble average, relative to the variance of a
 <p><strong>KEY</strong> — Random forests trade a small increase in the bias of each tree for a large reduction in the correlation between them. This is the only place in the course where deliberately weakening the components improves the whole.</p>
 </div></div><p>Conventional defaults are <span class="math inline">\(m \approx \sqrt{p}\)</span> for classification and <span class="math inline">\(m \approx p/3\)</span> for regression. Unlike <span class="math inline">\(B\)</span>, <span class="math inline">\(m\)</span> is a genuine tuning parameter and is worth cross-validating: small <span class="math inline">\(m\)</span> gives maximal decorrelation and maximal individual bias, large <span class="math inline">\(m\)</span> returns to bagging.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">102</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">102</span>)</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>rf_fit <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(f_reg, <span class="at">data =</span> plots, <span class="at">mtry =</span> <span class="dv">2</span>, <span class="at">ntree =</span> <span class="dv">500</span>,</span>
 <span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">importance =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">bagging_oob_mse =</span> <span class="fu">tail</span>(bag_fit<span class="sc">$</span>mse, <span class="dv">1</span>),</span>
 <span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">forest_oob_mse  =</span> <span class="fu">tail</span>(rf_fit<span class="sc">$</span>mse, <span class="dv">1</span>),</span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">irreducible     =</span> <span class="dv">36</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">irreducible     =</span> <span class="dv">36</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; bagging_oob_mse  forest_oob_mse     irreducible 
 #&gt;        48.37316        48.73683        36.00000</code></pre>
@@ -1200,7 +1231,7 @@ Figure&nbsp;12.3: Variance of an ensemble average, relative to the variance of a
 </div>
 <p>The two out-of-bag errors are directly comparable, since both are computed on the same data by the same mechanism, and both should be read against the irreducible error of 36 that no method can go below. The <code>mse</code> component of a fitted object holds the out-of-bag error after each tree, so its last element is the error of the full ensemble.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">103</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">103</span>)</span>
 <span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>mtry_grid <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span></span>
 <span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>oob <span class="ot">&lt;-</span> <span class="fu">vapply</span>(mtry_grid, <span class="cf">function</span>(m) {</span>
 <span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(f_reg, <span class="at">data =</span> plots, <span class="at">mtry =</span> m, <span class="at">ntree =</span> <span class="dv">300</span>)</span>
@@ -1210,7 +1241,7 @@ Figure&nbsp;12.3: Variance of an ensemble average, relative to the variance of a
 <span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mtry_grid, oob, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">16</span>,</span>
 <span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"mtry (variables considered per split)"</span>,</span>
 <span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"out-of-bag MSE"</span>)</span>
-<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">36</span>, <span class="at">lty =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="st">"firebrick"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">36</span>, <span class="at">lty =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="st">"firebrick"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1224,7 +1255,7 @@ Figure&nbsp;12.3: Variance of an ensemble average, relative to the variance of a
 <section id="variable-importance" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="variable-importance">Variable importance</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">importance</span>(rf_fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">importance</span>(rf_fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt;            %IncMSE IncNodePurity
 #&gt; light    54.149849     12234.659
@@ -1237,7 +1268,7 @@ Figure&nbsp;12.3: Variance of an ensemble average, relative to the variance of a
 </div>
 <p>Two measures are reported for regression forests. <strong><code>%IncMSE</code></strong> is a permutation measure: the values of one predictor are shuffled in the out-of-bag data, the increase in prediction error is recorded, and the result is averaged over trees. A variable that matters produces a large increase when scrambled. <strong><code>IncNodePurity</code></strong> accumulates the reduction in residual sum of squares attributable to splits on that variable, summed over the whole forest. For classification forests the second measure is the mean decrease in the Gini index instead.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">varImpPlot</span>(rf_fit, <span class="at">main =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">varImpPlot</span>(rf_fit, <span class="at">main =</span> <span class="st">""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1255,245 +1286,659 @@ Figure&nbsp;12.3: Variance of an ensemble average, relative to the variance of a
 </div></div>
 </section>
 </section>
-<section id="where-this-leads" class="level2">
-<h2 class="anchored" data-anchor-id="where-this-leads">Where this leads</h2>
-<p>Bagging and random forests fit their trees independently and average them. On Day 11 the trees are instead fitted in sequence, each correcting what its predecessors got wrong, and all methods are then compared on equal terms.</p>
+<section id="boosting" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="boosting">Boosting</h2>
+<p>Bagging and random forests start from deep trees and remove their variance by averaging. Boosting does the opposite: it starts from very small trees and removes their bias by accumulation. It uses the same simulated survey of understorey vegetation.</p>
+<section id="sequential-correction" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="sequential-correction">Sequential correction</h3>
+<p>Bagging and random forests fit their trees independently and in parallel; each one sees the data afresh. Boosting does the opposite. Trees are fitted in sequence, and each one is fitted to what the current ensemble is still getting wrong.</p>
 
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — <strong>Boosting</strong> builds an additive model by repeatedly fitting a small tree to the current residuals and adding a shrunken version of it to the running prediction.</p>
+</div></div><p>For regression with squared-error loss the algorithm is short enough to state in full. Set <span class="math inline">\(\hat f(x) = 0\)</span> and <span class="math inline">\(r_i = y_i\)</span>. Then for <span class="math inline">\(b = 1, \dots, B\)</span>:</p>
+<ol type="1">
+<li>fit a tree <span class="math inline">\(\hat f^{\,b}\)</span> with <span class="math inline">\(d\)</span> splits to the current residuals <span class="math inline">\(r\)</span>;</li>
+<li>update the prediction, <span class="math inline">\(\hat f(x) \leftarrow \hat f(x) + \lambda \hat f^{\,b}(x)\)</span>;</li>
+<li>update the residuals, <span class="math inline">\(r_i \leftarrow r_i - \lambda \hat f^{\,b}(x_i)\)</span>.</li>
+</ol>
+<p>The output is <span class="math inline">\(\hat f(x) = \sum_{b=1}^{B} \lambda \hat f^{\,b}(x)\)</span>.</p>
 
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>↪</strong> This is ISLR Algorithm 8.2, page 347. For other loss functions the residual is replaced by the negative gradient of the loss, which is where the name <em>gradient boosting</em> comes from.</p>
+</div></div><p>The learning is deliberately slow. Each tree is small, and only a fraction <span class="math inline">\(\lambda\)</span> of it is added, so no single step commits the model to much. Fitting the residuals means that regions already predicted well contribute nothing further, and attention concentrates automatically where the ensemble is still failing.</p>
 </section>
+<section id="boosting-is-gradient-descent-in-function-space" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="boosting-is-gradient-descent-in-function-space">Boosting is gradient descent in function space</h3>
+<p>Why fit the <em>residuals</em>? The answer connects boosting to the gradient descent of Appendix C. Suppose the aim is to minimise a loss summed over the training data,</p>
+<p><span class="math display">\[
+\sum_{i=1}^n L\big(y_i,\ f(x_i)\big),
+\]</span></p>
+<p>and regard the fitted values <span class="math inline">\(f(x_1), \dots, f(x_n)\)</span> as the quantities to be adjusted. Gradient descent would move each of them a small step against its derivative:</p>
+<p><span class="math display">\[
+f(x_i) \leftarrow f(x_i) - \lambda\,g_i,
+\qquad
+g_i = \frac{\partial L\big(y_i, f(x_i)\big)}{\partial f(x_i)} .
+\]</span></p>
+<p>For squared-error loss <span class="math inline">\(L = \tfrac12(y - f)^2\)</span> the negative gradient is</p>
+<p><span class="math display">\[
+-g_i = y_i - f(x_i),
+\]</span></p>
+<p>the residual. The catch is that such a step is defined only at the training points and says nothing about a new <span class="math inline">\(x\)</span>. Boosting therefore fits a small tree <em>to the negative gradients</em> and steps along that tree instead. The tree generalises the step to the whole predictor space.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — Each boosting round is one step of gradient descent, with a tree standing in for the gradient. The shrinkage <span class="math inline">\(\lambda\)</span> is the step size.</p>
+</div></div><p>The same recipe works for any differentiable loss, and only the “pseudo-residuals” change.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Loss</th>
+<th style="text-align: left;"><span class="math inline">\(L(y, f)\)</span></th>
+<th style="text-align: left;">Negative gradient <span class="math inline">\(-g_i\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">squared error</td>
+<td style="text-align: left;"><span class="math inline">\(\tfrac12(y - f)^2\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(y_i - f(x_i)\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">absolute error</td>
+<td style="text-align: left;"><span class="math inline">\(\lvert y - f\rvert\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\operatorname{sign}\big(y_i - f(x_i)\big)\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">logistic (0/1 labels, <span class="math inline">\(f\)</span> = log-odds)</td>
+<td style="text-align: left;"><span class="math inline">\(-yf + \ln(1 + e^{f})\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(y_i - p_i\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>The last row is the gradient of the logistic log-likelihood of Day 6: a boosted classifier fits trees to <span class="math inline">\(y_i - p_i\)</span>.</p>
+</section>
+<section id="boosting-from-scratch" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="boosting-from-scratch">Boosting from scratch</h3>
+<p>With <code>rpart</code> supplying the small trees, the algorithm is a loop of a few lines. One hundred plots are set aside to watch the error on data the model has not seen.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">104</span>)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>test_id <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">nrow</span>(plots), <span class="dv">100</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>b_train <span class="ot">&lt;-</span> plots[<span class="sc">-</span>test_id, ]</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>b_test  <span class="ot">&lt;-</span> plots[test_id, ]</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>boost_scratch <span class="ot">&lt;-</span> <span class="cf">function</span>(train, test, <span class="at">B =</span> <span class="dv">600</span>, <span class="at">shrink =</span> <span class="fl">0.05</span>, <span class="at">depth =</span> <span class="dv">2</span>) {</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  f_train <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">mean</span>(train<span class="sc">$</span>cover), <span class="fu">nrow</span>(train))        <span class="co"># start from the mean</span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>  f_test  <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">mean</span>(train<span class="sc">$</span>cover), <span class="fu">nrow</span>(test))</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>  err <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, B, <span class="dv">2</span>, <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="cn">NULL</span>, <span class="fu">c</span>(<span class="st">"train"</span>, <span class="st">"test"</span>)))</span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>  work <span class="ot">&lt;-</span> train</span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (b <span class="cf">in</span> <span class="fu">seq_len</span>(B)) {</span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>    work<span class="sc">$</span>r <span class="ot">&lt;-</span> train<span class="sc">$</span>cover <span class="sc">-</span> f_train                     <span class="co"># 1. residuals = negative gradient</span></span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>    tree <span class="ot">&lt;-</span> <span class="fu">rpart</span>(r <span class="sc">~</span> light <span class="sc">+</span> moisture <span class="sc">+</span> pH <span class="sc">+</span> litter <span class="sc">+</span> noise1 <span class="sc">+</span> noise2, <span class="at">data =</span> work,</span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>                  <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">maxdepth =</span> depth, <span class="at">cp =</span> <span class="dv">0</span>, <span class="at">minbucket =</span> <span class="dv">10</span>, <span class="at">xval =</span> <span class="dv">0</span>))</span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a>    f_train <span class="ot">&lt;-</span> f_train <span class="sc">+</span> shrink <span class="sc">*</span> <span class="fu">predict</span>(tree, train)  <span class="co"># 2. take a small step</span></span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>    f_test  <span class="ot">&lt;-</span> f_test  <span class="sc">+</span> shrink <span class="sc">*</span> <span class="fu">predict</span>(tree, test)</span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a>    err[b, ] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">mean</span>((train<span class="sc">$</span>cover <span class="sc">-</span> f_train)<span class="sc">^</span><span class="dv">2</span>), <span class="fu">mean</span>((test<span class="sc">$</span>cover <span class="sc">-</span> f_test)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a>  err</span>
+<span id="cb46-20"><a href="#cb46-20" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb46-21"><a href="#cb46-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-22"><a href="#cb46-22" aria-hidden="true" tabindex="-1"></a>err <span class="ot">&lt;-</span> <span class="fu">boost_scratch</span>(b_train, b_test)</span>
+<span id="cb46-23"><a href="#cb46-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-24"><a href="#cb46-24" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(err[, <span class="st">"train"</span>], <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"steelblue"</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">160</span>),</span>
+<span id="cb46-25"><a href="#cb46-25" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Boosting round"</span>, <span class="at">ylab =</span> <span class="st">"Mean squared error"</span>)</span>
+<span id="cb46-26"><a href="#cb46-26" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(err[, <span class="st">"test"</span>], <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb46-27"><a href="#cb46-27" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">36</span>, <span class="at">lty =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="st">"firebrick"</span>)</span>
+<span id="cb46-28"><a href="#cb46-28" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="fu">which.min</span>(err[, <span class="st">"test"</span>]), <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"grey50"</span>)</span>
+<span id="cb46-29"><a href="#cb46-29" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="fu">c</span>(<span class="st">"held-out plots"</span>, <span class="st">"training plots"</span>, <span class="st">"irreducible error"</span>), <span class="at">bty =</span> <span class="st">"n"</span>,</span>
+<span id="cb46-30"><a href="#cb46-30" aria-hidden="true" tabindex="-1"></a>       <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">3</span>), <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"black"</span>, <span class="st">"steelblue"</span>, <span class="st">"firebrick"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="10-trees-forests_files/figure-html/boost-scratch-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>best <span class="ot">&lt;-</span> <span class="fu">unname</span>(<span class="fu">which.min</span>(err[, <span class="st">"test"</span>]))</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">best_round    =</span> best,</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">train_at_best =</span> <span class="fu">unname</span>(<span class="fu">round</span>(err[best, <span class="st">"train"</span>], <span class="dv">1</span>)),</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">test_at_best  =</span> <span class="fu">unname</span>(<span class="fu">round</span>(err[best, <span class="st">"test"</span>], <span class="dv">1</span>)),</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">test_at_600   =</span> <span class="fu">unname</span>(<span class="fu">round</span>(err[<span class="dv">600</span>, <span class="st">"test"</span>], <span class="dv">1</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;    best_round train_at_best  test_at_best   test_at_600 
+#&gt;         174.0          23.9          52.6          56.1</code></pre>
+</div>
+</div>
+<p>The training error falls with every round and passes <em>below</em> the irreducible error of 36, which no honest prediction can beat: from that point on the model is fitting noise. The error on the held-out plots reaches its minimum well before the last round and then creeps upward. This is the overfitting that the number of rounds must control, and the reason why that number has to be chosen on data not used for fitting.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> The hundred held-out plots were used here to <em>choose</em> the number of rounds, so the minimum of the black curve is itself slightly optimistic (Day 7). The comparison at the end of this chapter keeps the two roles apart.</p>
+</div></div></section>
+<section id="three-tuning-parameters" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="three-tuning-parameters">Three tuning parameters</h3>
+<p>Boosting has three parameters, and in contrast to bagging all three matter.</p>
+<p>The <strong>number of trees</strong> <span class="math inline">\(B\)</span> must be chosen, because boosting <em>can</em> overfit if it is too large. This is the sharpest contrast with random forests, where more trees are never harmful. Each additional boosting round makes the model more flexible; each additional forest member only averages away more variance.</p>
+<p>The <strong>shrinkage</strong> <span class="math inline">\(\lambda\)</span>, typically 0.01 or 0.001, controls how much of each tree is taken. Smaller <span class="math inline">\(\lambda\)</span> requires larger <span class="math inline">\(B\)</span>; the two trade off against each other and are usually chosen together.</p>
+<p>The <strong>interaction depth</strong> <span class="math inline">\(d\)</span> is the number of splits per tree. With <span class="math inline">\(d = 1\)</span> each tree is a stump involving a single variable, and the boosted ensemble is then an additive model with no interactions at all. With <span class="math inline">\(d = 2\)</span> pairwise interactions become representable, and so on: <span class="math inline">\(d\)</span> is the interaction order of the fitted model, chosen rather than specified term by term.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — In our simulation the generating process contains one two-way interaction, so <span class="math inline">\(d = 2\)</span> is sufficient in principle and <span class="math inline">\(d = 1\)</span> is not. Boosting makes the interaction order an explicit, tunable quantity.</p>
+</div></div><div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gbm)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">104</span>)</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>boost_fit <span class="ot">&lt;-</span> <span class="fu">gbm</span>(f_reg, <span class="at">data =</span> plots, <span class="at">distribution =</span> <span class="st">"gaussian"</span>,</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">n.trees =</span> <span class="dv">3000</span>, <span class="at">interaction.depth =</span> <span class="dv">2</span>,</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">shrinkage =</span> <span class="fl">0.01</span>, <span class="at">n.minobsinnode =</span> <span class="dv">10</span>,</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">cv.folds =</span> <span class="dv">5</span>)</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>best_iter <span class="ot">&lt;-</span> <span class="fu">gbm.perf</span>(boost_fit, <span class="at">method =</span> <span class="st">"cv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="10-trees-forests_files/figure-html/boost-fit-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>best_iter</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 648</code></pre>
+</div>
+</div>
+<p><code>gbm.perf</code> plots the training error, which falls monotonically, against the cross-validated error, which falls and then flattens or rises, and returns the number of iterations at the cross-validated minimum. The gap between the two curves is the optimism of the training error, and it widens with every additional round.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> Predictions from a <code>gbm</code> object require the number of trees to be stated explicitly: <code>predict(fit, newdata, n.trees = best_iter)</code>. Omitting it uses all <code>n.trees</code>, which discards the tuning just performed.</p>
+</div></div><div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(boost_fit, <span class="at">n.trees =</span> best_iter, <span class="at">plotit =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;               var    rel.inf
+#&gt; moisture moisture 38.0961124
+#&gt; light       light 24.0593428
+#&gt; pH             pH 23.5108884
+#&gt; litter     litter 12.7003135
+#&gt; noise2     noise2  0.8935956
+#&gt; noise1     noise1  0.7397472</code></pre>
+</div>
+</div>
+<p>Relative influence is computed in the same spirit as impurity importance for forests: the improvement in squared error attributable to splits on each variable, summed over the ensemble and scaled to total 100. The noise predictors again serve as the reference level for irrelevance.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> <code>gbm</code> is no longer actively maintained. It remains the clearest implementation for teaching because it follows ISLR’s algorithm directly. For applied work, <code>xgboost</code> and <code>lightgbm</code> are the current standards, with the same three parameters under different names.</p>
+</div></div></section>
+</section>
+<section id="bias-variance-and-which-method-attacks-which" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="bias-variance-and-which-method-attacks-which">Bias, variance, and which method attacks which</h2>
+<p>The three ensembles are often presented as interchangeable alternatives. They are not, and the distinction is the single most useful thing to remember from this chapter.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Bagging</th>
+<th style="text-align: left;">Random forest</th>
+<th style="text-align: left;">Boosting</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Attacks</td>
+<td style="text-align: left;">variance</td>
+<td style="text-align: left;">variance</td>
+<td style="text-align: left;">bias</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Base learners</td>
+<td style="text-align: left;">deep, unpruned</td>
+<td style="text-align: left;">deep, unpruned</td>
+<td style="text-align: left;">shallow, often stumps</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Fitted</td>
+<td style="text-align: left;">in parallel, independently</td>
+<td style="text-align: left;">in parallel, decorrelated</td>
+<td style="text-align: left;">sequentially, dependently</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Effect of large <span class="math inline">\(B\)</span></td>
+<td style="text-align: left;">never harmful</td>
+<td style="text-align: left;">never harmful</td>
+<td style="text-align: left;">can overfit</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Tuning needed</td>
+<td style="text-align: left;">little</td>
+<td style="text-align: left;"><code>mtry</code></td>
+<td style="text-align: left;"><span class="math inline">\(B\)</span>, <span class="math inline">\(\lambda\)</span>, <span class="math inline">\(d\)</span> — all three</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Built-in validation</td>
+<td style="text-align: left;">out-of-bag</td>
+<td style="text-align: left;">out-of-bag</td>
+<td style="text-align: left;">none; use CV</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Interpretability</td>
+<td style="text-align: left;">low</td>
+<td style="text-align: left;">low, plus importance</td>
+<td style="text-align: left;">low, plus relative influence</td>
+</tr>
+</tbody>
+</table>
+<p>Bagging and random forests start from a low-bias, high-variance learner and remove the variance by averaging. Boosting starts from a high-bias, low-variance learner — a stump is about as biased as a model can be — and removes the bias by accumulation. Reading the table row by row, almost every difference between the columns follows from that one difference in the first row.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>↪</strong> The bias–variance decomposition itself was derived on Day 9. These two chapters are its most direct application.</p>
+</div></div></section>
+<section id="an-honest-comparison" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="an-honest-comparison">An honest comparison</h2>
+<p>Everything so far has been demonstrated on in-sample output or on out-of-bag error. The methods are now compared on equal terms, under one set of cross-validation folds, with all tuning performed inside the training data.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">77</span>)</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>fold <span class="ot">&lt;-</span> <span class="fu">cut</span>(<span class="fu">sample</span>(<span class="fu">seq_len</span>(<span class="fu">nrow</span>(plots))), <span class="at">breaks =</span> k, <span class="at">labels =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>methods <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"linear model"</span>, <span class="st">"pruned tree"</span>, <span class="st">"bagging"</span>,</span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>             <span class="st">"random forest"</span>, <span class="st">"boosting"</span>)</span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>mse <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA_real_</span>, <span class="at">nrow =</span> k, <span class="at">ncol =</span> <span class="fu">length</span>(methods),</span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="cn">NULL</span>, methods))</span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="fu">seq_len</span>(k)) {</span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a>  train <span class="ot">&lt;-</span> plots[fold <span class="sc">!=</span> j, ]</span>
+<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a>  test  <span class="ot">&lt;-</span> plots[fold <span class="sc">==</span> j, ]</span>
+<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a>  m_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(f_reg, <span class="at">data =</span> train)</span>
+<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a>  mse[j, <span class="st">"linear model"</span>] <span class="ot">&lt;-</span> <span class="fu">mean</span>((<span class="fu">predict</span>(m_lm, test) <span class="sc">-</span> test<span class="sc">$</span>cover)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-17"><a href="#cb54-17" aria-hidden="true" tabindex="-1"></a>  m_tr <span class="ot">&lt;-</span> <span class="fu">rpart</span>(f_reg, <span class="at">data =</span> train, <span class="at">method =</span> <span class="st">"anova"</span>,</span>
+<span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a>                <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="fl">0.002</span>, <span class="at">minsplit =</span> <span class="dv">10</span>, <span class="at">xval =</span> <span class="dv">10</span>))</span>
+<span id="cb54-19"><a href="#cb54-19" aria-hidden="true" tabindex="-1"></a>  cp_j <span class="ot">&lt;-</span> m_tr<span class="sc">$</span>cptable[<span class="fu">which.min</span>(m_tr<span class="sc">$</span>cptable[, <span class="st">"xerror"</span>]), <span class="st">"CP"</span>]</span>
+<span id="cb54-20"><a href="#cb54-20" aria-hidden="true" tabindex="-1"></a>  m_tr <span class="ot">&lt;-</span> <span class="fu">prune</span>(m_tr, <span class="at">cp =</span> cp_j)</span>
+<span id="cb54-21"><a href="#cb54-21" aria-hidden="true" tabindex="-1"></a>  mse[j, <span class="st">"pruned tree"</span>] <span class="ot">&lt;-</span> <span class="fu">mean</span>((<span class="fu">predict</span>(m_tr, test) <span class="sc">-</span> test<span class="sc">$</span>cover)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb54-22"><a href="#cb54-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-23"><a href="#cb54-23" aria-hidden="true" tabindex="-1"></a>  m_bag <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(f_reg, <span class="at">data =</span> train, <span class="at">mtry =</span> <span class="dv">6</span>, <span class="at">ntree =</span> <span class="dv">300</span>)</span>
+<span id="cb54-24"><a href="#cb54-24" aria-hidden="true" tabindex="-1"></a>  mse[j, <span class="st">"bagging"</span>] <span class="ot">&lt;-</span> <span class="fu">mean</span>((<span class="fu">predict</span>(m_bag, test) <span class="sc">-</span> test<span class="sc">$</span>cover)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb54-25"><a href="#cb54-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-26"><a href="#cb54-26" aria-hidden="true" tabindex="-1"></a>  m_rf <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(f_reg, <span class="at">data =</span> train, <span class="at">mtry =</span> <span class="dv">2</span>, <span class="at">ntree =</span> <span class="dv">300</span>)</span>
+<span id="cb54-27"><a href="#cb54-27" aria-hidden="true" tabindex="-1"></a>  mse[j, <span class="st">"random forest"</span>] <span class="ot">&lt;-</span> <span class="fu">mean</span>((<span class="fu">predict</span>(m_rf, test) <span class="sc">-</span> test<span class="sc">$</span>cover)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb54-28"><a href="#cb54-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-29"><a href="#cb54-29" aria-hidden="true" tabindex="-1"></a>  m_gb <span class="ot">&lt;-</span> <span class="fu">gbm</span>(f_reg, <span class="at">data =</span> train, <span class="at">distribution =</span> <span class="st">"gaussian"</span>,</span>
+<span id="cb54-30"><a href="#cb54-30" aria-hidden="true" tabindex="-1"></a>              <span class="at">n.trees =</span> <span class="dv">1500</span>, <span class="at">interaction.depth =</span> <span class="dv">2</span>, <span class="at">shrinkage =</span> <span class="fl">0.02</span>,</span>
+<span id="cb54-31"><a href="#cb54-31" aria-hidden="true" tabindex="-1"></a>              <span class="at">n.minobsinnode =</span> <span class="dv">10</span>, <span class="at">cv.folds =</span> <span class="dv">5</span>)</span>
+<span id="cb54-32"><a href="#cb54-32" aria-hidden="true" tabindex="-1"></a>  it_j <span class="ot">&lt;-</span> <span class="fu">gbm.perf</span>(m_gb, <span class="at">method =</span> <span class="st">"cv"</span>, <span class="at">plot.it =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb54-33"><a href="#cb54-33" aria-hidden="true" tabindex="-1"></a>  mse[j, <span class="st">"boosting"</span>] <span class="ot">&lt;-</span> <span class="fu">mean</span>((<span class="fu">predict</span>(m_gb, test, <span class="at">n.trees =</span> it_j) <span class="sc">-</span></span>
+<span id="cb54-34"><a href="#cb54-34" aria-hidden="true" tabindex="-1"></a>                                test<span class="sc">$</span>cover)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb54-35"><a href="#cb54-35" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb54-36"><a href="#cb54-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-37"><a href="#cb54-37" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">rbind</span>(<span class="at">CV_MSE =</span> <span class="fu">colMeans</span>(mse),</span>
+<span id="cb54-38"><a href="#cb54-38" aria-hidden="true" tabindex="-1"></a>            <span class="at">SE     =</span> <span class="fu">apply</span>(mse, <span class="dv">2</span>, sd) <span class="sc">/</span> <span class="fu">sqrt</span>(k)), <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;        linear model pruned tree bagging random forest boosting
+#&gt; CV_MSE        79.01       58.18   52.13         51.69    45.72
+#&gt; SE             5.07        5.06    3.14          3.88     2.96</code></pre>
+</div>
+</div>
+<p>Three points about the design of this comparison matter more than the numbers it produces.</p>
+<p>First, it is a <strong>nested</strong> cross-validation. The <code>cp</code> for the tree and the iteration count for the boosted model are selected by cross-validation <em>within</em> each training fold — <code>rpart</code> does this internally through <code>xval</code>, and <code>gbm</code> through <code>cv.folds</code>. The outer folds never participate in any choice, so the reported errors are honest estimates of the whole procedure.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>↪</strong> Day 7 argued for exactly this structure. The inner loops here are supplied by the fitting functions rather than written out, but they are the same construction.</p>
+</div></div><p>Second, the standard errors across folds are reported alongside the means. With five folds these are crude, and differences smaller than a couple of standard errors should not be read as a ranking. The one-standard-error rule applies to method comparison just as it applied to tree size.</p>
+<p>Third, every error should be read against the irreducible error of 36. A method achieving 45 has captured most of the available structure; the remaining gap to another method achieving 42 is a small fraction of what either has already explained. Improvements look larger than they are when the floor is forgotten.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> If the plots had been nested within forest stands, every fold above would have to be grouped by stand. Ensembles are especially vulnerable to this leak: a deep tree can effectively memorise a stand, so random folds would report an error close to the within-stand residual variance and a forest would appear to outperform everything else for entirely spurious reasons.</p>
+</div></div></section>
+<section id="reading-in-islr" class="level2">
+<h2 class="anchored" data-anchor-id="reading-in-islr">Reading in ISLR</h2>
+<p>Chapter 8 of <em>An Introduction to Statistical Learning</em> (2nd edition) covers this material. The figures repay study in the order given.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Topic</th>
+<th style="text-align: left;">ISLR</th>
+<th style="text-align: left;">Figure</th>
+<th style="text-align: left;">Page</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">A fitted regression tree, read as rules</td>
+<td style="text-align: left;">§8.1.1</td>
+<td style="text-align: left;">8.1</td>
+<td style="text-align: left;">328</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">The same tree as a partition</td>
+<td style="text-align: left;">§8.1.1</td>
+<td style="text-align: left;">8.2</td>
+<td style="text-align: left;">329</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Valid and invalid partitions; the 3-D view</td>
+<td style="text-align: left;">§8.1.1</td>
+<td style="text-align: left;">8.3</td>
+<td style="text-align: left;">332</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Unpruned tree, and error against tree size</td>
+<td style="text-align: left;">§8.1.1</td>
+<td style="text-align: left;">8.4, 8.5</td>
+<td style="text-align: left;">334–335</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Classification tree with CV error</td>
+<td style="text-align: left;">§8.1.2</td>
+<td style="text-align: left;">8.6</td>
+<td style="text-align: left;">336–337</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Trees versus linear models</td>
+<td style="text-align: left;">§8.1.3</td>
+<td style="text-align: left;">8.7</td>
+<td style="text-align: left;">338–339</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bagging and random forest test error</td>
+<td style="text-align: left;">§8.2.1–2</td>
+<td style="text-align: left;">8.8</td>
+<td style="text-align: left;">342</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Variable importance</td>
+<td style="text-align: left;">§8.2.1</td>
+<td style="text-align: left;">8.9</td>
+<td style="text-align: left;">344</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Effect of <code>mtry</code></td>
+<td style="text-align: left;">§8.2.2</td>
+<td style="text-align: left;">8.10</td>
+<td style="text-align: left;">346</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Boosting depth and number of trees</td>
+<td style="text-align: left;">§8.2.3</td>
+<td style="text-align: left;">8.11</td>
+<td style="text-align: left;">348</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Lab code</td>
+<td style="text-align: left;">§8.3</td>
+<td style="text-align: left;">—</td>
+<td style="text-align: left;">353–361</td>
+</tr>
+</tbody>
+</table>
+<p>Two differences from the book are worth noting while reading. ISLR uses <code>tree</code> and <code>randomForest</code>; the course uses <code>rpart</code>, whose complexity parameter <code>cp</code> is a scaled version of the <span class="math inline">\(\alpha\)</span> in ISLR’s equation (8.4), and whose cross-validation is performed automatically when the tree is grown. And §8.2.4 on Bayesian additive regression trees is not covered in the lectures; it is readable as extension material once boosting is understood, since BART is essentially a Bayesian treatment of the same additive-tree idea.</p>
+</section>
+<section id="where-this-leads" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="where-this-leads">Where this leads</h2>
+<p>The methods of this chapter produce models that predict well and explain little. That is a genuine change in what a statistical model is for, and it is worth stating plainly. A fitted random forest supports the claim that herb cover can be predicted from these four variables to within a certain error. It does not support a claim about the effect of raising soil pH by one unit, and no amount of variable-importance plotting converts it into one.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — Prediction and explanation are different goals served by different models.</p>
+</div></div><p>The course began with one proposition: statistics arises the moment a complicated process is described with a simple model. Every method since has been a version of it. Each approximates a process, explains part of the variation, leaves a residual, spends some measure of flexibility, and must be judged on data it has not seen.</p>
+
+
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>↪</strong> Day 11 returns to the thousands of genes of Day 2, and asks a different question: not which single genes change, but which <em>sets</em> of genes change together.</p>
+</div></div></section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
-window.document.addEventListener("DOMContentLoaded", function (event) {
-  const toggleBodyColorMode = (bsSheetEl) => {
-    const mode = bsSheetEl.getAttribute("data-mode");
-    const bodyEl = window.document.querySelector("body");
-    if (mode === "dark") {
-      bodyEl.classList.add("quarto-dark");
-      bodyEl.classList.remove("quarto-light");
-    } else {
-      bodyEl.classList.add("quarto-light");
-      bodyEl.classList.remove("quarto-dark");
-    }
-  }
-  const toggleBodyColorPrimary = () => {
-    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
-    if (bsSheetEl) {
-      toggleBodyColorMode(bsSheetEl);
-    }
-  }
-  toggleBodyColorPrimary();  
-  const icon = "";
-  const anchorJS = new window.AnchorJS();
-  anchorJS.options = {
-    placement: 'right',
-    icon: icon
-  };
-  anchorJS.add('.anchored');
-  const isCodeAnnotation = (el) => {
-    for (const clz of el.classList) {
-      if (clz.startsWith('code-annotation-')) {                     
-        return true;
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
       }
+      return false;
     }
-    return false;
-  }
-  const onCopySuccess = function(e) {
-    // button target
-    const button = e.trigger;
-    // don't keep focus
-    button.blur();
-    // flash "checked"
-    button.classList.add('code-copy-button-checked');
-    var currentTitle = button.getAttribute("title");
-    button.setAttribute("title", "Copied!");
-    let tooltip;
-    if (window.bootstrap) {
-      button.setAttribute("data-bs-toggle", "tooltip");
-      button.setAttribute("data-bs-placement", "left");
-      button.setAttribute("data-bs-title", "Copied!");
-      tooltip = new bootstrap.Tooltip(button, 
-        { trigger: "manual", 
-          customClass: "code-copy-button-tooltip",
-          offset: [0, -8]});
-      tooltip.show();    
-    }
-    setTimeout(function() {
-      if (tooltip) {
-        tooltip.hide();
-        button.removeAttribute("data-bs-title");
-        button.removeAttribute("data-bs-toggle");
-        button.removeAttribute("data-bs-placement");
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
       }
-      button.setAttribute("title", currentTitle);
-      button.classList.remove('code-copy-button-checked');
-    }, 1000);
-    // clear code selection
-    e.clearSelection();
-  }
-  const getTextToCopy = function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
       for (const childEl of codeEl.children) {
         if (isCodeAnnotation(childEl)) {
           childEl.remove();
         }
       }
       return codeEl.innerText;
-  }
-  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-    text: getTextToCopy
-  });
-  clipboard.on('success', onCopySuccess);
-  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-      text: getTextToCopy,
-      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
     });
-    clipboardModal.on('success', onCopySuccess);
-  }
-    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-    var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp('/' + window.location.host + '/');
-    var isInternal = (href) => {
-        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
     }
-    // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-    for (var i=0; i<links.length; i++) {
-      const link = links[i];
-      if (!isInternal(link.href)) {
-        // undo the damage that might have been done by quarto-nav.js in the case of
-        // links that we want to consider external
-        if (link.dataset.originalHref !== undefined) {
-          link.href = link.dataset.originalHref;
-        }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
-    }
-  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-    const config = {
-      allowHTML: true,
-      maxWidth: 500,
-      delay: 100,
-      arrow: false,
-      appendTo: function(el) {
-          return el.parentElement;
-      },
-      interactive: true,
-      interactiveBorder: 10,
-      theme: 'quarto',
-      placement: 'bottom-start',
-    };
-    if (contentFn) {
-      config.content = contentFn;
-    }
-    if (onTriggerFn) {
-      config.onTrigger = onTriggerFn;
-    }
-    if (onUntriggerFn) {
-      config.onUntrigger = onUntriggerFn;
-    }
-    window.tippy(el, config); 
-  }
-  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-  for (var i=0; i<noterefs.length; i++) {
-    const ref = noterefs[i];
-    tippyHover(ref, function() {
-      // use id or data attribute instead here
-      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-      try { href = new URL(href).hash; } catch {}
-      const id = href.replace(/^#\/?/, "");
-      const note = window.document.getElementById(id);
-      if (note) {
-        return note.innerHTML;
-      } else {
-        return "";
-      }
-    });
-  }
-  const xrefs = window.document.querySelectorAll('a.quarto-xref');
-  const processXRef = (id, note) => {
-    // Strip column container classes
-    const stripColumnClz = (el) => {
-      el.classList.remove("page-full", "page-columns");
-      if (el.children) {
-        for (const child of el.children) {
-          stripColumnClz(child);
-        }
-      }
-    }
-    stripColumnClz(note)
-    if (id === null || id.startsWith('sec-')) {
-      // Special case sections, only their first couple elements
-      const container = document.createElement("div");
-      if (note.children && note.children.length > 2) {
-        container.appendChild(note.children[0].cloneNode(true));
-        for (let i = 1; i < note.children.length; i++) {
-          const child = note.children[i];
-          if (child.tagName === "P" && child.innerText === "") {
-            continue;
-          } else {
-            container.appendChild(child.cloneNode(true));
-            break;
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
           }
         }
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(container);
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
         }
-        return container.innerHTML
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
       } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
         if (window.Quarto?.typesetMath) {
           window.Quarto.typesetMath(note);
         }
-        return note.innerHTML;
-      }
-    } else {
-      // Remove any anchor links if they are present
-      const anchorLink = note.querySelector('a.anchorjs-link');
-      if (anchorLink) {
-        anchorLink.remove();
-      }
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(note);
-      }
-      if (note.classList.contains("callout")) {
-        return note.outerHTML;
-      } else {
-        return note.innerHTML;
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
       }
     }
-  }
-  for (var i=0; i<xrefs.length; i++) {
-    const xref = xrefs[i];
-    tippyHover(xref, undefined, function(instance) {
-      instance.disable();
-      let url = xref.getAttribute('href');
-      let hash = undefined; 
-      if (url.startsWith('#')) {
-        hash = url;
-      } else {
-        try { hash = new URL(url).hash; } catch {}
-      }
-      if (hash) {
-        const id = hash.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note !== null) {
-          try {
-            const html = processXRef(id, note.cloneNode(true));
-            instance.setContent(html);
-          } finally {
-            instance.enable();
-            instance.show();
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
           }
         } else {
-          // See if we can fetch this
-          fetch(url.split('#')[0])
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
           .then(res => res.text())
           .then(html => {
             const parser = new DOMParser();
             const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.getElementById(id);
+            const note = htmlDoc.querySelector('main.content');
             if (note !== null) {
-              const html = processXRef(id, note);
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
               instance.setContent(html);
             } 
           }).finally(() => {
@@ -1501,185 +1946,161 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             instance.show();
           });
         }
-      } else {
-        // See if we can fetch a full url (with no hash to target)
-        // This is a special case and we should probably do some content thinning / targeting
-        fetch(url)
-        .then(res => res.text())
-        .then(html => {
-          const parser = new DOMParser();
-          const htmlDoc = parser.parseFromString(html, "text/html");
-          const note = htmlDoc.querySelector('main.content');
-          if (note !== null) {
-            // This should only happen for chapter cross references
-            // (since there is no id in the URL)
-            // remove the first header
-            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-              note.children[0].remove();
-            }
-            const html = processXRef(null, note);
-            instance.setContent(html);
-          } 
-        }).finally(() => {
-          instance.enable();
-          instance.show();
-        });
-      }
-    }, function(instance) {
-    });
-  }
-      let selectedAnnoteEl;
-      const selectorForAnnotation = ( cell, annotation) => {
-        let cellAttr = 'data-code-cell="' + cell + '"';
-        let lineAttr = 'data-code-annotation="' +  annotation + '"';
-        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-        return selector;
-      }
-      const selectCodeLines = (annoteEl) => {
-        const doc = window.document;
-        const targetCell = annoteEl.getAttribute("data-target-cell");
-        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-        const lineIds = lines.map((line) => {
-          return targetCell + "-" + line;
-        })
-        let top = null;
-        let height = null;
-        let parent = null;
-        if (lineIds.length > 0) {
-            //compute the position of the single el (top and bottom and make a div)
-            const el = window.document.getElementById(lineIds[0]);
-            top = el.offsetTop;
-            height = el.offsetHeight;
-            parent = el.parentElement.parentElement;
-          if (lineIds.length > 1) {
-            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-            height = bottom - top;
-          }
-          if (top !== null && height !== null && parent !== null) {
-            // cook up a div (if necessary) and position it 
-            let div = window.document.getElementById("code-annotation-line-highlight");
-            if (div === null) {
-              div = window.document.createElement("div");
-              div.setAttribute("id", "code-annotation-line-highlight");
-              div.style.position = 'absolute';
-              parent.appendChild(div);
-            }
-            div.style.top = top - 2 + "px";
-            div.style.height = height + 4 + "px";
-            div.style.left = 0;
-            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-            if (gutterDiv === null) {
-              gutterDiv = window.document.createElement("div");
-              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-              gutterDiv.style.position = 'absolute';
-              const codeCell = window.document.getElementById(targetCell);
-              const gutter = codeCell.querySelector('.code-annotation-gutter');
-              gutter.appendChild(gutterDiv);
-            }
-            gutterDiv.style.top = top - 2 + "px";
-            gutterDiv.style.height = height + 4 + "px";
-          }
-          selectedAnnoteEl = annoteEl;
-        }
-      };
-      const unselectCodeLines = () => {
-        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-        elementsIds.forEach((elId) => {
-          const div = window.document.getElementById(elId);
-          if (div) {
-            div.remove();
-          }
-        });
-        selectedAnnoteEl = undefined;
-      };
-        // Handle positioning of the toggle
-    window.addEventListener(
-      "resize",
-      throttle(() => {
-        elRect = undefined;
-        if (selectedAnnoteEl) {
-          selectCodeLines(selectedAnnoteEl);
-        }
-      }, 10)
-    );
-    function throttle(fn, ms) {
-    let throttle = false;
-    let timer;
-      return (...args) => {
-        if(!throttle) { // first call gets through
-            fn.apply(this, args);
-            throttle = true;
-        } else { // all the others get throttled
-            if(timer) clearTimeout(timer); // cancel #2
-            timer = setTimeout(() => {
-              fn.apply(this, args);
-              timer = throttle = false;
-            }, ms);
-        }
-      };
-    }
-      // Attach click handler to the DT
-      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-      for (const annoteDlNode of annoteDls) {
-        annoteDlNode.addEventListener('click', (event) => {
-          const clickedEl = event.target;
-          if (clickedEl !== selectedAnnoteEl) {
-            unselectCodeLines();
-            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-            if (activeEl) {
-              activeEl.classList.remove('code-annotation-active');
-            }
-            selectCodeLines(clickedEl);
-            clickedEl.classList.add('code-annotation-active');
-          } else {
-            // Unselect the line
-            unselectCodeLines();
-            clickedEl.classList.remove('code-annotation-active');
-          }
-        });
-      }
-  const findCites = (el) => {
-    const parentEl = el.parentElement;
-    if (parentEl) {
-      const cites = parentEl.dataset.cites;
-      if (cites) {
-        return {
-          el,
-          cites: cites.split(' ')
-        };
-      } else {
-        return findCites(el.parentElement)
-      }
-    } else {
-      return undefined;
-    }
-  };
-  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-  for (var i=0; i<bibliorefs.length; i++) {
-    const ref = bibliorefs[i];
-    const citeInfo = findCites(ref);
-    if (citeInfo) {
-      tippyHover(citeInfo.el, function() {
-        var popup = window.document.createElement('div');
-        citeInfo.cites.forEach(function(cite) {
-          var citeDiv = window.document.createElement('div');
-          citeDiv.classList.add('hanging-indent');
-          citeDiv.classList.add('csl-entry');
-          var biblioDiv = window.document.getElementById('ref-' + cite);
-          if (biblioDiv) {
-            citeDiv.innerHTML = biblioDiv.innerHTML;
-          }
-          popup.appendChild(citeDiv);
-        });
-        return popup.innerHTML;
+      }, function(instance) {
       });
     }
-  }
-});
-</script>
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="./09-regularisation.html" class="pagination-link" aria-label="Regularisation">
@@ -1687,8 +2108,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./11-boosting-comparison.html" class="pagination-link" aria-label="Boosting and an honest comparison">
-        <span class="nav-page-text"><span class="chapter-title">Boosting and an honest comparison</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./11-gene-set-enrichment.html" class="pagination-link" aria-label="Gene set enrichment analysis">
+        <span class="nav-page-text"><span class="chapter-title">Gene set enrichment analysis</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

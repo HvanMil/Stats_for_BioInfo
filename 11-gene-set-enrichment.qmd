@@ -1,0 +1,478 @@
+# Gene set enrichment analysis
+
+::: {.column-margin .margin-legend}
+**Margin legend**
+
+**DEF** — definition **KEY** — key idea to remember **↪** — bridge to another day **⚠** — common pitfall
+:::
+
+Day 2 left a bioinformatician with thousands of p-values, one per gene, and a correction for multiple testing. That answers the question *which genes change?* It often answers it badly. The changes may be too small to survive the correction, or the list may be long and without a common theme. And studies of the same biology often produce lists that hardly overlap.
+
+This chapter changes the question to *which groups of genes change together?* The groups are **gene sets**: genes that share a function, a pathway or a location. Two families of methods answer the question. **Over-representation analysis** counts how many genes of a set are on a list of significant genes. **Gene set enrichment analysis** (GSEA) uses the whole ranked list of genes, without a threshold, and borrows its test statistic from the Kolmogorov–Smirnov test.
+
+Both are built from ideas met earlier in the course: counts and their distributions (Day 1), multiple testing and the difference between confirming and exploring (Day 2), and resampling (Day 7). The chapter uses simulated genes and gene sets, so that the truth is known.
+
+```{r helpers}
+#| code-fold: true
+#| code-summary: "Helper functions used in this chapter"
+col_blue <- "#1F4E79"; col_orange <- "#D35400"; col_green <- "#2E7D5B"; col_grey <- "grey45"
+
+# two-sample t-statistic for every row of X; g is TRUE for the second group
+row_t <- function(X, g) {
+  a <- X[, !g, drop = FALSE]; b <- X[, g, drop = FALSE]
+  ma <- rowMeans(a); mb <- rowMeans(b)
+  s2 <- (rowSums((a - ma)^2) + rowSums((b - mb)^2)) / (ncol(a) + ncol(b) - 2)
+  (mb - ma) / sqrt(s2 * (1 / ncol(a) + 1 / ncol(b)))
+}
+```
+
+## From genes to gene sets
+
+### Why lists of single genes disappoint
+
+The paper that introduced GSEA [@Subramanian2005] gave four reasons to look beyond single genes. After correcting for multiple testing, no gene may be significant, because the biological effects are modest compared with the noise. Alternatively, the list may be long, with no unifying theme, and its interpretation then depends on the expertise of whoever reads it. Cellular processes involve sets of genes acting together: a modest increase in every gene of a pathway can matter more than a large increase in one gene. And different groups studying the same system often obtain lists of significant genes with distressingly little overlap.
+
+The last point is easy to reproduce. Three laboratories study the same biology: 300 of 5,000 genes truly change, all by the same moderate amount. Each laboratory measures four treated and four control samples and reports its 300 most significant genes.
+
+```{r fig-three-studies}
+#| code-fold: true
+#| code-summary: "Code for the figure"
+#| fig-width: 6
+#| fig-height: 4.6
+#| fig-cap: "The 300 most significant genes in three simulated studies of the same biology. Each study finds about 80 of the 300 truly changed genes, but different ones: two lists share only about 30 genes, and all three share a handful. The real figure, from three published studies of stem cells, looks much the same [@Fortunel2003]."
+set.seed(3)
+G <- 5000; truly_changed <- 1:300; n <- 4; grp <- rep(c(FALSE, TRUE), each = n)
+top <- lapply(1:3, function(s) {
+  X <- matrix(rnorm(G * 2 * n), G)
+  X[truly_changed, grp] <- X[truly_changed, grp] + 1.2
+  p <- 2 * pt(-abs(row_t(X, grp)), 2 * n - 2)
+  order(p)[1:300]
+})
+A <- top[[1]]; B <- top[[2]]; C <- top[[3]]
+region <- c(A = length(setdiff(A, union(B, C))), B = length(setdiff(B, union(A, C))),
+            C = length(setdiff(C, union(A, B))),
+            AB = length(setdiff(intersect(A, B), C)), AC = length(setdiff(intersect(A, C), B)),
+            BC = length(setdiff(intersect(B, C), A)), ABC = length(Reduce(intersect, top)))
+circ <- function(x, y, r, col) {
+  t <- seq(0, 2 * pi, length.out = 200); lines(x + r * cos(t), y + r * sin(t), col = col, lwd = 3)
+}
+par(mar = c(0, 0, 0, 0))
+plot(NA, xlim = c(-3.3, 3.3), ylim = c(-3, 3.2), asp = 1, axes = FALSE, xlab = "", ylab = "")
+circ(-0.9, 0.6, 1.8, col_orange); circ(0.9, 0.6, 1.8, col_blue); circ(0, -0.9, 1.8, col_green)
+text(c(-1.6, 1.6, 0, 0, -0.95, 0.95, 0), c(1.1, 1.1, -1.9, 1.25, -0.35, -0.35, 0.15),
+     region[c("A", "B", "C", "AB", "AC", "BC", "ABC")], cex = 1.3, font = 2)
+text(c(-2.4, 2.4, 0), c(2.6, 2.6, -2.95), c("study 1", "study 2", "study 3"),
+     col = c(col_orange, col_blue, col_green), cex = 1.1, font = 2)
+```
+
+```{r three-studies-numbers}
+c(true_genes_in_each_list = round(mean(sapply(top, function(t) sum(t %in% truly_changed)))),
+  overlap_study_1_and_2 = length(intersect(A, B)))
+```
+
+Every list is mostly right in the sense that matters: the genes on it are much more likely than chance to be truly changed. But with small effects and few samples, *which* of the 300 changed genes make it into the top 300 is largely a matter of luck. A conclusion about a group of genes, such as "the genes of this pathway go up", can be stable even when the individual lists are not.
+
+::: column-margin
+**KEY** — With modest effects and few samples, individual gene lists are unstable. Questions about groups of genes can be answered more reliably.
+:::
+
+### Where gene sets come from: Gene Ontology and pathways
+
+A gene set is any group of genes defined *before* the experiment. The most widely used source is the **Gene Ontology** (GO) [@Ashburner2000], which describes genes in three vocabularies: the *biological processes* they take part in, their *molecular functions*, and the *cellular components* where they act. The terms are organised as a directed acyclic graph: a specific term is linked to more general terms by relations such as *is a*, *part of* and *regulates*.
+
+```{r fig-go-dag}
+#| code-fold: true
+#| code-summary: "Code for the figure"
+#| fig-width: 8.5
+#| fig-height: 5.2
+#| fig-cap: "A small part of the Gene Ontology. Arrows point from a specific term to a more general one; grey arrows mean *is a*, orange arrows *regulates*. A gene annotated to a specific term is counted in all the terms above it, so gene sets are nested and overlap."
+nodes <- data.frame(
+  id = c("GO:0008150", "GO:0009987", "GO:0065007", "GO:0016043", "GO:0050789",
+         "GO:0030030", "GO:0050794", "GO:0031344"),
+  label = c("biological_process", "cellular process", "biological regulation",
+            "cellular component\norganization", "regulation of\nbiological process",
+            "cell projection\norganization", "regulation of\ncellular process",
+            "regulation of cell\nprojection organization"),
+  x = c(0, -2.2, 2.2, -3, 2.2, -3, 0.6, -0.8),
+  y = c(4, 3, 3, 2, 2, 1, 1, 0))
+edges <- data.frame(
+  from = c("GO:0009987", "GO:0065007", "GO:0016043", "GO:0050789", "GO:0030030",
+           "GO:0050794", "GO:0050794", "GO:0031344", "GO:0031344"),
+  to   = c("GO:0008150", "GO:0008150", "GO:0009987", "GO:0065007", "GO:0016043",
+           "GO:0050789", "GO:0009987", "GO:0050794", "GO:0030030"),
+  type = c("is_a", "is_a", "is_a", "is_a", "is_a", "is_a", "regulates", "is_a", "regulates"))
+par(mar = c(0, 0, 0, 0))
+plot(NA, xlim = c(-4.3, 3.6), ylim = c(-0.5, 4.5), axes = FALSE, xlab = "", ylab = "")
+pos <- function(id) unlist(nodes[nodes$id == id, c("x", "y")])
+for (k in seq_len(nrow(edges))) {
+  a <- pos(edges$from[k]); b <- pos(edges$to[k])
+  arrows(a[1], a[2] + 0.28, b[1], b[2] - 0.3, length = 0.09, lwd = 2,
+         col = ifelse(edges$type[k] == "is_a", "grey55", col_orange))
+}
+for (k in seq_len(nrow(nodes))) {
+  rect(nodes$x[k] - 0.85, nodes$y[k] - 0.28, nodes$x[k] + 0.85, nodes$y[k] + 0.28,
+       col = "white", border = "grey30")
+  text(nodes$x[k], nodes$y[k] + 0.08, nodes$label[k], cex = 0.68)
+  text(nodes$x[k], nodes$y[k] - 0.2, nodes$id[k], cex = 0.55, col = col_grey)
+}
+legend("bottomright", bty = "n", lwd = 2, col = c("grey55", col_orange),
+       legend = c("is a", "regulates"), cex = 0.85)
+```
+
+Pathway databases such as KEGG and Reactome provide another source, and collections such as MSigDB bundle sets from many sources. For statistics, three properties of these sets matter more than their biology:
+
+- **Sets overlap and are nested.** A gene annotated to a specific GO term also counts for every term above it. Tests for different sets are therefore not independent.
+- **Set sizes vary** from a handful of genes to thousands. A test statistic must be comparable across sizes.
+- **Annotation is incomplete and biased.** Well-studied genes carry many annotations, poorly studied genes few. Sets reflect what is known, not only what is true.
+
+::: column-margin
+**⚠** The gene sets must be chosen before looking at the results. Choosing the sets that "look interesting" after the analysis is the double dipping of Day 2.
+:::
+
+::: column-margin
+**↪** Real analyses read the sets from GO, KEGG or MSigDB with Bioconductor packages such as `clusterProfiler` or `fgsea`. The statistics underneath are the ones in this chapter.
+:::
+
+::: {.callout-caution title="Check yourself"}
+A gene set for "cellular process" contains thousands of genes, one for "regulation of cell projection organization" a few dozen. Why are the two tests not independent, and why can a significant result for the large set be uninformative?
+
+::: {.callout-tip collapse="true" title="Answer"}
+Every gene annotated to the specific term is also annotated to the general term above it, so the two sets share genes, and a change in those genes affects both tests. A very large set is significant as soon as a small fraction of its genes change; the result then says little more than "something happens in the cell". Specific sets are usually more informative, even though they have less power.
+:::
+:::
+
+## Over-representation analysis
+
+### A two-by-two table
+
+The oldest form of enrichment analysis starts from a list of significant genes, for example those with a false discovery rate below 5%. It asks whether the genes of a set are over-represented on the list. Every gene of the **universe**, the genes that could have appeared on the list, falls into one of four cells:
+
+| | in the set | not in the set | total |
+|:--|--:|--:|--:|
+| on the list | $x$ | $k - x$ | $k$ |
+| not on the list | $m - x$ | | $N - k$ |
+| total | $m$ | $N - m$ | $N$ |
+
+If the list has nothing to do with the set, the $k$ genes on the list are like $k$ balls drawn without replacement from an urn with $m$ marked balls among $N$. The number of marked balls drawn then has a **hypergeometric** distribution, with expected value $k\,m/N$, and the p-value is the probability of an overlap at least as large as the observed one:
+
+$$P(X \ge x) = \sum_{j \ge x} \frac{\binom{m}{j}\binom{N - m}{k - j}}{\binom{N}{k}} .$$
+
+This is the one-sided version of **Fisher's exact test** for a $2 \times 2$ table.
+
+::: column-margin
+**DEF** — The **hypergeometric distribution** counts marked items in a sample drawn *without* replacement. The binomial of Day 1 is the same count *with* replacement, and is a good approximation when the universe is large.
+:::
+
+```{r ora-example}
+set.seed(11)
+N_genes   <- 10000
+expressed <- sort(sample(N_genes, 5000))          # genes measured in this tissue
+set_genes <- c(sample(expressed, 190), sample(setdiff(1:N_genes, expressed), 10))
+
+# a list of 800 significant genes: 40 genes of the set changed, plus 760 others
+# drawn at random from the remaining expressed genes
+changed <- sample(intersect(set_genes, expressed), 40)
+de_list <- c(changed, sample(setdiff(expressed, changed), 760))
+
+universe <- expressed
+tab <- table(on_list = factor(universe %in% de_list, c(TRUE, FALSE)),
+             in_set  = factor(universe %in% set_genes, c(TRUE, FALSE)))
+tab
+
+x <- tab["TRUE", "TRUE"]; m <- sum(universe %in% set_genes); k <- length(de_list)
+k * m / length(universe)                     # expected overlap
+c(hypergeometric = phyper(x - 1, m, length(universe) - m, k, lower.tail = FALSE),
+  fisher         = fisher.test(tab, alternative = "greater")$p.value)
+```
+
+The set contributes `r x` genes to the list where about `r round(k * m / length(universe))` are expected, and both calculations give the same, very small p-value.
+
+### The universe matters
+
+The universe is the step most often done wrong. In the example, only the 5,000 genes expressed in the tissue could ever appear on the list, and almost all genes of the set are among them. Suppose now that the list contains no enrichment at all, 800 expressed genes drawn at random, and the analysis is run with the whole genome as universe.
+
+```{r ora-universe}
+set.seed(12)
+random_list <- sample(expressed, 800)                       # no enrichment at all
+ora_p <- function(list, universe) {
+  tab <- table(factor(universe %in% list, c(TRUE, FALSE)),
+               factor(universe %in% set_genes, c(TRUE, FALSE)))
+  c(overlap = tab[1, 1], expected = round(length(list) * mean(universe %in% set_genes), 1),
+    p = signif(fisher.test(tab, alternative = "greater")$p.value, 3))
+}
+rbind(whole_genome    = ora_p(random_list, 1:N_genes),
+      expressed_genes = ora_p(random_list, expressed))
+```
+
+With the genome as universe, the set appears strongly enriched: its genes are expressed, and expressed genes are the only ones that can be on a list. The correct universe removes the artefact.
+
+::: column-margin
+**KEY** — The universe is the set of genes that *could* have been on the list: the genes that were measured, expressed and kept after filtering. A universe that is too large produces enrichment from nothing.
+:::
+
+### What over-representation analysis assumes
+
+Two further weaknesses follow from the urn model.
+
+- **The threshold.** The list depends on an arbitrary cut-off (FDR 5%, or the top 500). Genes just below the cut-off count as much as genes that did not change at all, and a different cut-off can change the conclusion.
+- **Independence.** The urn assumes that genes are drawn independently. Genes in a pathway are co-regulated, so they tend to be on the list together or not at all. The effective number of independent draws is smaller than the count suggests, and the p-values are too small.
+
+GSEA addresses the first weakness directly. The second returns below.
+
+::: {.callout-caution title="Check yourself"}
+An over-representation analysis of a liver experiment uses all 20,000 human protein-coding genes as universe. Which kind of gene set is most likely to come out as falsely enriched, and how would you choose the universe instead?
+
+::: {.callout-tip collapse="true" title="Answer"}
+Sets of genes that are specifically expressed in the liver, or more generally in the measured tissue: their genes are over-represented among the measured, expressed genes, and therefore among any list of significant genes, whatever the treatment does. The universe should be the genes that could have been called significant: those measured on the platform, expressed in the tissue and retained after the filtering step of the differential-expression analysis.
+:::
+:::
+
+## Distributions of p-values, and the Kolmogorov–Smirnov test
+
+GSEA does not use a list but the whole distribution of gene-level results. Its statistic descends from a classical test for comparing distributions, which is easiest to introduce with p-values.
+
+### p-values under the null and the alternative
+
+If a test statistic $T$ has a continuous distribution function $F$ under $H_0$, the p-value $P = 1 - F(T)$ (or its two-sided version) is uniformly distributed between 0 and 1 when $H_0$ is true:
+
+$$P(P \le p) = P\big(T \ge F^{-1}(1-p)\big) = 1 - F\big(F^{-1}(1-p)\big) = p .$$
+
+The figure repeats a one-sample *t*-test 10,000 times on samples of 15 observations with true mean 2. On the left the null hypothesis is the truth ($\mu_0 = 2$); on the right it is not ($\mu_0 = 1.75$).
+
+```{r fig-pvalues}
+#| code-fold: true
+#| code-summary: "Code for the figure"
+#| fig-width: 8.5
+#| fig-height: 3.8
+#| fig-cap: "p-values of 10,000 one-sample t-tests. Left: the null hypothesis is true, and the p-values are uniform; about 5% fall below 0.05 (orange). Right: the true mean differs from the null value by a sixth of a standard deviation, and the p-values pile up near zero."
+set.seed(568)
+Xp <- matrix(rnorm(10000 * 15, 2, 1.5), 10000)
+t_stat <- function(mu0) (rowMeans(Xp) - mu0) / (apply(Xp, 1, sd) / sqrt(15))
+p_null <- 2 * pt(-abs(t_stat(2)), 14)
+p_alt  <- 2 * pt(-abs(t_stat(1.75)), 14)
+par(mfrow = c(1, 2), mar = c(4, 4, 2.5, 1))
+for (k in 1:2) {
+  p <- list(p_null, p_alt)[[k]]
+  hist(p, breaks = seq(0, 1, 0.05), col = c(col_orange, rep("#DCE6F1", 19)), border = "grey50",
+       las = 1, ylim = c(0, 1100), xlab = "p-value", ylab = "number of tests",
+       main = c("H0 true: effect size 0", "H0 false: effect size 1/6")[k])
+  abline(h = 500, lty = 2, col = col_blue)
+}
+```
+
+### Comparing distributions: the Kolmogorov–Smirnov statistic
+
+To compare the two histograms with the uniform distribution formally, plot their **empirical cumulative distribution functions** (ECDFs): for each value $x$, the fraction of p-values at or below $x$. Under $H_0$ the ECDF follows the diagonal. The **Kolmogorov–Smirnov statistic** is the largest vertical distance between an ECDF $F_n$ and the reference distribution $F$:
+
+$$D_n = \sup_x \big|F_n(x) - F(x)\big| .$$
+
+```{r fig-ks}
+#| code-fold: true
+#| code-summary: "Code for the figure"
+#| fig-width: 5.8
+#| fig-height: 4.4
+#| fig-cap: "Empirical cumulative distribution functions of the two sets of p-values, and the uniform distribution (dashed diagonal). The orange segment marks the Kolmogorov–Smirnov statistic D for the p-values under the alternative: the largest vertical distance to the diagonal."
+xs <- seq(0, 1, length.out = 1001)
+F_alt <- ecdf(p_alt)(xs); F_null <- ecdf(p_null)(xs)
+k_max <- which.max(abs(F_alt - xs))
+par(mar = c(4, 4, 1, 1))
+plot(xs, F_alt, type = "l", lwd = 3, col = col_blue, las = 1, xlim = c(0, 1), ylim = c(0, 1),
+     xlab = "p-value", ylab = "fraction of p-values at or below")
+lines(xs, F_null, lwd = 3, col = col_green)
+abline(0, 1, lty = 2, lwd = 2)
+segments(xs[k_max], xs[k_max], xs[k_max], F_alt[k_max], col = col_orange, lwd = 4)
+text(xs[k_max], (xs[k_max] + F_alt[k_max]) / 2, "D", pos = 4, col = col_orange, font = 2)
+legend("bottomright", bty = "n", lwd = 3, col = c(col_blue, col_green),
+       legend = c("H0 false", "H0 true"))
+```
+
+```{r ks-test}
+ks.test(p_alt, "punif")
+c(critical_value_one_sample = 1.358 / sqrt(length(p_alt)))
+```
+
+For a sample of size $n$ compared with a fixed distribution, $D_n$ exceeds $c(\alpha)/\sqrt n$ with probability $\alpha$ under $H_0$, where $c(0.05) = 1.358$ and $c(0.01) = 1.628$. Here $D$ is about 0.10, far above the critical value of 0.014. When two samples of sizes $n$ and $m$ are compared with each other, `ks.test(sample1, sample2)`, the critical value becomes $c(\alpha)\sqrt{(n + m)/(nm)}$.
+
+::: column-margin
+**KEY** — The Kolmogorov–Smirnov test asks whether a sample is distributed like a reference. GSEA asks the same question of a gene set: are its genes distributed over the ranked list like randomly chosen genes?
+:::
+
+## Gene set enrichment analysis
+
+### Ranking all genes
+
+GSEA starts from a statistic for every gene, here the *t*-statistic comparing two groups, and ranks all genes from most up-regulated to most down-regulated. No threshold is applied. The simulated experiment has 2,000 genes, measured in 8 control and 8 treated samples, and three gene sets of 40 genes each:
+
+- **S1**: every gene is raised by 0.8 standard deviations in the treated samples, a modest change that few genes would survive alone;
+- **S2**: a random set, with no change;
+- **S3**: no change either, but its genes are strongly **correlated**: they share a common source of variation between samples, as co-regulated genes do.
+
+```{r gsea-data}
+set.seed(2027)
+G <- 2000; n <- 8; grp <- rep(c(FALSE, TRUE), each = n)
+X <- matrix(rnorm(G * 2 * n), G)
+sets <- list(S1 = 1:40, S2 = 41:80, S3 = 81:120)
+X[sets$S1, grp] <- X[sets$S1, grp] + 0.8                   # a real, modest shift
+shared <- rnorm(2 * n)                                     # a common factor per sample
+X[sets$S3, ] <- X[sets$S3, ] + matrix(1.2 * shared, 40, 2 * n, byrow = TRUE)
+
+t_obs <- row_t(X, grp)
+p_gene <- 2 * pt(-abs(t_obs), 2 * n - 2)
+c(S1_genes_significant_after_BH = sum(p.adjust(p_gene, "BH")[sets$S1] < 0.05))
+```
+
+Not one of the 40 genes of S1 is significant on its own after the Benjamini–Hochberg correction. The question is whether the set, taken together, is.
+
+### The running sum and the enrichment score
+
+Walk down the ranked list. Each time a gene of the set is met, a running sum goes up; each time another gene is met, it goes down. In the formulation of @Subramanian2005, after the first $i$ genes of the list,
+
+$$P_\text{hit}(S, i) = \sum_{g_j \in S,\ j \le i} \frac{|r_j|^p}{N_R},
+\qquad
+P_\text{miss}(S, i) = \sum_{g_j \notin S,\ j \le i} \frac{1}{N - N_S},
+\qquad
+N_R = \sum_{g_j \in S} |r_j|^p ,$$
+
+where $r_j$ is the statistic of the gene at rank $j$, $N$ the number of genes and $N_S$ the size of the set. The **enrichment score** is the maximum deviation of $P_\text{hit} - P_\text{miss}$ from zero.
+
+With $p = 0$ every hit counts equally, and the running sum is, up to scaling, the difference between the ECDF of the set's ranks and that of all other genes: the Kolmogorov–Smirnov statistic. With $p = 1$, the usual choice, genes with large statistics count more, so a set whose genes cluster in the middle of the list cannot reach a large score.
+
+```{r running-sum}
+running_sum <- function(stat, in_set, p = 1) {
+  o <- order(stat, decreasing = TRUE)
+  hit  <- in_set[o]
+  w    <- abs(stat[o])^p * hit
+  cumsum(w) / sum(w) - cumsum(!hit) / sum(!hit)
+}
+enrichment_score <- function(stat, in_set, p = 1) {
+  r <- running_sum(stat, in_set, p); r[which.max(abs(r))]
+}
+in_set <- lapply(sets, function(s) seq_len(G) %in% s)
+es_obs <- sapply(in_set, function(s) enrichment_score(t_obs, s))
+round(es_obs, 3)
+```
+
+```{r fig-running-sums}
+#| code-fold: true
+#| code-summary: "Code for the figure"
+#| fig-width: 9
+#| fig-height: 3.6
+#| fig-cap: "Running sums for the three gene sets along the ranked list (rank 1 is the most up-regulated gene). The bars at the top mark where the genes of the set fall. S1's genes cluster at the top, and the running sum climbs steeply. S2's genes are spread evenly, and the sum wanders around zero. S3's genes also cluster, at the bottom in this sample, although nothing changed: they are correlated and moved together by chance."
+cols <- c(S1 = col_orange, S2 = col_blue, S3 = col_green)
+par(mfrow = c(1, 3), mar = c(4, 4, 2.5, 1))
+for (s in names(sets)) {
+  r <- running_sum(t_obs, in_set[[s]])
+  ranks <- which(in_set[[s]][order(t_obs, decreasing = TRUE)])
+  plot(r, type = "l", lwd = 2.5, col = cols[s], las = 1, ylim = c(-0.85, 0.95),
+       xlab = "rank in the list", ylab = "running enrichment score", main = s)
+  abline(h = 0, lty = 2)
+  segments(ranks, 0.8, ranks, 0.92, col = cols[s])
+  k <- which.max(abs(r)); points(k, r[k], pch = 19, col = cols[s], cex = 1.3)
+}
+```
+
+### Significance by permutation
+
+The enrichment score has no simple null distribution: it depends on the set size, on the weights, and on the correlation between genes. GSEA therefore obtains its null distribution by **permutation**. The labels of the samples (control or treated) are shuffled, all gene statistics are recomputed, and the enrichment score of each set is calculated again. Repeating this a thousand times gives the distribution of the score when the treatment has no effect; the p-value is the fraction of permutation scores at least as extreme as the observed one.
+
+```{r permutation-samples}
+set.seed(1)
+B <- 1000
+es_null <- replicate(B, {
+  t_perm <- row_t(X, sample(grp))                 # shuffle samples, keep genes together
+  sapply(in_set, function(s) enrichment_score(t_perm, s))
+})
+p_sample_perm <- sapply(names(sets), function(s) mean(abs(es_null[s, ]) >= abs(es_obs[s])))
+round(p_sample_perm, 3)
+```
+
+Set sizes differ between real gene sets, and so do their null distributions. GSEA therefore divides each score by the mean of the permutation scores of the same sign, giving a **normalised enrichment score** (NES) that can be compared across sets. With many sets, the p-values (or NES-based FDR values) are corrected for multiple testing, exactly as for genes on Day 2.
+
+::: column-margin
+**↪** Permutation is resampling without replacement, the sibling of the bootstrap (Day 7). Both replace a theoretical distribution by one built from the data themselves.
+:::
+
+### Permuting genes or permuting samples?
+
+A cheaper alternative is to permute *genes*: draw random sets of 40 genes from the same ranked list, and compare their scores with the observed one. It needs only the one ranked list. But it treats the genes of a set as independent draws, and S3 shows what that costs.
+
+```{r permutation-genes}
+set.seed(2)
+es_gene_null <- replicate(B, enrichment_score(t_obs, seq_len(G) %in% sample(G, 40)))
+p_gene_perm <- sapply(names(sets), function(s) mean(abs(es_gene_null) >= abs(es_obs[s])))
+rbind(permute_samples = round(p_sample_perm, 3), permute_genes = round(p_gene_perm, 3))
+```
+
+```{r fig-permutation-null}
+#| code-fold: true
+#| code-summary: "Code for the figure"
+#| fig-width: 8.5
+#| fig-height: 3.6
+#| fig-cap: "Null distributions for the enrichment score of S3, the correlated set without any real change, and its observed score (orange line). Permuting samples keeps the correlation between the set's genes, so large scores are common and the observed score is unremarkable. Permuting genes breaks the correlation, so such a score looks impossible."
+par(mfrow = c(1, 2), mar = c(4, 4, 2.5, 1))
+hist(abs(es_null["S3", ]), breaks = 30, col = "#DCE6F1", border = "grey50", las = 1, xlim = c(0, 0.9),
+     main = "permuting samples", xlab = "|enrichment score|", ylab = "permutations")
+abline(v = abs(es_obs["S3"]), col = col_orange, lwd = 3)
+hist(abs(es_gene_null), breaks = 30, col = "#DCE6F1", border = "grey50", las = 1, xlim = c(0, 0.9),
+     main = "permuting genes", xlab = "|enrichment score|", ylab = "permutations")
+abline(v = abs(es_obs["S3"]), col = col_orange, lwd = 3)
+```
+
+For S1 both approaches agree: the set is enriched. For S3 they disagree completely. Its genes moved together because they are correlated, not because of the treatment; sample permutation recognises this, gene permutation declares a discovery.
+
+The two approaches test different null hypotheses [@Goeman2007]. A **self-contained** test asks whether the genes of the set are associated with the treatment at all; permuting samples answers it. A **competitive** test asks whether the set is more associated with the treatment than other genes are; permuting genes, and over-representation analysis, answer it, but only under the assumption that genes are independent. How often does that assumption fail? Repeated over 100 simulated experiments, each with a correlated set and no real change:
+
+```{r false-positive-rate}
+#| cache: true
+set.seed(3)
+false_positive <- replicate(100, {
+  Xs <- matrix(rnorm(1000 * 2 * n), 1000)
+  Xs[1:40, ] <- Xs[1:40, ] + matrix(1.2 * rnorm(2 * n), 40, 2 * n, byrow = TRUE)
+  s  <- seq_len(1000) <= 40
+  ts <- row_t(Xs, grp); o <- enrichment_score(ts, s)
+  null_s <- replicate(200, enrichment_score(row_t(Xs, sample(grp)), s))
+  null_g <- replicate(200, enrichment_score(ts, seq_len(1000) %in% sample(1000, 40)))
+  c(permute_samples = mean(abs(null_s) >= abs(o)) < 0.05,
+    permute_genes   = mean(abs(null_g) >= abs(o)) < 0.05)
+})
+rowMeans(false_positive)          # fraction of experiments with p < 0.05
+```
+
+Sample permutation keeps the false-positive rate at the nominal 5%; gene permutation declares a correlated set enriched in most experiments.
+
+::: column-margin
+**KEY** — Genes are not independent. Permuting samples keeps their correlation and gives valid p-values; permuting genes, and the urn model of over-representation analysis, ignore it and produce discoveries from co-regulation alone.
+:::
+
+::: column-margin
+**⚠** Sample permutation needs enough samples: with 3 against 3 there are only 20 distinct ways to split six samples, so the smallest attainable p-value is 0.05. This is one reason gene permutation is still used in practice, and one reason small studies should be interpreted with care.
+:::
+
+::: {.callout-caution title="Check yourself"}
+A GSEA on an experiment with 4 treated and 4 control samples reports, for a set of 25 genes from one protein complex, a p-value of 0.0001 obtained by permuting genes. What would you check before believing it?
+
+::: {.callout-tip collapse="true" title="Answer"}
+Genes of one protein complex are typically co-regulated, so the set's genes are correlated, and a gene-permutation p-value can be far too small, as for S3. Check the correlation between the set's genes, and repeat the analysis with sample permutation (with 4 against 4 there are 70 splits, so the smallest possible p-value is about 0.014). Also check that the set was chosen before the analysis, and how many sets were tested: 0.0001 among thousands of sets is less impressive than it sounds.
+:::
+:::
+
+## Enrichment within the course
+
+Gene set analysis brings together several threads of the course, and each carries a warning.
+
+- **Confirming or exploring** (Day 2). Testing a handful of sets chosen from the hypothesis, as the GSEA authors recommended, is confirmatory. Testing all 10,000 GO terms and reporting the top of the list is exploratory: the result is a hypothesis, and it needs correction for multiple testing and independent confirmation.
+- **Design** (Day 2). Batch effects shift many genes together, exactly like the shared factor of S3. An enrichment found in a confounded design is an enrichment of the batch.
+- **Distributions** (Day 1). The hypergeometric distribution is a count with a ceiling, like the binomial; the uniform distribution of p-values under the null is what the Kolmogorov–Smirnov test checks.
+- **Resampling** (Day 7). Permutation must respect the structure of the data: shuffle the units that were randomised (samples), not the units that are correlated (genes).
+
+## Summary
+
+- Gene set analysis replaces the question *which genes change?* by *which groups of genes change together?* Group-level conclusions are often more stable than gene lists.
+- Gene sets come from GO and pathway databases; they overlap, vary in size and reflect what is known. They must be chosen before the results are seen.
+- **Over-representation analysis** uses a $2 \times 2$ table and the hypergeometric distribution (Fisher's exact test). It depends on a threshold, on the correct universe, and on the independence of genes.
+- **GSEA** ranks all genes and computes a running-sum enrichment score, a weighted form of the Kolmogorov–Smirnov statistic. Its significance comes from permutation, and its scores are normalised for set size.
+- **Permuting samples** gives a self-contained test that respects the correlation between genes; **permuting genes** gives a competitive test that assumes independence and can produce discoveries from co-regulation alone.
+
+## Reading
+
+ISLR does not cover gene set analysis; its Chapter 13 on multiple testing is the background for the correction step. The original GSEA paper [@Subramanian2005] is readable and explains the motivation, the running sum and the normalisation. @Goeman2007 discusses the difference between competitive and self-contained tests and the role of correlation between genes.

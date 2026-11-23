@@ -321,7 +321,7 @@ AIC(mA_full, mA_add,
 ```
 
 ::: column-margin
-**DEF** — $\mathrm{AIC} = 2k - 2\ln\hat{L}$, with $k$ the number of parameters and $\hat L$ the maximised likelihood. It rewards fit and penalises complexity, and unlike the $F$-test it can compare **non-nested** models. A difference of $\gtrsim 2$ is usually taken as meaningful. Day 6 returns to this.
+**DEF** — $\mathrm{AIC} = 2k - 2\ln\hat{L}$, with $k$ the number of parameters and $\hat L$ the maximised likelihood. It rewards fit and penalises complexity, and unlike the $F$-test it can compare **non-nested** models. A difference of $\gtrsim 2$ is usually taken as meaningful. Day 5 returns to this.
 :::
 
 The additive model has the lowest AIC (408.3 against 410.3 for the interaction model): dropping the interaction *improved* the penalised fit. Both models far outperform either predictor alone. The additive model is therefore the minimal adequate model, and the $F$-test and AIC agree on this conclusion.

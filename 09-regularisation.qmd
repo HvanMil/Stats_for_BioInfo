@@ -31,10 +31,10 @@ islr <- function(page, label) {
 
 ## Where this chapter fits {#sec-reg-fits}
 
-A penalty has already appeared on Day 6: the Akaike information criterion,
+A penalty has already appeared on Day 5: the Akaike information criterion,
 $\text{AIC} = -2\log L + 2k$, adds a cost of 2 for every parameter the model
-estimates. The cost term of the SVM on Day 8 was a second example. The trees of
-Days 10 and 11 will bring two more.
+estimates. The cost term of the SVM on Day 8 was a second example. The trees and boosting of
+Day 10 will bring two more.
 
 Ridge and lasso regression charge the model
 not for the *number* of its coefficients but for their *size*:
@@ -469,7 +469,7 @@ $$
 \hat{\boldsymbol\beta}_\lambda = (\mathbf{X}^\top\mathbf{X} + \lambda\mathbf{I})^{-1}\mathbf{X}^\top\mathbf{y} .
 $$
 
-Compare this with the least-squares formula of Day 3: the only change is the term $\lambda\mathbf{I}$ added to $\mathbf{X}^\top\mathbf{X}$. That small change has two consequences.
+Compare this with the least-squares formula of Appendix B: the only change is the term $\lambda\mathbf{I}$ added to $\mathbf{X}^\top\mathbf{X}$. That small change has two consequences.
 
 - **The solution always exists.** The eigenvalues of $\mathbf{X}^\top\mathbf{X}$ are $d_j^2 \ge 0$, so those of $\mathbf{X}^\top\mathbf{X} + \lambda\mathbf{I}$ are $d_j^2 + \lambda > 0$. The matrix is invertible even when $p > n$ or when predictors are perfectly collinear, the two cases in which least squares fails.
 - **It is stable.** Least squares divides by the eigenvalues $d_j^2$, and a tiny eigenvalue, the signature of collinearity, blows the estimate up. Ridge divides by $d_j^2 + \lambda$ instead, which is never smaller than $\lambda$.
@@ -630,7 +630,7 @@ predictions.
 The degrees-of-freedom question of Day 1 has an exact answer for ridge
 regression. The cloud of observations in the space of the standardised
 predictors can be described by $p$ independent directions, each with its own
-amount of spread; these are the principal components of Day 4. Write
+amount of spread; these are the principal components of Day 3. Write
 $d_j^2$ for the spread along direction $j$ (strictly, $d_j^2/(n-1)$ is the
 variance along that direction; the $d_j$ are called the *singular values* of
 the design matrix). Ridge regression shrinks the fit along direction $j$ by the
@@ -1142,7 +1142,7 @@ it — but it is not obtained by refitting with `lm` and reading off the stars.
 :::
 
 ::: {.column-margin}
-**↪** This is the double dipping of Day 2 (Exercise 2.1) in another guise: the data chose the variables, and the same data are then asked to test them.
+**↪** This is the double dipping of Day 2 (Exercise 2.2) in another guise: the data chose the variables, and the same data are then asked to test them.
 :::
 
 An honest summary of a lasso analysis is a prediction error estimated by
@@ -1180,7 +1180,7 @@ it must be written into the design matrix.
 Xmat_int <- model.matrix(~ .^2, data = predictors)[, -1]
 ```
 
-This is the sharpest contrast with the tree-based methods of Days 10 and 11. A random forest finds
+This is the sharpest contrast with the tree-based methods of Day 10. A random forest finds
 interactions automatically but does not report what they are; a penalised
 regression requires them to be specified, and then reports their coefficients.
 
@@ -1204,7 +1204,7 @@ binomial model.
 Penalisation is not the only answer to having too many correlated predictors.
 The alternative is to replace the predictors by a small number of new variables,
 each a weighted combination of all the original ones, and to regress the
-response on those. The construction of the new variables, principal component analysis (PCA), was the subject of Day 4.
+response on those. The construction of the new variables, principal component analysis (PCA), was the subject of Day 3.
 
 ### Principal components regression
 

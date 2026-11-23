@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Gene set enrichment analysis – Statistics for Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./references.html" rel="next">
+<link href="./10-trees-forests.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-ec8eff129d6f50c8392963982e963180.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating slimcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./11-gene-set-enrichment.html">Day 11. Gene set enrichment</a></li><li class="breadcrumb-item"><a href="./11-gene-set-enrichment.html"><span class="chapter-title">Gene set enrichment analysis</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Statistics for Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 1. Why statistics?</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-why-statistics.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Why statistics?</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 2. Design and data</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-design.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Experimental Design</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-confounding.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Correlation, Confounding, and Causation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./p02-data-quality.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Practical: data quality</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 3. Directions</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-pca.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Principal component analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 4. Groups</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-clustering.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Cluster analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 5. Likelihood</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-likelihood-aic.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Likelihood, information and AIC</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 6. Generalised linear models</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-glm-logistic.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Generalised linear models: logistic regression</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 7. Resampling</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-resampling.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Resampling: The Bootstrap and Cross-Validation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 8. Classifiers</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-classifiers-knn-svm.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Evaluating classifiers, KNN and SVM</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 9. Regularisation</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-regularisation.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Regularisation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 10. Trees, forests and boosting</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-trees-forests.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Trees, forests and boosting</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 11. Gene set enrichment</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-gene-set-enrichment.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Gene set enrichment analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./a-linear-models.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear models: a worked reference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./b-linear-algebra.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear algebra: the geometry of data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./c-linear-algebra-details.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear algebra: definitions, proofs and algorithms</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#from-genes-to-gene-sets" id="toc-from-genes-to-gene-sets" class="nav-link active" data-scroll-target="#from-genes-to-gene-sets">From genes to gene sets</a></li>
+  <li><a href="#over-representation-analysis" id="toc-over-representation-analysis" class="nav-link" data-scroll-target="#over-representation-analysis">Over-representation analysis</a></li>
+  <li><a href="#distributions-of-p-values-and-the-kolmogorovsmirnov-test" id="toc-distributions-of-p-values-and-the-kolmogorovsmirnov-test" class="nav-link" data-scroll-target="#distributions-of-p-values-and-the-kolmogorovsmirnov-test">Distributions of p-values, and the Kolmogorov–Smirnov test</a></li>
+  <li><a href="#gene-set-enrichment-analysis" id="toc-gene-set-enrichment-analysis" class="nav-link" data-scroll-target="#gene-set-enrichment-analysis">Gene set enrichment analysis</a></li>
+  <li><a href="#enrichment-within-the-course" id="toc-enrichment-within-the-course" class="nav-link" data-scroll-target="#enrichment-within-the-course">Enrichment within the course</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#reading" id="toc-reading" class="nav-link" data-scroll-target="#reading">Reading</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content page-columns page-full" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./11-gene-set-enrichment.html">Day 11. Gene set enrichment</a></li><li class="breadcrumb-item"><a href="./11-gene-set-enrichment.html"><span class="chapter-title">Gene set enrichment analysis</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-title">Gene set enrichment analysis</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+<nav id="TOC-body" role="doc-toc">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#from-genes-to-gene-sets" id="toc-from-genes-to-gene-sets">From genes to gene sets</a></li>
+  <li><a href="#over-representation-analysis" id="toc-over-representation-analysis">Over-representation analysis</a></li>
+  <li><a href="#distributions-of-p-values-and-the-kolmogorovsmirnov-test" id="toc-distributions-of-p-values-and-the-kolmogorovsmirnov-test">Distributions of p-values, and the Kolmogorov–Smirnov test</a></li>
+  <li><a href="#gene-set-enrichment-analysis" id="toc-gene-set-enrichment-analysis">Gene set enrichment analysis</a></li>
+  <li><a href="#enrichment-within-the-course" id="toc-enrichment-within-the-course">Enrichment within the course</a></li>
+  <li><a href="#summary" id="toc-summary">Summary</a></li>
+  <li><a href="#reading" id="toc-reading">Reading</a></li>
+  </ul>
+</nav>
+
+<div class="no-row-height column-margin column-container"><div class="margin-legend">
+<p><strong>Margin legend</strong></p>
+<p><strong>DEF</strong> — definition <strong>KEY</strong> — key idea to remember <strong>↪</strong> — bridge to another day <strong>⚠</strong> — common pitfall</p>
+</div></div><p>Day 2 left a bioinformatician with thousands of p-values, one per gene, and a correction for multiple testing. That answers the question <em>which genes change?</em> It often answers it badly. The changes may be too small to survive the correction, or the list may be long and without a common theme. And studies of the same biology often produce lists that hardly overlap.</p>
+<p>This chapter changes the question to <em>which groups of genes change together?</em> The groups are <strong>gene sets</strong>: genes that share a function, a pathway or a location. Two families of methods answer the question. <strong>Over-representation analysis</strong> counts how many genes of a set are on a list of significant genes. <strong>Gene set enrichment analysis</strong> (GSEA) uses the whole ranked list of genes, without a threshold, and borrows its test statistic from the Kolmogorov–Smirnov test.</p>
+<p>Both are built from ideas met earlier in the course: counts and their distributions (Day 1), multiple testing and the difference between confirming and exploring (Day 2), and resampling (Day 7). The chapter uses simulated genes and gene sets, so that the truth is known.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Helper functions used in this chapter</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>col_blue <span class="ot">&lt;-</span> <span class="st">"#1F4E79"</span>; col_orange <span class="ot">&lt;-</span> <span class="st">"#D35400"</span>; col_green <span class="ot">&lt;-</span> <span class="st">"#2E7D5B"</span>; col_grey <span class="ot">&lt;-</span> <span class="st">"grey45"</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># two-sample t-statistic for every row of X; g is TRUE for the second group</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>row_t <span class="ot">&lt;-</span> <span class="cf">function</span>(X, g) {</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  a <span class="ot">&lt;-</span> X[, <span class="sc">!</span>g, drop <span class="ot">=</span> <span class="cn">FALSE</span>]; b <span class="ot">&lt;-</span> X[, g, drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  ma <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(a); mb <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(b)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  s2 <span class="ot">&lt;-</span> (<span class="fu">rowSums</span>((a <span class="sc">-</span> ma)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> <span class="fu">rowSums</span>((b <span class="sc">-</span> mb)<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">/</span> (<span class="fu">ncol</span>(a) <span class="sc">+</span> <span class="fu">ncol</span>(b) <span class="sc">-</span> <span class="dv">2</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  (mb <span class="sc">-</span> ma) <span class="sc">/</span> <span class="fu">sqrt</span>(s2 <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">/</span> <span class="fu">ncol</span>(a) <span class="sc">+</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">ncol</span>(b)))</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<section id="from-genes-to-gene-sets" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="from-genes-to-gene-sets">From genes to gene sets</h2>
+<section id="why-lists-of-single-genes-disappoint" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="why-lists-of-single-genes-disappoint">Why lists of single genes disappoint</h3>
+<p>The paper that introduced GSEA <span class="citation" data-cites="Subramanian2005">(<a href="references.html#ref-Subramanian2005" role="doc-biblioref">Subramanian et al. 2005</a>)</span> gave four reasons to look beyond single genes. After correcting for multiple testing, no gene may be significant, because the biological effects are modest compared with the noise. Alternatively, the list may be long, with no unifying theme, and its interpretation then depends on the expertise of whoever reads it. Cellular processes involve sets of genes acting together: a modest increase in every gene of a pathway can matter more than a large increase in one gene. And different groups studying the same system often obtain lists of significant genes with distressingly little overlap.</p>
+<p>The last point is easy to reproduce. Three laboratories study the same biology: 300 of 5,000 genes truly change, all by the same moderate amount. Each laboratory measures four treated and four control samples and reports its 300 most significant genes.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code for the figure</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>G <span class="ot">&lt;-</span> <span class="dv">5000</span>; truly_changed <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">300</span>; n <span class="ot">&lt;-</span> <span class="dv">4</span>; grp <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="cn">FALSE</span>, <span class="cn">TRUE</span>), <span class="at">each =</span> n)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>top <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(s) {</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(G <span class="sc">*</span> <span class="dv">2</span> <span class="sc">*</span> n), G)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  X[truly_changed, grp] <span class="ot">&lt;-</span> X[truly_changed, grp] <span class="sc">+</span> <span class="fl">1.2</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">pt</span>(<span class="sc">-</span><span class="fu">abs</span>(<span class="fu">row_t</span>(X, grp)), <span class="dv">2</span> <span class="sc">*</span> n <span class="sc">-</span> <span class="dv">2</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">order</span>(p)[<span class="dv">1</span><span class="sc">:</span><span class="dv">300</span>]</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> top[[<span class="dv">1</span>]]; B <span class="ot">&lt;-</span> top[[<span class="dv">2</span>]]; C <span class="ot">&lt;-</span> top[[<span class="dv">3</span>]]</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>region <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">A =</span> <span class="fu">length</span>(<span class="fu">setdiff</span>(A, <span class="fu">union</span>(B, C))), <span class="at">B =</span> <span class="fu">length</span>(<span class="fu">setdiff</span>(B, <span class="fu">union</span>(A, C))),</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">C =</span> <span class="fu">length</span>(<span class="fu">setdiff</span>(C, <span class="fu">union</span>(A, B))),</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">AB =</span> <span class="fu">length</span>(<span class="fu">setdiff</span>(<span class="fu">intersect</span>(A, B), C)), <span class="at">AC =</span> <span class="fu">length</span>(<span class="fu">setdiff</span>(<span class="fu">intersect</span>(A, C), B)),</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">BC =</span> <span class="fu">length</span>(<span class="fu">setdiff</span>(<span class="fu">intersect</span>(B, C), A)), <span class="at">ABC =</span> <span class="fu">length</span>(<span class="fu">Reduce</span>(intersect, top)))</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>circ <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y, r, col) {</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  t <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span> <span class="sc">*</span> pi, <span class="at">length.out =</span> <span class="dv">200</span>); <span class="fu">lines</span>(x <span class="sc">+</span> r <span class="sc">*</span> <span class="fu">cos</span>(t), y <span class="sc">+</span> r <span class="sc">*</span> <span class="fu">sin</span>(t), <span class="at">col =</span> col, <span class="at">lwd =</span> <span class="dv">3</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>))</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">3.3</span>, <span class="fl">3.3</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="fl">3.2</span>), <span class="at">asp =</span> <span class="dv">1</span>, <span class="at">axes =</span> <span class="cn">FALSE</span>, <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="fu">circ</span>(<span class="sc">-</span><span class="fl">0.9</span>, <span class="fl">0.6</span>, <span class="fl">1.8</span>, col_orange); <span class="fu">circ</span>(<span class="fl">0.9</span>, <span class="fl">0.6</span>, <span class="fl">1.8</span>, col_blue); <span class="fu">circ</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.9</span>, <span class="fl">1.8</span>, col_green)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.6</span>, <span class="fl">1.6</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.95</span>, <span class="fl">0.95</span>, <span class="dv">0</span>), <span class="fu">c</span>(<span class="fl">1.1</span>, <span class="fl">1.1</span>, <span class="sc">-</span><span class="fl">1.9</span>, <span class="fl">1.25</span>, <span class="sc">-</span><span class="fl">0.35</span>, <span class="sc">-</span><span class="fl">0.35</span>, <span class="fl">0.15</span>),</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>     region[<span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"AB"</span>, <span class="st">"AC"</span>, <span class="st">"BC"</span>, <span class="st">"ABC"</span>)], <span class="at">cex =</span> <span class="fl">1.3</span>, <span class="at">font =</span> <span class="dv">2</span>)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="fl">2.4</span>, <span class="fl">2.4</span>, <span class="dv">0</span>), <span class="fu">c</span>(<span class="fl">2.6</span>, <span class="fl">2.6</span>, <span class="sc">-</span><span class="fl">2.95</span>), <span class="fu">c</span>(<span class="st">"study 1"</span>, <span class="st">"study 2"</span>, <span class="st">"study 3"</span>),</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="fu">c</span>(col_orange, col_blue, col_green), <span class="at">cex =</span> <span class="fl">1.1</span>, <span class="at">font =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-three-studies" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-three-studies-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="11-gene-set-enrichment_files/figure-html/fig-three-studies-1.png" class="img-fluid figure-img" width="576">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-three-studies-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.1: The 300 most significant genes in three simulated studies of the same biology. Each study finds about 80 of the 300 truly changed genes, but different ones: two lists share only about 30 genes, and all three share a handful. The real figure, from three published studies of stem cells, looks much the same <span class="citation" data-cites="Fortunel2003">(<a href="references.html#ref-Fortunel2003" role="doc-biblioref"><span class="nocase">Fortunel et al.</span> 2003</a>)</span>.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">true_genes_in_each_list =</span> <span class="fu">round</span>(<span class="fu">mean</span>(<span class="fu">sapply</span>(top, <span class="cf">function</span>(t) <span class="fu">sum</span>(t <span class="sc">%in%</span> truly_changed)))),</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">overlap_study_1_and_2 =</span> <span class="fu">length</span>(<span class="fu">intersect</span>(A, B)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; true_genes_in_each_list   overlap_study_1_and_2 
+#&gt;                      81                      31</code></pre>
+</div>
+</div>
+<p>Every list is mostly right in the sense that matters: the genes on it are much more likely than chance to be truly changed. But with small effects and few samples, <em>which</em> of the 300 changed genes make it into the top 300 is largely a matter of luck. A conclusion about a group of genes, such as “the genes of this pathway go up”, can be stable even when the individual lists are not.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — With modest effects and few samples, individual gene lists are unstable. Questions about groups of genes can be answered more reliably.</p>
+</div></div></section>
+<section id="where-gene-sets-come-from-gene-ontology-and-pathways" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="where-gene-sets-come-from-gene-ontology-and-pathways">Where gene sets come from: Gene Ontology and pathways</h3>
+<p>A gene set is any group of genes defined <em>before</em> the experiment. The most widely used source is the <strong>Gene Ontology</strong> (GO) <span class="citation" data-cites="Ashburner2000">(<a href="references.html#ref-Ashburner2000" role="doc-biblioref"><span class="nocase">Ashburner et al.</span> 2000</a>)</span>, which describes genes in three vocabularies: the <em>biological processes</em> they take part in, their <em>molecular functions</em>, and the <em>cellular components</em> where they act. The terms are organised as a directed acyclic graph: a specific term is linked to more general terms by relations such as <em>is a</em>, <em>part of</em> and <em>regulates</em>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code for the figure</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>nodes <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">id =</span> <span class="fu">c</span>(<span class="st">"GO:0008150"</span>, <span class="st">"GO:0009987"</span>, <span class="st">"GO:0065007"</span>, <span class="st">"GO:0016043"</span>, <span class="st">"GO:0050789"</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>         <span class="st">"GO:0030030"</span>, <span class="st">"GO:0050794"</span>, <span class="st">"GO:0031344"</span>),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">label =</span> <span class="fu">c</span>(<span class="st">"biological_process"</span>, <span class="st">"cellular process"</span>, <span class="st">"biological regulation"</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">"cellular component</span><span class="sc">\n</span><span class="st">organization"</span>, <span class="st">"regulation of</span><span class="sc">\n</span><span class="st">biological process"</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"cell projection</span><span class="sc">\n</span><span class="st">organization"</span>, <span class="st">"regulation of</span><span class="sc">\n</span><span class="st">cellular process"</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"regulation of cell</span><span class="sc">\n</span><span class="st">projection organization"</span>),</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="fl">2.2</span>, <span class="fl">2.2</span>, <span class="sc">-</span><span class="dv">3</span>, <span class="fl">2.2</span>, <span class="sc">-</span><span class="dv">3</span>, <span class="fl">0.6</span>, <span class="sc">-</span><span class="fl">0.8</span>),</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>edges <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">from =</span> <span class="fu">c</span>(<span class="st">"GO:0009987"</span>, <span class="st">"GO:0065007"</span>, <span class="st">"GO:0016043"</span>, <span class="st">"GO:0050789"</span>, <span class="st">"GO:0030030"</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>           <span class="st">"GO:0050794"</span>, <span class="st">"GO:0050794"</span>, <span class="st">"GO:0031344"</span>, <span class="st">"GO:0031344"</span>),</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">to   =</span> <span class="fu">c</span>(<span class="st">"GO:0008150"</span>, <span class="st">"GO:0008150"</span>, <span class="st">"GO:0009987"</span>, <span class="st">"GO:0065007"</span>, <span class="st">"GO:0016043"</span>,</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>           <span class="st">"GO:0050789"</span>, <span class="st">"GO:0009987"</span>, <span class="st">"GO:0050794"</span>, <span class="st">"GO:0030030"</span>),</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"is_a"</span>, <span class="st">"is_a"</span>, <span class="st">"is_a"</span>, <span class="st">"is_a"</span>, <span class="st">"is_a"</span>, <span class="st">"is_a"</span>, <span class="st">"regulates"</span>, <span class="st">"is_a"</span>, <span class="st">"regulates"</span>))</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>))</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">4.3</span>, <span class="fl">3.6</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="fl">4.5</span>), <span class="at">axes =</span> <span class="cn">FALSE</span>, <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>pos <span class="ot">&lt;-</span> <span class="cf">function</span>(id) <span class="fu">unlist</span>(nodes[nodes<span class="sc">$</span>id <span class="sc">==</span> id, <span class="fu">c</span>(<span class="st">"x"</span>, <span class="st">"y"</span>)])</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(edges))) {</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  a <span class="ot">&lt;-</span> <span class="fu">pos</span>(edges<span class="sc">$</span>from[k]); b <span class="ot">&lt;-</span> <span class="fu">pos</span>(edges<span class="sc">$</span>to[k])</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrows</span>(a[<span class="dv">1</span>], a[<span class="dv">2</span>] <span class="sc">+</span> <span class="fl">0.28</span>, b[<span class="dv">1</span>], b[<span class="dv">2</span>] <span class="sc">-</span> <span class="fl">0.3</span>, <span class="at">length =</span> <span class="fl">0.09</span>, <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>         <span class="at">col =</span> <span class="fu">ifelse</span>(edges<span class="sc">$</span>type[k] <span class="sc">==</span> <span class="st">"is_a"</span>, <span class="st">"grey55"</span>, col_orange))</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(nodes))) {</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rect</span>(nodes<span class="sc">$</span>x[k] <span class="sc">-</span> <span class="fl">0.85</span>, nodes<span class="sc">$</span>y[k] <span class="sc">-</span> <span class="fl">0.28</span>, nodes<span class="sc">$</span>x[k] <span class="sc">+</span> <span class="fl">0.85</span>, nodes<span class="sc">$</span>y[k] <span class="sc">+</span> <span class="fl">0.28</span>,</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">border =</span> <span class="st">"grey30"</span>)</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">text</span>(nodes<span class="sc">$</span>x[k], nodes<span class="sc">$</span>y[k] <span class="sc">+</span> <span class="fl">0.08</span>, nodes<span class="sc">$</span>label[k], <span class="at">cex =</span> <span class="fl">0.68</span>)</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">text</span>(nodes<span class="sc">$</span>x[k], nodes<span class="sc">$</span>y[k] <span class="sc">-</span> <span class="fl">0.2</span>, nodes<span class="sc">$</span>id[k], <span class="at">cex =</span> <span class="fl">0.55</span>, <span class="at">col =</span> col_grey)</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"grey55"</span>, col_orange),</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"is a"</span>, <span class="st">"regulates"</span>), <span class="at">cex =</span> <span class="fl">0.85</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-go-dag" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-go-dag-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="11-gene-set-enrichment_files/figure-html/fig-go-dag-1.png" class="img-fluid figure-img" width="816">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-go-dag-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.2: A small part of the Gene Ontology. Arrows point from a specific term to a more general one; grey arrows mean <em>is a</em>, orange arrows <em>regulates</em>. A gene annotated to a specific term is counted in all the terms above it, so gene sets are nested and overlap.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Pathway databases such as KEGG and Reactome provide another source, and collections such as MSigDB bundle sets from many sources. For statistics, three properties of these sets matter more than their biology:</p>
+<ul>
+<li><strong>Sets overlap and are nested.</strong> A gene annotated to a specific GO term also counts for every term above it. Tests for different sets are therefore not independent.</li>
+<li><strong>Set sizes vary</strong> from a handful of genes to thousands. A test statistic must be comparable across sizes.</li>
+<li><strong>Annotation is incomplete and biased.</strong> Well-studied genes carry many annotations, poorly studied genes few. Sets reflect what is known, not only what is true.</li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> The gene sets must be chosen before looking at the results. Choosing the sets that “look interesting” after the analysis is the double dipping of Day 2.</p>
+</div><div class="">
+<p><strong>↪</strong> Real analyses read the sets from GO, KEGG or MSigDB with Bioconductor packages such as <code>clusterProfiler</code> or <code>fgsea</code>. The statistics underneath are the ones in this chapter.</p>
+</div></div>
+<div class="callout callout-style-default callout-caution callout-titled" title="Check yourself">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>Check yourself
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A gene set for “cellular process” contains thousands of genes, one for “regulation of cell projection organization” a few dozen. Why are the two tests not independent, and why can a significant result for the large set be uninformative?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Answer">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Every gene annotated to the specific term is also annotated to the general term above it, so the two sets share genes, and a change in those genes affects both tests. A very large set is significant as soon as a small fraction of its genes change; the result then says little more than “something happens in the cell”. Specific sets are usually more informative, even though they have less power.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="over-representation-analysis" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="over-representation-analysis">Over-representation analysis</h2>
+<section id="a-two-by-two-table" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="a-two-by-two-table">A two-by-two table</h3>
+<p>The oldest form of enrichment analysis starts from a list of significant genes, for example those with a false discovery rate below 5%. It asks whether the genes of a set are over-represented on the list. Every gene of the <strong>universe</strong>, the genes that could have appeared on the list, falls into one of four cells:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">in the set</th>
+<th style="text-align: right;">not in the set</th>
+<th style="text-align: right;">total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">on the list</td>
+<td style="text-align: right;"><span class="math inline">\(x\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(k - x\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(k\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">not on the list</td>
+<td style="text-align: right;"><span class="math inline">\(m - x\)</span></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"><span class="math inline">\(N - k\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total</td>
+<td style="text-align: right;"><span class="math inline">\(m\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(N - m\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(N\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>If the list has nothing to do with the set, the <span class="math inline">\(k\)</span> genes on the list are like <span class="math inline">\(k\)</span> balls drawn without replacement from an urn with <span class="math inline">\(m\)</span> marked balls among <span class="math inline">\(N\)</span>. The number of marked balls drawn then has a <strong>hypergeometric</strong> distribution, with expected value <span class="math inline">\(k\,m/N\)</span>, and the p-value is the probability of an overlap at least as large as the observed one:</p>
+<p><span class="math display">\[P(X \ge x) = \sum_{j \ge x} \frac{\binom{m}{j}\binom{N - m}{k - j}}{\binom{N}{k}} .\]</span></p>
+<p>This is the one-sided version of <strong>Fisher’s exact test</strong> for a <span class="math inline">\(2 \times 2\)</span> table.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — The <strong>hypergeometric distribution</strong> counts marked items in a sample drawn <em>without</em> replacement. The binomial of Day 1 is the same count <em>with</em> replacement, and is a good approximation when the universe is large.</p>
+</div></div><div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">11</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>N_genes   <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>expressed <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">sample</span>(N_genes, <span class="dv">5000</span>))          <span class="co"># genes measured in this tissue</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>set_genes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">sample</span>(expressed, <span class="dv">190</span>), <span class="fu">sample</span>(<span class="fu">setdiff</span>(<span class="dv">1</span><span class="sc">:</span>N_genes, expressed), <span class="dv">10</span>))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># a list of 800 significant genes: 40 genes of the set changed, plus 760 others</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># drawn at random from the remaining expressed genes</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>changed <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">intersect</span>(set_genes, expressed), <span class="dv">40</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>de_list <span class="ot">&lt;-</span> <span class="fu">c</span>(changed, <span class="fu">sample</span>(<span class="fu">setdiff</span>(expressed, changed), <span class="dv">760</span>))</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>universe <span class="ot">&lt;-</span> expressed</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>tab <span class="ot">&lt;-</span> <span class="fu">table</span>(<span class="at">on_list =</span> <span class="fu">factor</span>(universe <span class="sc">%in%</span> de_list, <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>)),</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>             <span class="at">in_set  =</span> <span class="fu">factor</span>(universe <span class="sc">%in%</span> set_genes, <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>)))</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>tab</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;        in_set
+#&gt; on_list TRUE FALSE
+#&gt;   TRUE    55   745
+#&gt;   FALSE  135  4065</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> tab[<span class="st">"TRUE"</span>, <span class="st">"TRUE"</span>]; m <span class="ot">&lt;-</span> <span class="fu">sum</span>(universe <span class="sc">%in%</span> set_genes); k <span class="ot">&lt;-</span> <span class="fu">length</span>(de_list)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>k <span class="sc">*</span> m <span class="sc">/</span> <span class="fu">length</span>(universe)                     <span class="co"># expected overlap</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 30.4</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">hypergeometric =</span> <span class="fu">phyper</span>(x <span class="sc">-</span> <span class="dv">1</span>, m, <span class="fu">length</span>(universe) <span class="sc">-</span> m, k, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">fisher         =</span> <span class="fu">fisher.test</span>(tab, <span class="at">alternative =</span> <span class="st">"greater"</span>)<span class="sc">$</span>p.value)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; hypergeometric         fisher 
+#&gt;   3.253917e-06   3.253917e-06</code></pre>
+</div>
+</div>
+<p>The set contributes 55 genes to the list where about 30 are expected, and both calculations give the same, very small p-value.</p>
+</section>
+<section id="the-universe-matters" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="the-universe-matters">The universe matters</h3>
+<p>The universe is the step most often done wrong. In the example, only the 5,000 genes expressed in the tissue could ever appear on the list, and almost all genes of the set are among them. Suppose now that the list contains no enrichment at all, 800 expressed genes drawn at random, and the analysis is run with the whole genome as universe.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>random_list <span class="ot">&lt;-</span> <span class="fu">sample</span>(expressed, <span class="dv">800</span>)                       <span class="co"># no enrichment at all</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>ora_p <span class="ot">&lt;-</span> <span class="cf">function</span>(list, universe) {</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  tab <span class="ot">&lt;-</span> <span class="fu">table</span>(<span class="fu">factor</span>(universe <span class="sc">%in%</span> list, <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>)),</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>               <span class="fu">factor</span>(universe <span class="sc">%in%</span> set_genes, <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>)))</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">overlap =</span> tab[<span class="dv">1</span>, <span class="dv">1</span>], <span class="at">expected =</span> <span class="fu">round</span>(<span class="fu">length</span>(list) <span class="sc">*</span> <span class="fu">mean</span>(universe <span class="sc">%in%</span> set_genes), <span class="dv">1</span>),</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">p =</span> <span class="fu">signif</span>(<span class="fu">fisher.test</span>(tab, <span class="at">alternative =</span> <span class="st">"greater"</span>)<span class="sc">$</span>p.value, <span class="dv">3</span>))</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">whole_genome    =</span> <span class="fu">ora_p</span>(random_list, <span class="dv">1</span><span class="sc">:</span>N_genes),</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">expressed_genes =</span> <span class="fu">ora_p</span>(random_list, expressed))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;                 overlap expected        p
+#&gt; whole_genome         32     16.0 0.000114
+#&gt; expressed_genes      32     30.4 0.404000</code></pre>
+</div>
+</div>
+<p>With the genome as universe, the set appears strongly enriched: its genes are expressed, and expressed genes are the only ones that can be on a list. The correct universe removes the artefact.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — The universe is the set of genes that <em>could</em> have been on the list: the genes that were measured, expressed and kept after filtering. A universe that is too large produces enrichment from nothing.</p>
+</div></div></section>
+<section id="what-over-representation-analysis-assumes" class="level3">
+<h3 class="anchored" data-anchor-id="what-over-representation-analysis-assumes">What over-representation analysis assumes</h3>
+<p>Two further weaknesses follow from the urn model.</p>
+<ul>
+<li><strong>The threshold.</strong> The list depends on an arbitrary cut-off (FDR 5%, or the top 500). Genes just below the cut-off count as much as genes that did not change at all, and a different cut-off can change the conclusion.</li>
+<li><strong>Independence.</strong> The urn assumes that genes are drawn independently. Genes in a pathway are co-regulated, so they tend to be on the list together or not at all. The effective number of independent draws is smaller than the count suggests, and the p-values are too small.</li>
+</ul>
+<p>GSEA addresses the first weakness directly. The second returns below.</p>
+<div class="callout callout-style-default callout-caution callout-titled" title="Check yourself">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>Check yourself
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>An over-representation analysis of a liver experiment uses all 20,000 human protein-coding genes as universe. Which kind of gene set is most likely to come out as falsely enriched, and how would you choose the universe instead?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Answer">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Sets of genes that are specifically expressed in the liver, or more generally in the measured tissue: their genes are over-represented among the measured, expressed genes, and therefore among any list of significant genes, whatever the treatment does. The universe should be the genes that could have been called significant: those measured on the platform, expressed in the tissue and retained after the filtering step of the differential-expression analysis.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="distributions-of-p-values-and-the-kolmogorovsmirnov-test" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="distributions-of-p-values-and-the-kolmogorovsmirnov-test">Distributions of p-values, and the Kolmogorov–Smirnov test</h2>
+<p>GSEA does not use a list but the whole distribution of gene-level results. Its statistic descends from a classical test for comparing distributions, which is easiest to introduce with p-values.</p>
+<section id="p-values-under-the-null-and-the-alternative" class="level3">
+<h3 class="anchored" data-anchor-id="p-values-under-the-null-and-the-alternative">p-values under the null and the alternative</h3>
+<p>If a test statistic <span class="math inline">\(T\)</span> has a continuous distribution function <span class="math inline">\(F\)</span> under <span class="math inline">\(H_0\)</span>, the p-value <span class="math inline">\(P = 1 - F(T)\)</span> (or its two-sided version) is uniformly distributed between 0 and 1 when <span class="math inline">\(H_0\)</span> is true:</p>
+<p><span class="math display">\[P(P \le p) = P\big(T \ge F^{-1}(1-p)\big) = 1 - F\big(F^{-1}(1-p)\big) = p .\]</span></p>
+<p>The figure repeats a one-sample <em>t</em>-test 10,000 times on samples of 15 observations with true mean 2. On the left the null hypothesis is the truth (<span class="math inline">\(\mu_0 = 2\)</span>); on the right it is not (<span class="math inline">\(\mu_0 = 1.75\)</span>).</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code for the figure</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">568</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>Xp <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">10000</span> <span class="sc">*</span> <span class="dv">15</span>, <span class="dv">2</span>, <span class="fl">1.5</span>), <span class="dv">10000</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>t_stat <span class="ot">&lt;-</span> <span class="cf">function</span>(mu0) (<span class="fu">rowMeans</span>(Xp) <span class="sc">-</span> mu0) <span class="sc">/</span> (<span class="fu">apply</span>(Xp, <span class="dv">1</span>, sd) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="dv">15</span>))</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>p_null <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">pt</span>(<span class="sc">-</span><span class="fu">abs</span>(<span class="fu">t_stat</span>(<span class="dv">2</span>)), <span class="dv">14</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>p_alt  <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">pt</span>(<span class="sc">-</span><span class="fu">abs</span>(<span class="fu">t_stat</span>(<span class="fl">1.75</span>)), <span class="dv">14</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="fl">2.5</span>, <span class="dv">1</span>))</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>) {</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">list</span>(p_null, p_alt)[[k]]</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">hist</span>(p, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="fl">0.05</span>), <span class="at">col =</span> <span class="fu">c</span>(col_orange, <span class="fu">rep</span>(<span class="st">"#DCE6F1"</span>, <span class="dv">19</span>)), <span class="at">border =</span> <span class="st">"grey50"</span>,</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">las =</span> <span class="dv">1</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1100</span>), <span class="at">xlab =</span> <span class="st">"p-value"</span>, <span class="at">ylab =</span> <span class="st">"number of tests"</span>,</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> <span class="fu">c</span>(<span class="st">"H0 true: effect size 0"</span>, <span class="st">"H0 false: effect size 1/6"</span>)[k])</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">500</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> col_blue)</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-pvalues" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pvalues-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="11-gene-set-enrichment_files/figure-html/fig-pvalues-1.png" class="img-fluid figure-img" width="816">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pvalues-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.3: p-values of 10,000 one-sample t-tests. Left: the null hypothesis is true, and the p-values are uniform; about 5% fall below 0.05 (orange). Right: the true mean differs from the null value by a sixth of a standard deviation, and the p-values pile up near zero.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="comparing-distributions-the-kolmogorovsmirnov-statistic" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="comparing-distributions-the-kolmogorovsmirnov-statistic">Comparing distributions: the Kolmogorov–Smirnov statistic</h3>
+<p>To compare the two histograms with the uniform distribution formally, plot their <strong>empirical cumulative distribution functions</strong> (ECDFs): for each value <span class="math inline">\(x\)</span>, the fraction of p-values at or below <span class="math inline">\(x\)</span>. Under <span class="math inline">\(H_0\)</span> the ECDF follows the diagonal. The <strong>Kolmogorov–Smirnov statistic</strong> is the largest vertical distance between an ECDF <span class="math inline">\(F_n\)</span> and the reference distribution <span class="math inline">\(F\)</span>:</p>
+<p><span class="math display">\[D_n = \sup_x \big|F_n(x) - F(x)\big| .\]</span></p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code for the figure</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">1001</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>F_alt <span class="ot">&lt;-</span> <span class="fu">ecdf</span>(p_alt)(xs); F_null <span class="ot">&lt;-</span> <span class="fu">ecdf</span>(p_null)(xs)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>k_max <span class="ot">&lt;-</span> <span class="fu">which.max</span>(<span class="fu">abs</span>(F_alt <span class="sc">-</span> xs))</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(xs, F_alt, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">col =</span> col_blue, <span class="at">las =</span> <span class="dv">1</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"p-value"</span>, <span class="at">ylab =</span> <span class="st">"fraction of p-values at or below"</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(xs, F_null, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">col =</span> col_green)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(xs[k_max], xs[k_max], xs[k_max], F_alt[k_max], <span class="at">col =</span> col_orange, <span class="at">lwd =</span> <span class="dv">4</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(xs[k_max], (xs[k_max] <span class="sc">+</span> F_alt[k_max]) <span class="sc">/</span> <span class="dv">2</span>, <span class="st">"D"</span>, <span class="at">pos =</span> <span class="dv">4</span>, <span class="at">col =</span> col_orange, <span class="at">font =</span> <span class="dv">2</span>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="fu">c</span>(col_blue, col_green),</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"H0 false"</span>, <span class="st">"H0 true"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-ks" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ks-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="11-gene-set-enrichment_files/figure-html/fig-ks-1.png" class="img-fluid figure-img" width="556">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ks-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.4: Empirical cumulative distribution functions of the two sets of p-values, and the uniform distribution (dashed diagonal). The orange segment marks the Kolmogorov–Smirnov statistic D for the p-values under the alternative: the largest vertical distance to the diagonal.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ks.test</span>(p_alt, <span class="st">"punif"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt;  Asymptotic one-sample Kolmogorov-Smirnov test
+#&gt; 
+#&gt; data:  p_alt
+#&gt; D = 0.09794, p-value &lt; 2.2e-16
+#&gt; alternative hypothesis: two-sided</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">critical_value_one_sample =</span> <span class="fl">1.358</span> <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">length</span>(p_alt)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; critical_value_one_sample 
+#&gt;                   0.01358</code></pre>
+</div>
+</div>
+<p>For a sample of size <span class="math inline">\(n\)</span> compared with a fixed distribution, <span class="math inline">\(D_n\)</span> exceeds <span class="math inline">\(c(\alpha)/\sqrt n\)</span> with probability <span class="math inline">\(\alpha\)</span> under <span class="math inline">\(H_0\)</span>, where <span class="math inline">\(c(0.05) = 1.358\)</span> and <span class="math inline">\(c(0.01) = 1.628\)</span>. Here <span class="math inline">\(D\)</span> is about 0.10, far above the critical value of 0.014. When two samples of sizes <span class="math inline">\(n\)</span> and <span class="math inline">\(m\)</span> are compared with each other, <code>ks.test(sample1, sample2)</code>, the critical value becomes <span class="math inline">\(c(\alpha)\sqrt{(n + m)/(nm)}\)</span>.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — The Kolmogorov–Smirnov test asks whether a sample is distributed like a reference. GSEA asks the same question of a gene set: are its genes distributed over the ranked list like randomly chosen genes?</p>
+</div></div></section>
+</section>
+<section id="gene-set-enrichment-analysis" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="gene-set-enrichment-analysis">Gene set enrichment analysis</h2>
+<section id="ranking-all-genes" class="level3">
+<h3 class="anchored" data-anchor-id="ranking-all-genes">Ranking all genes</h3>
+<p>GSEA starts from a statistic for every gene, here the <em>t</em>-statistic comparing two groups, and ranks all genes from most up-regulated to most down-regulated. No threshold is applied. The simulated experiment has 2,000 genes, measured in 8 control and 8 treated samples, and three gene sets of 40 genes each:</p>
+<ul>
+<li><strong>S1</strong>: every gene is raised by 0.8 standard deviations in the treated samples, a modest change that few genes would survive alone;</li>
+<li><strong>S2</strong>: a random set, with no change;</li>
+<li><strong>S3</strong>: no change either, but its genes are strongly <strong>correlated</strong>: they share a common source of variation between samples, as co-regulated genes do.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2027</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>G <span class="ot">&lt;-</span> <span class="dv">2000</span>; n <span class="ot">&lt;-</span> <span class="dv">8</span>; grp <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="cn">FALSE</span>, <span class="cn">TRUE</span>), <span class="at">each =</span> n)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(G <span class="sc">*</span> <span class="dv">2</span> <span class="sc">*</span> n), G)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>sets <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">S1 =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">40</span>, <span class="at">S2 =</span> <span class="dv">41</span><span class="sc">:</span><span class="dv">80</span>, <span class="at">S3 =</span> <span class="dv">81</span><span class="sc">:</span><span class="dv">120</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>X[sets<span class="sc">$</span>S1, grp] <span class="ot">&lt;-</span> X[sets<span class="sc">$</span>S1, grp] <span class="sc">+</span> <span class="fl">0.8</span>                   <span class="co"># a real, modest shift</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>shared <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">2</span> <span class="sc">*</span> n)                                     <span class="co"># a common factor per sample</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>X[sets<span class="sc">$</span>S3, ] <span class="ot">&lt;-</span> X[sets<span class="sc">$</span>S3, ] <span class="sc">+</span> <span class="fu">matrix</span>(<span class="fl">1.2</span> <span class="sc">*</span> shared, <span class="dv">40</span>, <span class="dv">2</span> <span class="sc">*</span> n, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>t_obs <span class="ot">&lt;-</span> <span class="fu">row_t</span>(X, grp)</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>p_gene <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">pt</span>(<span class="sc">-</span><span class="fu">abs</span>(t_obs), <span class="dv">2</span> <span class="sc">*</span> n <span class="sc">-</span> <span class="dv">2</span>)</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">S1_genes_significant_after_BH =</span> <span class="fu">sum</span>(<span class="fu">p.adjust</span>(p_gene, <span class="st">"BH"</span>)[sets<span class="sc">$</span>S1] <span class="sc">&lt;</span> <span class="fl">0.05</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; S1_genes_significant_after_BH 
+#&gt;                             0</code></pre>
+</div>
+</div>
+<p>Not one of the 40 genes of S1 is significant on its own after the Benjamini–Hochberg correction. The question is whether the set, taken together, is.</p>
+</section>
+<section id="the-running-sum-and-the-enrichment-score" class="level3">
+<h3 class="anchored" data-anchor-id="the-running-sum-and-the-enrichment-score">The running sum and the enrichment score</h3>
+<p>Walk down the ranked list. Each time a gene of the set is met, a running sum goes up; each time another gene is met, it goes down. In the formulation of <span class="citation" data-cites="Subramanian2005">Subramanian et al. (<a href="references.html#ref-Subramanian2005" role="doc-biblioref">2005</a>)</span>, after the first <span class="math inline">\(i\)</span> genes of the list,</p>
+<p><span class="math display">\[P_\text{hit}(S, i) = \sum_{g_j \in S,\ j \le i} \frac{|r_j|^p}{N_R},
+\qquad
+P_\text{miss}(S, i) = \sum_{g_j \notin S,\ j \le i} \frac{1}{N - N_S},
+\qquad
+N_R = \sum_{g_j \in S} |r_j|^p ,\]</span></p>
+<p>where <span class="math inline">\(r_j\)</span> is the statistic of the gene at rank <span class="math inline">\(j\)</span>, <span class="math inline">\(N\)</span> the number of genes and <span class="math inline">\(N_S\)</span> the size of the set. The <strong>enrichment score</strong> is the maximum deviation of <span class="math inline">\(P_\text{hit} - P_\text{miss}\)</span> from zero.</p>
+<p>With <span class="math inline">\(p = 0\)</span> every hit counts equally, and the running sum is, up to scaling, the difference between the ECDF of the set’s ranks and that of all other genes: the Kolmogorov–Smirnov statistic. With <span class="math inline">\(p = 1\)</span>, the usual choice, genes with large statistics count more, so a set whose genes cluster in the middle of the list cannot reach a large score.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>running_sum <span class="ot">&lt;-</span> <span class="cf">function</span>(stat, in_set, <span class="at">p =</span> <span class="dv">1</span>) {</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  o <span class="ot">&lt;-</span> <span class="fu">order</span>(stat, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  hit  <span class="ot">&lt;-</span> in_set[o]</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  w    <span class="ot">&lt;-</span> <span class="fu">abs</span>(stat[o])<span class="sc">^</span>p <span class="sc">*</span> hit</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cumsum</span>(w) <span class="sc">/</span> <span class="fu">sum</span>(w) <span class="sc">-</span> <span class="fu">cumsum</span>(<span class="sc">!</span>hit) <span class="sc">/</span> <span class="fu">sum</span>(<span class="sc">!</span>hit)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>enrichment_score <span class="ot">&lt;-</span> <span class="cf">function</span>(stat, in_set, <span class="at">p =</span> <span class="dv">1</span>) {</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  r <span class="ot">&lt;-</span> <span class="fu">running_sum</span>(stat, in_set, p); r[<span class="fu">which.max</span>(<span class="fu">abs</span>(r))]</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>in_set <span class="ot">&lt;-</span> <span class="fu">lapply</span>(sets, <span class="cf">function</span>(s) <span class="fu">seq_len</span>(G) <span class="sc">%in%</span> s)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>es_obs <span class="ot">&lt;-</span> <span class="fu">sapply</span>(in_set, <span class="cf">function</span>(s) <span class="fu">enrichment_score</span>(t_obs, s))</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(es_obs, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;     S1     S2     S3 
+#&gt;  0.728 -0.226 -0.569</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code for the figure</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">S1 =</span> col_orange, <span class="at">S2 =</span> col_blue, <span class="at">S3 =</span> col_green)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="fl">2.5</span>, <span class="dv">1</span>))</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (s <span class="cf">in</span> <span class="fu">names</span>(sets)) {</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  r <span class="ot">&lt;-</span> <span class="fu">running_sum</span>(t_obs, in_set[[s]])</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  ranks <span class="ot">&lt;-</span> <span class="fu">which</span>(in_set[[s]][<span class="fu">order</span>(t_obs, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)])</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(r, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lwd =</span> <span class="fl">2.5</span>, <span class="at">col =</span> cols[s], <span class="at">las =</span> <span class="dv">1</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.85</span>, <span class="fl">0.95</span>),</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">xlab =</span> <span class="st">"rank in the list"</span>, <span class="at">ylab =</span> <span class="st">"running enrichment score"</span>, <span class="at">main =</span> s)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">segments</span>(ranks, <span class="fl">0.8</span>, ranks, <span class="fl">0.92</span>, <span class="at">col =</span> cols[s])</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  k <span class="ot">&lt;-</span> <span class="fu">which.max</span>(<span class="fu">abs</span>(r)); <span class="fu">points</span>(k, r[k], <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> cols[s], <span class="at">cex =</span> <span class="fl">1.3</span>)</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-running-sums" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-running-sums-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="11-gene-set-enrichment_files/figure-html/fig-running-sums-1.png" class="img-fluid figure-img" width="864">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-running-sums-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.5: Running sums for the three gene sets along the ranked list (rank 1 is the most up-regulated gene). The bars at the top mark where the genes of the set fall. S1’s genes cluster at the top, and the running sum climbs steeply. S2’s genes are spread evenly, and the sum wanders around zero. S3’s genes also cluster, at the bottom in this sample, although nothing changed: they are correlated and moved together by chance.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="significance-by-permutation" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="significance-by-permutation">Significance by permutation</h3>
+<p>The enrichment score has no simple null distribution: it depends on the set size, on the weights, and on the correlation between genes. GSEA therefore obtains its null distribution by <strong>permutation</strong>. The labels of the samples (control or treated) are shuffled, all gene statistics are recomputed, and the enrichment score of each set is calculated again. Repeating this a thousand times gives the distribution of the score when the treatment has no effect; the p-value is the fraction of permutation scores at least as extreme as the observed one.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>es_null <span class="ot">&lt;-</span> <span class="fu">replicate</span>(B, {</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  t_perm <span class="ot">&lt;-</span> <span class="fu">row_t</span>(X, <span class="fu">sample</span>(grp))                 <span class="co"># shuffle samples, keep genes together</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sapply</span>(in_set, <span class="cf">function</span>(s) <span class="fu">enrichment_score</span>(t_perm, s))</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>p_sample_perm <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">names</span>(sets), <span class="cf">function</span>(s) <span class="fu">mean</span>(<span class="fu">abs</span>(es_null[s, ]) <span class="sc">&gt;=</span> <span class="fu">abs</span>(es_obs[s])))</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(p_sample_perm, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;    S1    S2    S3 
+#&gt; 0.000 0.756 0.480</code></pre>
+</div>
+</div>
+<p>Set sizes differ between real gene sets, and so do their null distributions. GSEA therefore divides each score by the mean of the permutation scores of the same sign, giving a <strong>normalised enrichment score</strong> (NES) that can be compared across sets. With many sets, the p-values (or NES-based FDR values) are corrected for multiple testing, exactly as for genes on Day 2.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>↪</strong> Permutation is resampling without replacement, the sibling of the bootstrap (Day 7). Both replace a theoretical distribution by one built from the data themselves.</p>
+</div></div></section>
+<section id="permuting-genes-or-permuting-samples" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="permuting-genes-or-permuting-samples">Permuting genes or permuting samples?</h3>
+<p>A cheaper alternative is to permute <em>genes</em>: draw random sets of 40 genes from the same ranked list, and compare their scores with the observed one. It needs only the one ranked list. But it treats the genes of a set as independent draws, and S3 shows what that costs.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>es_gene_null <span class="ot">&lt;-</span> <span class="fu">replicate</span>(B, <span class="fu">enrichment_score</span>(t_obs, <span class="fu">seq_len</span>(G) <span class="sc">%in%</span> <span class="fu">sample</span>(G, <span class="dv">40</span>)))</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>p_gene_perm <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">names</span>(sets), <span class="cf">function</span>(s) <span class="fu">mean</span>(<span class="fu">abs</span>(es_gene_null) <span class="sc">&gt;=</span> <span class="fu">abs</span>(es_obs[s])))</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">permute_samples =</span> <span class="fu">round</span>(p_sample_perm, <span class="dv">3</span>), <span class="at">permute_genes =</span> <span class="fu">round</span>(p_gene_perm, <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;                 S1    S2   S3
+#&gt; permute_samples  0 0.756 0.48
+#&gt; permute_genes    0 0.779 0.00</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code for the figure</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="fl">2.5</span>, <span class="dv">1</span>))</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">abs</span>(es_null[<span class="st">"S3"</span>, ]), <span class="at">breaks =</span> <span class="dv">30</span>, <span class="at">col =</span> <span class="st">"#DCE6F1"</span>, <span class="at">border =</span> <span class="st">"grey50"</span>, <span class="at">las =</span> <span class="dv">1</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.9</span>),</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"permuting samples"</span>, <span class="at">xlab =</span> <span class="st">"|enrichment score|"</span>, <span class="at">ylab =</span> <span class="st">"permutations"</span>)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="fu">abs</span>(es_obs[<span class="st">"S3"</span>]), <span class="at">col =</span> col_orange, <span class="at">lwd =</span> <span class="dv">3</span>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">abs</span>(es_gene_null), <span class="at">breaks =</span> <span class="dv">30</span>, <span class="at">col =</span> <span class="st">"#DCE6F1"</span>, <span class="at">border =</span> <span class="st">"grey50"</span>, <span class="at">las =</span> <span class="dv">1</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.9</span>),</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"permuting genes"</span>, <span class="at">xlab =</span> <span class="st">"|enrichment score|"</span>, <span class="at">ylab =</span> <span class="st">"permutations"</span>)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="fu">abs</span>(es_obs[<span class="st">"S3"</span>]), <span class="at">col =</span> col_orange, <span class="at">lwd =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-permutation-null" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-permutation-null-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="11-gene-set-enrichment_files/figure-html/fig-permutation-null-1.png" class="img-fluid figure-img" width="816">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-permutation-null-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.6: Null distributions for the enrichment score of S3, the correlated set without any real change, and its observed score (orange line). Permuting samples keeps the correlation between the set’s genes, so large scores are common and the observed score is unremarkable. Permuting genes breaks the correlation, so such a score looks impossible.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>For S1 both approaches agree: the set is enriched. For S3 they disagree completely. Its genes moved together because they are correlated, not because of the treatment; sample permutation recognises this, gene permutation declares a discovery.</p>
+<p>The two approaches test different null hypotheses <span class="citation" data-cites="Goeman2007">(<a href="references.html#ref-Goeman2007" role="doc-biblioref">Goeman and Bühlmann 2007</a>)</span>. A <strong>self-contained</strong> test asks whether the genes of the set are associated with the treatment at all; permuting samples answers it. A <strong>competitive</strong> test asks whether the set is more associated with the treatment than other genes are; permuting genes, and over-representation analysis, answer it, but only under the assumption that genes are independent. How often does that assumption fail? Repeated over 100 simulated experiments, each with a correlated set and no real change:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>false_positive <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">100</span>, {</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  Xs <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">1000</span> <span class="sc">*</span> <span class="dv">2</span> <span class="sc">*</span> n), <span class="dv">1000</span>)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  Xs[<span class="dv">1</span><span class="sc">:</span><span class="dv">40</span>, ] <span class="ot">&lt;-</span> Xs[<span class="dv">1</span><span class="sc">:</span><span class="dv">40</span>, ] <span class="sc">+</span> <span class="fu">matrix</span>(<span class="fl">1.2</span> <span class="sc">*</span> <span class="fu">rnorm</span>(<span class="dv">2</span> <span class="sc">*</span> n), <span class="dv">40</span>, <span class="dv">2</span> <span class="sc">*</span> n, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  s  <span class="ot">&lt;-</span> <span class="fu">seq_len</span>(<span class="dv">1000</span>) <span class="sc">&lt;=</span> <span class="dv">40</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  ts <span class="ot">&lt;-</span> <span class="fu">row_t</span>(Xs, grp); o <span class="ot">&lt;-</span> <span class="fu">enrichment_score</span>(ts, s)</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  null_s <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">200</span>, <span class="fu">enrichment_score</span>(<span class="fu">row_t</span>(Xs, <span class="fu">sample</span>(grp)), s))</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  null_g <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">200</span>, <span class="fu">enrichment_score</span>(ts, <span class="fu">seq_len</span>(<span class="dv">1000</span>) <span class="sc">%in%</span> <span class="fu">sample</span>(<span class="dv">1000</span>, <span class="dv">40</span>)))</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">permute_samples =</span> <span class="fu">mean</span>(<span class="fu">abs</span>(null_s) <span class="sc">&gt;=</span> <span class="fu">abs</span>(o)) <span class="sc">&lt;</span> <span class="fl">0.05</span>,</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">permute_genes   =</span> <span class="fu">mean</span>(<span class="fu">abs</span>(null_g) <span class="sc">&gt;=</span> <span class="fu">abs</span>(o)) <span class="sc">&lt;</span> <span class="fl">0.05</span>)</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a><span class="fu">rowMeans</span>(false_positive)          <span class="co"># fraction of experiments with p &lt; 0.05</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; permute_samples   permute_genes 
+#&gt;            0.05            0.71</code></pre>
+</div>
+</div>
+<p>Sample permutation keeps the false-positive rate at the nominal 5%; gene permutation declares a correlated set enriched in most experiments.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — Genes are not independent. Permuting samples keeps their correlation and gives valid p-values; permuting genes, and the urn model of over-representation analysis, ignore it and produce discoveries from co-regulation alone.</p>
+</div><div class="">
+<p><strong>⚠</strong> Sample permutation needs enough samples: with 3 against 3 there are only 20 distinct ways to split six samples, so the smallest attainable p-value is 0.05. This is one reason gene permutation is still used in practice, and one reason small studies should be interpreted with care.</p>
+</div></div>
+<div class="callout callout-style-default callout-caution callout-titled" title="Check yourself">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>Check yourself
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A GSEA on an experiment with 4 treated and 4 control samples reports, for a set of 25 genes from one protein complex, a p-value of 0.0001 obtained by permuting genes. What would you check before believing it?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Answer">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Genes of one protein complex are typically co-regulated, so the set’s genes are correlated, and a gene-permutation p-value can be far too small, as for S3. Check the correlation between the set’s genes, and repeat the analysis with sample permutation (with 4 against 4 there are 70 splits, so the smallest possible p-value is about 0.014). Also check that the set was chosen before the analysis, and how many sets were tested: 0.0001 among thousands of sets is less impressive than it sounds.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="enrichment-within-the-course" class="level2">
+<h2 class="anchored" data-anchor-id="enrichment-within-the-course">Enrichment within the course</h2>
+<p>Gene set analysis brings together several threads of the course, and each carries a warning.</p>
+<ul>
+<li><strong>Confirming or exploring</strong> (Day 2). Testing a handful of sets chosen from the hypothesis, as the GSEA authors recommended, is confirmatory. Testing all 10,000 GO terms and reporting the top of the list is exploratory: the result is a hypothesis, and it needs correction for multiple testing and independent confirmation.</li>
+<li><strong>Design</strong> (Day 2). Batch effects shift many genes together, exactly like the shared factor of S3. An enrichment found in a confounded design is an enrichment of the batch.</li>
+<li><strong>Distributions</strong> (Day 1). The hypergeometric distribution is a count with a ceiling, like the binomial; the uniform distribution of p-values under the null is what the Kolmogorov–Smirnov test checks.</li>
+<li><strong>Resampling</strong> (Day 7). Permutation must respect the structure of the data: shuffle the units that were randomised (samples), not the units that are correlated (genes).</li>
+</ul>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<ul>
+<li>Gene set analysis replaces the question <em>which genes change?</em> by <em>which groups of genes change together?</em> Group-level conclusions are often more stable than gene lists.</li>
+<li>Gene sets come from GO and pathway databases; they overlap, vary in size and reflect what is known. They must be chosen before the results are seen.</li>
+<li><strong>Over-representation analysis</strong> uses a <span class="math inline">\(2 \times 2\)</span> table and the hypergeometric distribution (Fisher’s exact test). It depends on a threshold, on the correct universe, and on the independence of genes.</li>
+<li><strong>GSEA</strong> ranks all genes and computes a running-sum enrichment score, a weighted form of the Kolmogorov–Smirnov statistic. Its significance comes from permutation, and its scores are normalised for set size.</li>
+<li><strong>Permuting samples</strong> gives a self-contained test that respects the correlation between genes; <strong>permuting genes</strong> gives a competitive test that assumes independence and can produce discoveries from co-regulation alone.</li>
+</ul>
+</section>
+<section id="reading" class="level2">
+<h2 class="anchored" data-anchor-id="reading">Reading</h2>
+<p>ISLR does not cover gene set analysis; its Chapter 13 on multiple testing is the background for the correction step. The original GSEA paper <span class="citation" data-cites="Subramanian2005">(<a href="references.html#ref-Subramanian2005" role="doc-biblioref">Subramanian et al. 2005</a>)</span> is readable and explains the motivation, the running sum and the normalisation. <span class="citation" data-cites="Goeman2007">Goeman and Bühlmann (<a href="references.html#ref-Goeman2007" role="doc-biblioref">2007</a>)</span> discusses the difference between competitive and self-contained tests and the role of correlation between genes.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-Ashburner2000" class="csl-entry" role="listitem">
+<span class="nocase">Ashburner, Michael et al.</span> 2000. <span>“Gene Ontology: Tool for the Unification of Biology.”</span> <em>Nature Genetics</em> 25 (1): 25–29.
+</div>
+<div id="ref-Fortunel2003" class="csl-entry" role="listitem">
+<span class="nocase">Fortunel, Nicolas O. et al.</span> 2003. <span>“Comment on <span>‘<span>’Stemness’</span>: Transcriptional Profiling of Embryonic and Adult Stem Cells’</span> and <span>‘a Stem Cell Molecular Signature’</span>.”</span> <em>Science</em> 302 (5644): 393.
+</div>
+<div id="ref-Goeman2007" class="csl-entry" role="listitem">
+Goeman, Jelle J., and Peter Bühlmann. 2007. <span>“Analyzing Gene Expression Data in Terms of Gene Sets: Methodological Issues.”</span> <em>Bioinformatics</em> 23 (8): 980–87.
+</div>
+<div id="ref-Subramanian2005" class="csl-entry" role="listitem">
+Subramanian, Aravind, Pablo Tamayo, Vamsi K. Mootha, et al. 2005. <span>“Gene Set Enrichment Analysis: A Knowledge-Based Approach for Interpreting Genome-Wide Expression Profiles.”</span> <em>Proceedings of the National Academy of Sciences</em> 102 (43): 15545–50.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./10-trees-forests.html" class="pagination-link" aria-label="Trees, forests and boosting">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Trees, forests and boosting</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -130,7 +130,7 @@ There is no training phase and no parameters are estimated. The data *are* the m
 **DEF** — $K$ is a **hyperparameter**: it is set before fitting and chosen by cross-validation. It is the number of neighbours, not the number of clusters as in K-means.
 :::
 
-Distances are those of Day 5: Euclidean by default, and Minkowski in general.
+Distances are those of Day 4: Euclidean by default, and Minkowski in general.
 
 ### KNN from scratch
 
@@ -220,7 +220,7 @@ plot(1:25, err, type = "b", pch = 16,
 
 A linear classifier uses a score $f(\mathbf{x}) = \beta_0 + \boldsymbol\beta^\top\mathbf{x}$ and predicts by its sign. The points with $f(\mathbf{x}) = 0$ form a **hyperplane**.
 
-If $\mathbf{x}_1$ and $\mathbf{x}_2$ both lie on the hyperplane, subtracting their equations gives $\boldsymbol\beta^\top(\mathbf{x}_1 - \mathbf{x}_2) = 0$. So $\boldsymbol\beta$ is orthogonal to the hyperplane, and the signed distance from a point to it is a projection (Day 3):
+If $\mathbf{x}_1$ and $\mathbf{x}_2$ both lie on the hyperplane, subtracting their equations gives $\boldsymbol\beta^\top(\mathbf{x}_1 - \mathbf{x}_2) = 0$. So $\boldsymbol\beta$ is orthogonal to the hyperplane, and the signed distance from a point to it is a projection (Appendix B):
 
 $$
 d(\mathbf{x}) = \frac{\beta_0 + \boldsymbol\beta^\top\mathbf{x}}{\lVert\boldsymbol\beta\rVert} .
@@ -251,7 +251,7 @@ $$
 Here $\xi_i = 0$ means correctly classified and outside the margin, $0 < \xi_i < 1$ inside the margin, and $\xi_i \ge 1$ misclassified.
 
 ::: column-margin
-**KEY** — This is *complexity + C × error*, the same trade as AIC on Day 6 and the penalties of Day 9. A large $C$ tolerates few violations and risks overfitting. A small $C$ gives a wider margin and more bias.
+**KEY** — This is *complexity + C × error*, the same trade as AIC on Day 5 and the penalties of Day 9. A large $C$ tolerates few violations and risks overfitting. A small $C$ gives a wider margin and more bias.
 :::
 
 ### The same problem as a loss function
@@ -279,7 +279,7 @@ legend("topright", c("hinge (SVM)", "logistic", "0-1 (misclassification)"), bty 
 **KEY** — Both losses are convex stand-ins for the misclassification count, which cannot be optimised directly. The hinge loss is exactly zero beyond the margin: points classified correctly with room to spare have no influence at all. That is the loss-function view of "only support vectors matter".
 :::
 
-Seen this way, the SVM can be fitted by the gradient descent of Appendix B. The hinge has a kink at 1, so one uses a *subgradient*: a point inside the margin contributes $-y_i\mathbf{x}_i$, any other point contributes nothing.
+Seen this way, the SVM can be fitted by the gradient descent of Appendix C. The hinge has a kink at 1, so one uses a *subgradient*: a point inside the margin contributes $-y_i\mathbf{x}_i$, any other point contributes nothing.
 
 ```{r svm-subgradient}
 library(e1071)
@@ -317,7 +317,7 @@ Twenty lines of code reproduce the coefficients of the library to two decimals. 
 
 ### Where the support vectors come from: the dual problem
 
-The constrained problem is solved with Lagrange multipliers, as in the derivation of PCA on Day 4, now with one multiplier $\alpha_i \ge 0$ per margin constraint and one $\mu_i \ge 0$ per constraint $\xi_i \ge 0$:
+The constrained problem is solved with Lagrange multipliers, as in the derivation of PCA on Day 3, now with one multiplier $\alpha_i \ge 0$ per margin constraint and one $\mu_i \ge 0$ per constraint $\xi_i \ge 0$:
 
 $$
 \mathcal{L} = \tfrac12\lVert\boldsymbol\beta\rVert^2 + C\sum_i\xi_i - \sum_i\alpha_i\big[y_i(\beta_0 + \boldsymbol\beta^\top\mathbf{x}_i) - 1 + \xi_i\big] - \sum_i\mu_i\xi_i .

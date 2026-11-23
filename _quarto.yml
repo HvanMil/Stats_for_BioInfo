@@ -22,18 +22,18 @@ book:
         - 02-design.qmd
         - 02-confounding.qmd
         - p02-data-quality.qmd
-    - part: "Day 3. Linear algebra"
+    - part: "Day 3. Directions"
       chapters:
-        - 03-linear-algebra.qmd
-    - part: "Day 4. Directions"
+        - 03-pca.qmd
+    - part: "Day 4. Groups"
       chapters:
-        - 04-pca.qmd
-    - part: "Day 5. Groups"
+        - 04-clustering.qmd
+    - part: "Day 5. Likelihood"
       chapters:
-        - 05-clustering.qmd
-    - part: "Day 6. Likelihood"
+        - 05-likelihood-aic.qmd
+    - part: "Day 6. Generalised linear models"
       chapters:
-        - 06-likelihood-aic.qmd
+        - 06-glm-logistic.qmd
     - part: "Day 7. Resampling"
       chapters:
         - 07-resampling.qmd
@@ -43,16 +43,17 @@ book:
     - part: "Day 9. Regularisation"
       chapters:
         - 09-regularisation.qmd
-    - part: "Day 10. Trees"
+    - part: "Day 10. Trees, forests and boosting"
       chapters:
         - 10-trees-forests.qmd
-    - part: "Day 11. Boosting"
+    - part: "Day 11. Gene set enrichment"
       chapters:
-        - 11-boosting-comparison.qmd
+        - 11-gene-set-enrichment.qmd
     - references.qmd
   appendices:
     - a-linear-models.qmd
-    - b-linear-algebra-details.qmd
+    - b-linear-algebra.qmd
+    - c-linear-algebra-details.qmd
 
 bibliography: references.bib
 
@@ -61,9 +62,10 @@ format:
     theme: cosmo
     css: styles.css
     toc: true
-    toc-location: left
+    toc-location: left-body
     toc-depth: 2
     toc-title: "On this page"
+    back-to-top-navigation: true
     number-sections: false
     code-copy: true
     code-overflow: wrap

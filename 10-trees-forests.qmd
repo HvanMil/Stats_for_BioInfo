@@ -1,4 +1,4 @@
-# Trees, bagging and random forests
+# Trees, forests and boosting
 
 ::: {.column-margin}
 **Margin legend**
@@ -44,7 +44,7 @@ difference is the organising idea of the second half.
 
 ::: {.column-margin}
 **↪** ISLR Chapter 8 covers the same ground. A reading guide with figure and
-page numbers is given at the end of Day 11.
+page numbers is given at the end of this chapter.
 :::
 
 ## Explaining variance by splitting
@@ -476,7 +476,7 @@ $$
 
 ::: {.column-margin}
 **↪** Cross-entropy is the Shannon entropy of the class distribution within the
-node. Day 6 introduced it and
+node. Day 5 introduced it and
 connected it to deviance and AIC.
 :::
 
@@ -860,6 +860,341 @@ higher than binary predictors regardless of signal. The permutation measure is
 the safer of the two.
 :::
 
+## Boosting
+
+Bagging and random forests start from deep trees and remove their variance by averaging. Boosting does the opposite: it starts from very small trees and removes their bias by accumulation. It uses the same simulated survey of understorey vegetation.
+
+### Sequential correction
+
+Bagging and random forests fit their trees independently and in parallel; each
+one sees the data afresh. Boosting does the opposite. Trees are fitted in
+sequence, and each one is fitted to what the current ensemble is still getting
+wrong.
+
+::: {.column-margin}
+**DEF** — **Boosting** builds an additive model by repeatedly fitting a small
+tree to the current residuals and adding a shrunken version of it to the running
+prediction.
+:::
+
+For regression with squared-error loss the algorithm is short enough to state in
+full. Set $\hat f(x) = 0$ and $r_i = y_i$. Then for $b = 1, \dots, B$:
+
+1. fit a tree $\hat f^{\,b}$ with $d$ splits to the current residuals $r$;
+2. update the prediction, $\hat f(x) \leftarrow \hat f(x) + \lambda \hat f^{\,b}(x)$;
+3. update the residuals, $r_i \leftarrow r_i - \lambda \hat f^{\,b}(x_i)$.
+
+The output is $\hat f(x) = \sum_{b=1}^{B} \lambda \hat f^{\,b}(x)$.
+
+::: {.column-margin}
+**↪** This is ISLR Algorithm 8.2, page 347. For other loss functions the
+residual is replaced by the negative gradient of the loss, which is where the
+name *gradient boosting* comes from.
+:::
+
+The learning is deliberately slow. Each tree is small, and only a fraction
+$\lambda$ of it is added, so no single step commits the model to much. Fitting
+the residuals means that regions already predicted well contribute nothing
+further, and attention concentrates automatically where the ensemble is still
+failing.
+
+### Boosting is gradient descent in function space
+
+Why fit the *residuals*? The answer connects boosting to the gradient descent of Appendix C. Suppose the aim is to minimise a loss summed over the training data,
+
+$$
+\sum_{i=1}^n L\big(y_i,\ f(x_i)\big),
+$$
+
+and regard the fitted values $f(x_1), \dots, f(x_n)$ as the quantities to be adjusted. Gradient descent would move each of them a small step against its derivative:
+
+$$
+f(x_i) \leftarrow f(x_i) - \lambda\,g_i,
+\qquad
+g_i = \frac{\partial L\big(y_i, f(x_i)\big)}{\partial f(x_i)} .
+$$
+
+For squared-error loss $L = \tfrac12(y - f)^2$ the negative gradient is
+
+$$
+-g_i = y_i - f(x_i),
+$$
+
+the residual. The catch is that such a step is defined only at the training points and says nothing about a new $x$. Boosting therefore fits a small tree *to the negative gradients* and steps along that tree instead. The tree generalises the step to the whole predictor space.
+
+::: {.column-margin}
+**KEY** — Each boosting round is one step of gradient descent, with a tree standing in for the gradient. The shrinkage $\lambda$ is the step size.
+:::
+
+The same recipe works for any differentiable loss, and only the "pseudo-residuals" change.
+
+| Loss | $L(y, f)$ | Negative gradient $-g_i$ |
+|:--|:--|:--|
+| squared error | $\tfrac12(y - f)^2$ | $y_i - f(x_i)$ |
+| absolute error | $\lvert y - f\rvert$ | $\operatorname{sign}\big(y_i - f(x_i)\big)$ |
+| logistic (0/1 labels, $f$ = log-odds) | $-yf + \ln(1 + e^{f})$ | $y_i - p_i$ |
+
+The last row is the gradient of the logistic log-likelihood of Day 6: a boosted classifier fits trees to $y_i - p_i$.
+
+### Boosting from scratch
+
+With `rpart` supplying the small trees, the algorithm is a loop of a few lines. One hundred plots are set aside to watch the error on data the model has not seen.
+
+```{r boost-scratch}
+set.seed(104)
+test_id <- sample(nrow(plots), 100)
+b_train <- plots[-test_id, ]
+b_test  <- plots[test_id, ]
+
+boost_scratch <- function(train, test, B = 600, shrink = 0.05, depth = 2) {
+  f_train <- rep(mean(train$cover), nrow(train))        # start from the mean
+  f_test  <- rep(mean(train$cover), nrow(test))
+  err <- matrix(NA, B, 2, dimnames = list(NULL, c("train", "test")))
+  work <- train
+  for (b in seq_len(B)) {
+    work$r <- train$cover - f_train                     # 1. residuals = negative gradient
+    tree <- rpart(r ~ light + moisture + pH + litter + noise1 + noise2, data = work,
+                  control = rpart.control(maxdepth = depth, cp = 0, minbucket = 10, xval = 0))
+    f_train <- f_train + shrink * predict(tree, train)  # 2. take a small step
+    f_test  <- f_test  + shrink * predict(tree, test)
+    err[b, ] <- c(mean((train$cover - f_train)^2), mean((test$cover - f_test)^2))
+  }
+  err
+}
+
+err <- boost_scratch(b_train, b_test)
+
+plot(err[, "train"], type = "l", lwd = 2, col = "steelblue", ylim = c(0, 160),
+     xlab = "Boosting round", ylab = "Mean squared error")
+lines(err[, "test"], lwd = 2)
+abline(h = 36, lty = 3, col = "firebrick")
+abline(v = which.min(err[, "test"]), lty = 2, col = "grey50")
+legend("topright", c("held-out plots", "training plots", "irreducible error"), bty = "n",
+       lwd = 2, lty = c(1, 1, 3), col = c("black", "steelblue", "firebrick"))
+
+best <- unname(which.min(err[, "test"]))
+c(best_round    = best,
+  train_at_best = unname(round(err[best, "train"], 1)),
+  test_at_best  = unname(round(err[best, "test"], 1)),
+  test_at_600   = unname(round(err[600, "test"], 1)))
+```
+
+The training error falls with every round and passes *below* the irreducible error of 36, which no honest prediction can beat: from that point on the model is fitting noise. The error on the held-out plots reaches its minimum well before the last round and then creeps upward. This is the overfitting that the number of rounds must control, and the reason why that number has to be chosen on data not used for fitting.
+
+::: {.column-margin}
+**⚠** The hundred held-out plots were used here to *choose* the number of rounds, so the minimum of the black curve is itself slightly optimistic (Day 7). The comparison at the end of this chapter keeps the two roles apart.
+:::
+
+### Three tuning parameters
+
+Boosting has three parameters, and in contrast to bagging all three matter.
+
+The **number of trees** $B$ must be chosen, because boosting *can* overfit if it
+is too large. This is the sharpest contrast with random forests, where more
+trees are never harmful. Each additional boosting round makes the model more
+flexible; each additional forest member only averages away more variance.
+
+The **shrinkage** $\lambda$, typically 0.01 or 0.001, controls how much of each
+tree is taken. Smaller $\lambda$ requires larger $B$; the two trade off against
+each other and are usually chosen together.
+
+The **interaction depth** $d$ is the number of splits per tree. With $d = 1$
+each tree is a stump involving a single variable, and the boosted ensemble is
+then an additive model with no interactions at all. With $d = 2$ pairwise
+interactions become representable, and so on: $d$ is the interaction order of
+the fitted model, chosen rather than specified term by term.
+
+::: {.column-margin}
+**KEY** — In our simulation the generating process contains one two-way
+interaction, so $d = 2$ is sufficient in principle and $d = 1$ is not. Boosting
+makes the interaction order an explicit, tunable quantity.
+:::
+
+```{r boost-fit}
+library(gbm)
+
+set.seed(104)
+boost_fit <- gbm(f_reg, data = plots, distribution = "gaussian",
+                 n.trees = 3000, interaction.depth = 2,
+                 shrinkage = 0.01, n.minobsinnode = 10,
+                 cv.folds = 5)
+
+best_iter <- gbm.perf(boost_fit, method = "cv")
+best_iter
+```
+
+`gbm.perf` plots the training error, which falls monotonically, against the
+cross-validated error, which falls and then flattens or rises, and returns the
+number of iterations at the cross-validated minimum. The gap between the two
+curves is the optimism of the training error, and it widens with every
+additional round.
+
+::: {.column-margin}
+**⚠** Predictions from a `gbm` object require the number of trees to be stated
+explicitly: `predict(fit, newdata, n.trees = best_iter)`. Omitting it uses all
+`n.trees`, which discards the tuning just performed.
+:::
+
+```{r boost-importance}
+summary(boost_fit, n.trees = best_iter, plotit = FALSE)
+```
+
+Relative influence is computed in the same spirit as impurity importance for
+forests: the improvement in squared error attributable to splits on each
+variable, summed over the ensemble and scaled to total 100. The noise
+predictors again serve as the reference level for irrelevance.
+
+::: {.column-margin}
+**⚠** `gbm` is no longer actively maintained. It remains the clearest
+implementation for teaching because it follows ISLR's algorithm directly. For
+applied work, `xgboost` and `lightgbm` are the current standards, with the same
+three parameters under different names.
+:::
+
+## Bias, variance, and which method attacks which
+
+The three ensembles are often presented as interchangeable alternatives. They
+are not, and the distinction is the single most useful thing to remember from
+this chapter.
+
+| | Bagging | Random forest | Boosting |
+|:--|:--|:--|:--|
+| Attacks | variance | variance | bias |
+| Base learners | deep, unpruned | deep, unpruned | shallow, often stumps |
+| Fitted | in parallel, independently | in parallel, decorrelated | sequentially, dependently |
+| Effect of large $B$ | never harmful | never harmful | can overfit |
+| Tuning needed | little | `mtry` | $B$, $\lambda$, $d$ — all three |
+| Built-in validation | out-of-bag | out-of-bag | none; use CV |
+| Interpretability | low | low, plus importance | low, plus relative influence |
+
+Bagging and random forests start from a low-bias, high-variance learner and
+remove the variance by averaging. Boosting starts from a high-bias,
+low-variance learner — a stump is about as biased as a model can be — and
+removes the bias by accumulation. Reading the table row by row, almost every
+difference between the columns follows from that one difference in the first
+row.
+
+::: {.column-margin}
+**↪** The bias–variance decomposition itself was derived on Day 9. These two chapters are its most direct application.
+:::
+
+## An honest comparison
+
+Everything so far has been demonstrated on in-sample output or on out-of-bag
+error. The methods are now compared on equal terms, under one set of
+cross-validation folds, with all tuning performed inside the training data.
+
+```{r cv-comparison}
+k <- 5
+set.seed(77)
+fold <- cut(sample(seq_len(nrow(plots))), breaks = k, labels = FALSE)
+
+methods <- c("linear model", "pruned tree", "bagging",
+             "random forest", "boosting")
+mse <- matrix(NA_real_, nrow = k, ncol = length(methods),
+              dimnames = list(NULL, methods))
+
+for (j in seq_len(k)) {
+  train <- plots[fold != j, ]
+  test  <- plots[fold == j, ]
+
+  m_lm <- lm(f_reg, data = train)
+  mse[j, "linear model"] <- mean((predict(m_lm, test) - test$cover)^2)
+
+  m_tr <- rpart(f_reg, data = train, method = "anova",
+                control = rpart.control(cp = 0.002, minsplit = 10, xval = 10))
+  cp_j <- m_tr$cptable[which.min(m_tr$cptable[, "xerror"]), "CP"]
+  m_tr <- prune(m_tr, cp = cp_j)
+  mse[j, "pruned tree"] <- mean((predict(m_tr, test) - test$cover)^2)
+
+  m_bag <- randomForest(f_reg, data = train, mtry = 6, ntree = 300)
+  mse[j, "bagging"] <- mean((predict(m_bag, test) - test$cover)^2)
+
+  m_rf <- randomForest(f_reg, data = train, mtry = 2, ntree = 300)
+  mse[j, "random forest"] <- mean((predict(m_rf, test) - test$cover)^2)
+
+  m_gb <- gbm(f_reg, data = train, distribution = "gaussian",
+              n.trees = 1500, interaction.depth = 2, shrinkage = 0.02,
+              n.minobsinnode = 10, cv.folds = 5)
+  it_j <- gbm.perf(m_gb, method = "cv", plot.it = FALSE)
+  mse[j, "boosting"] <- mean((predict(m_gb, test, n.trees = it_j) -
+                                test$cover)^2)
+}
+
+round(rbind(CV_MSE = colMeans(mse),
+            SE     = apply(mse, 2, sd) / sqrt(k)), 2)
+```
+
+Three points about the design of this comparison matter more than the numbers it
+produces.
+
+First, it is a **nested** cross-validation. The `cp` for the tree and the
+iteration count for the boosted model are selected by cross-validation *within*
+each training fold — `rpart` does this internally through `xval`, and `gbm`
+through `cv.folds`. The outer folds never participate in any choice, so the
+reported errors are honest estimates of the whole procedure.
+
+::: {.column-margin}
+**↪** Day 7 argued for exactly this structure. The
+inner loops here are supplied by the fitting functions rather than written out,
+but they are the same construction.
+:::
+
+Second, the standard errors across folds are reported alongside the means. With
+five folds these are crude, and differences smaller than a couple of standard
+errors should not be read as a ranking. The one-standard-error rule applies to
+method comparison just as it applied to tree size.
+
+Third, every error should be read against the irreducible error of 36. A method
+achieving 45 has captured most of the available structure; the remaining gap to
+another method achieving 42 is a small fraction of what either has already
+explained. Improvements look larger than they are when the floor is forgotten.
+
+::: {.column-margin}
+**⚠** If the plots had been nested within forest stands, every fold above would
+have to be grouped by stand. Ensembles are especially vulnerable to this leak: a
+deep tree can effectively memorise a stand, so random folds would report an
+error close to the within-stand residual variance and a forest would appear to
+outperform everything else for entirely spurious reasons.
+:::
+
+## Reading in ISLR
+
+Chapter 8 of *An Introduction to Statistical Learning* (2nd edition) covers this
+material. The figures repay study in the order given.
+
+| Topic | ISLR | Figure | Page |
+|:--|:--|:--|:--|
+| A fitted regression tree, read as rules | §8.1.1 | 8.1 | 328 |
+| The same tree as a partition | §8.1.1 | 8.2 | 329 |
+| Valid and invalid partitions; the 3-D view | §8.1.1 | 8.3 | 332 |
+| Unpruned tree, and error against tree size | §8.1.1 | 8.4, 8.5 | 334–335 |
+| Classification tree with CV error | §8.1.2 | 8.6 | 336–337 |
+| Trees versus linear models | §8.1.3 | 8.7 | 338–339 |
+| Bagging and random forest test error | §8.2.1–2 | 8.8 | 342 |
+| Variable importance | §8.2.1 | 8.9 | 344 |
+| Effect of `mtry` | §8.2.2 | 8.10 | 346 |
+| Boosting depth and number of trees | §8.2.3 | 8.11 | 348 |
+| Lab code | §8.3 | — | 353–361 |
+
+Two differences from the book are worth noting while reading. ISLR uses `tree`
+and `randomForest`; the course uses `rpart`, whose complexity parameter `cp` is
+a scaled version of the $\alpha$ in ISLR's equation (8.4), and whose
+cross-validation is performed automatically when the tree is grown. And §8.2.4
+on Bayesian additive regression trees is not covered in the lectures; it is
+readable as extension material once boosting is understood, since BART is
+essentially a Bayesian treatment of the same additive-tree idea.
+
 ## Where this leads
 
-Bagging and random forests fit their trees independently and average them. On Day 11 the trees are instead fitted in sequence, each correcting what its predecessors got wrong, and all methods are then compared on equal terms.
+The methods of this chapter produce models that predict well and explain little. That is a genuine change in what a statistical model is for, and it is worth stating plainly. A fitted random forest supports the claim that herb cover can be predicted from these four variables to within a certain error. It does not support a claim about the effect of raising soil pH by one unit, and no amount of variable-importance plotting converts it into one.
+
+::: {.column-margin}
+**KEY** — Prediction and explanation are different goals served by different models.
+:::
+
+The course began with one proposition: statistics arises the moment a complicated process is described with a simple model. Every method since has been a version of it. Each approximates a process, explains part of the variation, leaves a residual, spends some measure of flexibility, and must be judged on data it has not seen.
+
+::: {.column-margin}
+**↪** Day 11 returns to the thousands of genes of Day 2, and asks a different question: not which single genes change, but which *sets* of genes change together.
+:::

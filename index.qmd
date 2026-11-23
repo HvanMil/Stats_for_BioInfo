@@ -10,15 +10,17 @@ The aim is that you understand not only *how* a machine-learning method works, b
 |:--|:--|:--|
 | 1 | Why statistics? | One gene to thousands: an expression matrix |
 | 2 | Experimental design and confounding | Data quality and batch structure |
-| 3 | Linear algebra refresher | Matrices and eigenvectors on expression data |
-| 4 | Principal component analysis | Finding structure in samples |
-| 5 | Cluster analysis | Clustering genes and samples |
-| 6 | Likelihood, information and AIC | Read counts and variant calls |
+| 3 | Principal component analysis | Finding structure in samples |
+| 4 | Cluster analysis | Clustering genes and samples |
+| 5 | Likelihood, information and AIC | Read counts and variant calls |
+| 6 | Generalised linear models: logistic regression | Methylation and tumour status: odds ratios, tests and calibration |
 | 7 | The bootstrap and cross-validation | Honest error estimates, grouped by patient |
 | 8 | Evaluating classifiers, KNN and SVM | Classifying tumour samples |
 | 9 | Regularisation, PCR and PLS | Prediction when genes outnumber samples |
-| 10 | Trees, bagging and random forests | Forests on molecular data |
-| 11 | Boosting and an honest comparison | Comparing methods on equal terms |
+| 10 | Trees, random forests and boosting | Forests and boosting on molecular data |
+| 11 | Gene set enrichment analysis | Simulated gene sets: over-representation and GSEA by hand |
+
+The linear algebra the course relies on is reviewed in two appendices: [Appendix B](b-linear-algebra.qmd) builds the geometric intuition with pictures (norms, projections, eigenvectors), and [Appendix C](c-linear-algebra-details.qmd) gives the definitions, proofs and algorithms. Read Appendix B before Day 3.
 
 The practicals use data that look like bioinformatics data: expression matrices, read counts, variant calls. They contain no gene ontologies or pathway databases, because the object of study is the statistics. Most data sets are simulated, so that the correct answer is known and your analysis can be checked against it.
 

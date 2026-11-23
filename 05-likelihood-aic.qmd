@@ -1,0 +1,360 @@
+# Likelihood, information and AIC
+
+::: {.column-margin .margin-legend}
+**Margin legend**
+
+**DEF** — definition **KEY** — key idea to remember **↪** — bridge to another day **⚠** — common pitfall
+:::
+
+Three questions run underneath every model in this book. How are its parameters chosen? How wrong is it? And how should one model be preferred to another? This chapter gives one connected answer. **Maximum likelihood** chooses the parameters, the **Kullback–Leibler divergence** measures how wrong a model is, and **AIC** estimates that divergence from the data, including a correction for the optimism seen at the end of Day 1.
+
+## Likelihood
+
+### From probability to likelihood
+
+Twenty patients receive a drug and seven respond. If the response probability were known, the binomial distribution of Day 1 would give the probability of this outcome. Here the situation is reversed: the outcome is fixed, $k = 7$ of $n = 20$, and $p$ is unknown. The same formula, read as a function of $p$, is the **likelihood**.
+
+```{r lik-binom}
+#| fig-height: 3.8
+p <- seq(0.005, 0.995, length.out = 500)
+op <- par(mfrow = c(1, 2))
+plot(p, dbinom(7, 20, p), type = "l", lwd = 2, xlab = "p", ylab = "L(p)")
+abline(v = 7 / 20, lty = 2, col = "firebrick")
+plot(p, dbinom(7, 20, p, log = TRUE), type = "l", lwd = 2, ylim = c(-12, 0),
+     xlab = "p", ylab = "log L(p)")
+abline(v = 7 / 20, lty = 2, col = "firebrick")
+par(op)
+```
+
+::: column-margin
+**DEF** — For independent observations with density or probability $f(x;\theta)$, the **likelihood** is $L(\theta) = \prod_i f(x_i;\theta)$ and the **log-likelihood** is $\ell(\theta) = \sum_i \ln f(x_i;\theta)$. The data are fixed; $\theta$ varies.
+:::
+
+The **maximum likelihood estimate** (MLE) $\hat\theta$ is the value that makes the observed data most probable. The logarithm turns the product into a sum, does not move the maximum, and avoids numerically tiny numbers.
+
+For the binomial model, dropping the constant,
+
+$$
+\ell(p) = k\ln p + (n-k)\ln(1-p),
+\qquad
+\ell'(p) = \frac{k}{p} - \frac{n-k}{1-p} = 0
+\quad\Longrightarrow\quad
+\hat p = \frac{k}{n}.
+$$
+
+The second derivative is negative for all $p$, so this is a maximum. The estimate of a probability is the observed fraction, here 0.35, as the figure shows. The same recipe gives $\hat\lambda = \bar x$ for the Poisson distribution.
+
+### Normal residuals: least squares is maximum likelihood
+
+Take the linear model of Day 1 with normal residuals. The log-likelihood is
+
+$$
+\ell(\boldsymbol\beta, \sigma^2) = -\frac{n}{2}\ln(2\pi\sigma^2) - \frac{1}{2\sigma^2}\sum_{i=1}^n \big(y_i - \mathbf{x}_i^\top\boldsymbol\beta\big)^2 .
+$$
+
+The first term has no $\boldsymbol\beta$ in it, and the second is minus the residual sum of squares, up to a constant. Therefore:
+
+::: column-margin
+**KEY** — Least squares is not an arbitrary choice. It is what maximum likelihood gives when the residuals are normal.
+:::
+
+$\ell$ is maximal exactly where RSS is minimal. Maximising over $\sigma^2$ gives $\hat\sigma^2 = \text{RSS}/n$.
+
+```{r lik-lm}
+set.seed(2026)
+x <- runif(40, 0, 10)
+y <- 3 + 1.5 * x + rnorm(40, 0, 2)
+fit <- lm(y ~ x)
+
+n <- length(y); rss <- sum(resid(fit)^2)
+ll_by_hand <- -n / 2 * log(2 * pi * rss / n) - n / 2
+
+c(by_hand = ll_by_hand, logLik_in_R = as.numeric(logLik(fit)))
+```
+
+::: column-margin
+**⚠** The maximum likelihood estimate $\text{RSS}/n$ is biased. `summary(lm)` reports the unbiased $\text{RSS}/(n-p)$, using the degrees of freedom of Day 1.
+:::
+
+The maximum can also be found by a general-purpose optimiser, which is what happens when no formula exists.
+
+```{r lik-optim}
+nll <- function(par) {
+  -sum(dnorm(y, par[1] + par[2] * x, exp(par[3]), log = TRUE))
+}
+opt <- optim(c(0, 0, 0), nll, method = "BFGS")
+
+rbind(optim = c(opt$par[1:2], sigma = exp(opt$par[3])),
+      lm    = c(coef(fit), sqrt(rss / n)))
+```
+
+Using `exp(par[3])` keeps the standard deviation positive without a constraint.
+
+### Curvature and uncertainty
+
+A sharply peaked likelihood means the data pin the parameter down. A flat one means they do not. Curvature therefore measures information.
+
+```{r fisher}
+#| fig-height: 3.8
+ell <- function(p, k, n) k * log(p) + (n - k) * log(1 - p)
+p <- seq(0.1, 0.65, length.out = 400)
+
+plot(p, ell(p, 7, 20) - ell(0.35, 7, 20), type = "l", lwd = 2, ylim = c(-6, 0),
+     xlab = "p", ylab = expression(l(p) - l(hat(p))))
+lines(p, ell(p, 70, 200) - ell(0.35, 70, 200), lwd = 2, col = "steelblue")
+legend("bottomright", c("7 of 20", "70 of 200"), col = c("black", "steelblue"),
+       lwd = 2, bty = "n")
+```
+
+::: column-margin
+**DEF** — The **Fisher information** is the expected curvature of the log-likelihood, $I(\theta) = -E[\ell''(\theta)]$. For large samples, $\operatorname{SE}(\hat\theta) \approx 1/\sqrt{I(\hat\theta)}$.
+:::
+
+For the binomial model, $I(p) = n / (p(1-p))$, so $\operatorname{SE}(\hat p) = \sqrt{\hat p(1-\hat p)/n}$. Ten times the data gives ten times the curvature and $\sqrt{10}$ times the precision, the same $\sqrt n$ as for the mean. Standard errors in `glm` output are computed this way.
+
+::: column-margin
+**↪** Day 7 applies maximum likelihood to an outcome that depends on predictors: logistic regression, the first *generalised linear model*. Its standard errors come from this curvature, now as a matrix.
+:::
+
+## Information and divergence
+
+### Surprise and entropy
+
+An outcome with a small probability is surprising when it occurs. The **information content** of outcome $x$ is $-\ln p(x)$: zero for a certain event, growing as the probability shrinks, and additive for independent events. The **entropy** is its average:
+
+$$
+H(p) = -\sum_x p(x)\ln p(x) .
+$$
+
+### Cross-entropy and the Kullback–Leibler divergence
+
+Suppose outcomes come from $p$ while we calculate with a model $q$. The **cross-entropy** $H(p,q) = -\sum_x p(x)\ln q(x)$ is the average surprise under the wrong distribution. The excess over the unavoidable $H(p)$ is the **Kullback–Leibler divergence** [@Kullback1951]:
+
+$$
+D(p\,\|\,q) = H(p,q) - H(p) = \sum_x p(x)\ln\frac{p(x)}{q(x)} .
+$$
+
+It is never negative, and it is zero only if $q = p$.
+
+As a worked example, take the nucleotide frequencies in an AT-rich region, against a model of no preference.
+
+```{r kl}
+kl <- function(p, q) sum(ifelse(p > 0, p * log(p / q), 0))
+
+p <- c(A = 0.4, C = 0.1, G = 0.1, T = 0.4)
+q <- rep(0.25, 4)
+
+rbind(contribution = p * log(p / q))
+c(D_p_q = kl(p, q), D_q_p = kl(q, p))
+```
+
+::: column-margin
+**⚠** The divergence is not a distance: $D(p\|q) \ne D(q\|p)$. The order matters: first the distribution that generates the data, then the model. It is infinite if the model gives probability zero to something that can happen, which is why $k$-mer models use pseudocounts.
+:::
+
+### Maximum likelihood minimises divergence
+
+Write out the divergence from the truth $p$ to a model $q_\theta$:
+
+$$
+D(p\,\|\,q_\theta) = \underbrace{\sum_x p(x)\ln p(x)}_{\text{same for every model}} \;-\; E_p[\ln q_\theta(X)] .
+$$
+
+The only term that depends on the model is the expected log-probability of a new observation. The average log-likelihood $\ell(\theta)/n$ is the sample estimate of that term.
+
+::: column-margin
+**KEY** — Maximising the likelihood is minimising the estimated Kullback–Leibler divergence from the data to the model.
+:::
+
+This also explains the **loss functions** of machine learning. Log-loss, or cross-entropy loss, is the negative Bernoulli log-likelihood. Squared error is the negative normal log-likelihood, up to constants.
+
+::: {.callout-note collapse="true" title="Going deeper: Fisher information is the curvature of the divergence"}
+For a small change of a parameter within a model,
+$$
+D(p_\theta\,\|\,p_{\theta+\delta}) \approx \tfrac12\,\delta^2\, I(\theta) .
+$$
+This holds only for nearby parameter values within one model family. It does not approximate the divergence between a misspecified model and the truth.
+
+```{r fisher-kl}
+kl_bern <- function(a, b) a * log(a / b) + (1 - a) * log((1 - a) / (1 - b))
+a <- 0.35
+d <- c(0.1, 0.05, 0.01)
+round(rbind(exact = kl_bern(a, a + d), approx = 0.5 * d^2 / (a * (1 - a))), 6)
+```
+:::
+
+## Why the training likelihood is optimistic
+
+A larger model always fits at least as well, because it contains the smaller model. So $\ell(\hat\theta)$ cannot choose between models, for the same reason $R^2$ could not on Day 1. Part of the improvement is noise. A parameter estimated from the data has adapted to the particular residuals of that sample, and new data will have different residuals.
+
+Prediction error decomposes accordingly, into squared bias, variance and irreducible noise:
+
+$$
+E\big[(y - \hat f(x))^2\big] = \big(E[\hat f(x)] - f(x)\big)^2 + \operatorname{Var}\big(\hat f(x)\big) + \sigma^2 .
+$$
+
+Too simple a model has large bias. Too complex a model has large variance.
+
+The size of the optimism can be measured by simulation. Polynomials of increasing degree are fitted to data from a quadratic truth, and each fit is evaluated on the training data and on a large new sample from the same process.
+
+```{r optimism}
+set.seed(11)
+sim_y <- function(x) 2 + 1.5 * x - 0.8 * x^2 + rnorm(length(x))
+degs  <- 0:8
+n     <- 40
+R     <- 500
+
+dev2 <- function(y, mu, s2) -2 * sum(dnorm(y, mu, sqrt(s2), log = TRUE))
+
+train <- test <- aic <- matrix(NA, R, length(degs))
+xnew <- runif(2000, -2, 2); ynew <- sim_y(xnew)
+
+for (r in 1:R) {
+  x <- runif(n, -2, 2); y <- sim_y(x)
+  for (j in seq_along(degs)) {
+    d <- degs[j]
+    f <- if (d == 0) lm(y ~ 1) else lm(y ~ poly(x, d, raw = TRUE))
+    s2 <- sum(resid(f)^2) / n
+    mu <- predict(f, newdata = data.frame(x = xnew))
+    train[r, j] <- dev2(y, fitted(f), s2)
+    test[r, j]  <- dev2(ynew, mu, s2) * n / 2000   # scaled to n observations
+    aic[r, j]   <- AIC(f)
+  }
+}
+
+k <- degs + 2       # coefficients plus the variance
+tab <- rbind(degree = degs, k = k,
+             training = colMeans(train), new_data = colMeans(test),
+             AIC = colMeans(aic), optimism = colMeans(test - train),
+             two_k = 2 * k)
+round(tab, 1)
+```
+
+```{r optimism-plot}
+plot(degs, colMeans(test), type = "b", pch = 16, lwd = 2,
+     ylim = range(colMeans(train), colMeans(test)),
+     xlab = "Polynomial degree", ylab = "-2 log-likelihood")
+lines(degs, colMeans(train), type = "b", col = "steelblue", lwd = 2)
+lines(degs, colMeans(aic), type = "b", col = "firebrick", lwd = 2, lty = 2)
+legend("topright", c("new data", "training data", "AIC"), bty = "n", lwd = 2,
+       lty = c(1, 1, 2), col = c("black", "steelblue", "firebrick"))
+```
+
+The optimism, the gap between $-2\ell$ on new data and on the training data, is close to $2k$ for small models. That is what Akaike showed [@Akaike1974].
+
+### Where the $2k$ comes from
+
+For the linear model the size of the optimism can be derived exactly, with the hat matrix of Appendix C. Suppose the model is correct, $\mathbf{y} = \boldsymbol\mu + \boldsymbol\varepsilon$ with $\boldsymbol\mu = \mathbf{X}\boldsymbol\beta$, and $\sigma^2$ is known. The fitted values are $\hat{\mathbf{y}} = \mathbf{H}\mathbf{y}$, and because $\mathbf{H}\boldsymbol\mu = \boldsymbol\mu$,
+
+$$
+\hat{\mathbf{y}} - \boldsymbol\mu = \mathbf{H}\boldsymbol\varepsilon,
+\qquad
+\mathbf{y} - \hat{\mathbf{y}} = (\mathbf{I} - \mathbf{H})\,\boldsymbol\varepsilon .
+$$
+
+For any projection matrix $\mathbf{P}$, $E\lVert\mathbf{P}\boldsymbol\varepsilon\rVert^2 = \sigma^2\operatorname{tr}(\mathbf{P})$, and $\operatorname{tr}(\mathbf{H}) = p$. The **training error** is therefore
+
+$$
+E\lVert\mathbf{y} - \hat{\mathbf{y}}\rVert^2 = \sigma^2\operatorname{tr}(\mathbf{I} - \mathbf{H}) = (n - p)\,\sigma^2 .
+$$
+
+Now draw *new* responses $\mathbf{y}^* = \boldsymbol\mu + \boldsymbol\varepsilon^*$ at the same predictor values. The new noise is independent of the fit, so the two error sources add:
+
+$$
+E\lVert\mathbf{y}^* - \hat{\mathbf{y}}\rVert^2 = E\lVert\boldsymbol\varepsilon^*\rVert^2 + E\lVert\mathbf{H}\boldsymbol\varepsilon\rVert^2 = (n + p)\,\sigma^2 .
+$$
+
+The fit looks better than the truth by $p\sigma^2$ on the training data, and is worse than the truth by $p\sigma^2$ on new data. The difference is
+
+$$
+\text{optimism} = 2p\,\sigma^2 ,
+$$
+
+and since $-2\ell$ equals the sum of squares divided by $\sigma^2$, up to a constant, the optimism of $-2\ell$ is exactly $2p$.
+
+::: column-margin
+**KEY** — Each parameter absorbs one $\sigma^2$ of noise from the training data, and returns one $\sigma^2$ of error on new data. That double count is the factor 2.
+:::
+
+```{r optimism-exact}
+set.seed(3)
+n_o <- 40; p_o <- 6; sig <- 1
+Xo  <- cbind(1, matrix(rnorm(n_o * (p_o - 1)), n_o))
+mu  <- drop(Xo %*% rnorm(p_o))
+Ho  <- Xo %*% solve(t(Xo) %*% Xo) %*% t(Xo)
+
+gap <- replicate(5000, {
+  y_o   <- mu + rnorm(n_o, 0, sig)
+  y_hat <- drop(Ho %*% y_o)
+  y_new <- mu + rnorm(n_o, 0, sig)
+  c(train = sum((y_o - y_hat)^2), new = sum((y_new - y_hat)^2))
+})
+
+c(rowMeans(gap), optimism = unname(diff(rowMeans(gap))),
+  theory_train = (n_o - p_o) * sig^2, theory_new = (n_o + p_o) * sig^2,
+  theory_optimism = 2 * p_o * sig^2)
+```
+
+The simulation at the start of this section was slightly less tidy: it also estimated $\sigma^2$ and drew new predictor values, which is why its optimism sat a little above $2k$ and grew for the largest models. Akaike's contribution was to show that the same correction, $2k$, holds approximately for any model fitted by maximum likelihood, given enough data.
+
+## The Akaike information criterion
+
+::: column-margin
+**DEF** — $\text{AIC} = -2\,\ell(\hat\theta) + 2k$, with $k$ the number of estimated parameters.
+:::
+
+AIC adds the estimated optimism to the training deviance, and so estimates $-2\ell$ on new data. That quantity is, up to a constant shared by all models, twice the expected Kullback–Leibler divergence from the truth to the fitted model times $n$. The model with the lowest AIC is the one expected to lose the least information.
+
+For a linear model with normal residuals,
+
+$$
+\text{AIC} = n\ln\frac{\text{RSS}}{n} + 2k + n(1 + \ln 2\pi) .
+$$
+
+### Using AIC
+
+```{r aic-use}
+set.seed(5)
+x <- runif(40, -2, 2); y <- sim_y(x)
+models <- lapply(1:5, function(d) lm(y ~ poly(x, d, raw = TRUE)))
+
+a  <- sapply(models, AIC)
+dA <- a - min(a)
+w  <- exp(-dA / 2) / sum(exp(-dA / 2))
+
+round(rbind(degree = 1:5, k = sapply(models, function(m) attr(logLik(m), "df")),
+            AIC = a, delta = dA, weight = w), 2)
+```
+
+Only differences mean anything. A common guideline [@Burnham2002]: a $\Delta$AIC below about 2 gives no clear preference, and above about 10 the worse model has essentially no support. The **Akaike weights** in the last row rescale these differences into relative support that sums to one.
+
+### What AIC does not do
+
+- **It does not test anything.** It gives a ranking.
+- **It compares only the models offered.** The best of a set of poor models is still poor, so residuals must still be inspected.
+- **It requires the same response on the same observations.** A model of `y` and a model of `log(y)` cannot be compared directly.
+- **It counts all estimated parameters.** R includes $\sigma$ for `lm`. `extractAIC()` drops a constant, so never mix the two.
+- **It relies on large samples.** With few observations per parameter it favours models that are too large, as the last columns of the simulation show. The small-sample version adds a correction: $\text{AICc} = \text{AIC} + \frac{2k(k+1)}{n-k-1}$.
+- **It fails when flexibility cannot be counted.** A ridge fit or a random forest has no meaningful $k$, and a search through many candidate models spends more flexibility than $k$ records.
+
+::: column-margin
+**DEF** — $\text{BIC} = -2\ell + k\ln n$ penalises complexity more strongly when $n > 7$. It aims to identify the true model among the candidates, whereas AIC aims at prediction.
+:::
+
+::: column-margin
+**↪** Where a parameter count is unavailable, Day 7 measures the optimism directly by cross-validation. Day 9 replaces the count $k$ by a penalty on the size of the coefficients, with the same form: *fit + cost of complexity*.
+:::
+
+## Summary
+
+- The likelihood is the probability of the data, seen as a function of the parameters. The maximum likelihood estimate makes the data most probable.
+- With normal residuals, maximum likelihood is least squares. Day 7 applies it to a binary outcome: logistic regression.
+- The curvature of the log-likelihood gives the standard errors.
+- $D(p\|q)$ measures the information lost when $q$ is used in place of $p$. Maximum likelihood minimises its estimate.
+- The training log-likelihood is optimistic by about $k$. AIC corrects for this.
+
+## Reading in ISLR
+
+| Topic | ISLR |
+|:--|:--|
+| $C_p$, AIC, BIC, adjusted $R^2$ | §6.1.3 |

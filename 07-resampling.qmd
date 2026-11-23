@@ -1037,7 +1037,7 @@ right amount. The shortcut is specific to linear models fitted by least squares;
 for anything else the $n$ fits must actually be performed.
 
 ::: {.callout-note collapse="true" title="Why the shortcut is exact"}
-Write $\hat y_{(i)}$ for the prediction of observation $i$ from the model fitted *without* it, and recall from Appendix B that the fitted values are $\hat{\mathbf{y}} = \mathbf{H}\mathbf{y}$, so that $\hat y_i = \sum_j h_{ij}\,y_j$.
+Write $\hat y_{(i)}$ for the prediction of observation $i$ from the model fitted *without* it, and recall from Appendix C that the fitted values are $\hat{\mathbf{y}} = \mathbf{H}\mathbf{y}$, so that $\hat y_i = \sum_j h_{ij}\,y_j$.
 
 Now imagine replacing the observed $y_i$ by $\hat y_{(i)}$ and refitting on all $n$ points. The new point lies exactly on the leave-one-out line, so it adds nothing to that line's sum of squares: the leave-one-out fit is also the least-squares fit of the modified data. Applying the hat matrix to the modified data therefore returns $\hat y_{(i)}$ itself:
 
@@ -1195,7 +1195,7 @@ count is the right bookkeeping. Cross-validation does not need that bookkeeping,
 because it measures the consequence of flexibility rather than its cause.
 
 ::: {.column-margin}
-**↪** Why AIC penalises exactly $2p$, and what it is approximating, was the subject of Day 6. Cross-validation and AIC are
+**↪** Why AIC penalises exactly $2p$, and what it is approximating, was the subject of Day 5. Cross-validation and AIC are
 asymptotically equivalent for some model classes; they are not the same thing.
 :::
 
@@ -1308,7 +1308,7 @@ included. All of it must sit inside the loop whose error is being estimated.
 :::
 
 ::: {.column-margin}
-**↪** Exercise 2.2 (Day 2) showed the extreme case: selecting genes on all samples before splitting gave 94% accuracy on labels that carried no information.
+**↪** Exercise 2.3 (Day 2) showed the extreme case: selecting genes on all samples before splitting gave 94% accuracy on labels that carried no information.
 :::
 
 ### The nested scheme
@@ -1506,6 +1506,6 @@ Statistical Inference* (2016), Chapters 10 and 11.
 
 The bootstrap and cross-validation are not two topics but two applications of one manoeuvre: when a quantity is hard to derive, resample. Both were introduced here on models simple enough that the answers could be checked against a formula or a known truth. Both become indispensable from now on.
 
-Day 8 tunes the number of neighbours and the SVM cost by cross-validation. Day 9 adds a penalty $\lambda$ whose whole justification is out-of-sample performance. On Day 10, trees are pruned by cross-validation, and bagging and random forests use the bootstrap not to measure variance but to reduce it, with the out-of-bag third of each resample supplying a cross-validation that costs nothing extra. On Day 11, boosting adds a number of iterations that must be chosen, and choosing it on training error guarantees overfitting.
+Day 8 tunes the number of neighbours and the SVM cost by cross-validation. Day 9 adds a penalty $\lambda$ whose whole justification is out-of-sample performance. On Day 10, trees are pruned by cross-validation, and bagging and random forests use the bootstrap not to measure variance but to reduce it, with the out-of-bag third of each resample supplying a cross-validation that costs nothing extra. Later on Day 10, boosting adds a number of iterations that must be chosen, and choosing it on training error guarantees overfitting.
 
 The practical applies both tools to expression data in which samples come from a limited number of patients, and asks which of two error estimates answers the question that was posed.

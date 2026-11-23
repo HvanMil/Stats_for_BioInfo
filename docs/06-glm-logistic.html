@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Generalised linear models: logistic regression – Statistics for Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./07-resampling.html" rel="next">
+<link href="./05-likelihood-aic.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-ec8eff129d6f50c8392963982e963180.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating slimcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./06-glm-logistic.html">Day 6. Generalised linear models</a></li><li class="breadcrumb-item"><a href="./06-glm-logistic.html"><span class="chapter-title">Generalised linear models: logistic regression</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Statistics for Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 1. Why statistics?</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-why-statistics.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Why statistics?</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 2. Design and data</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-design.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Experimental Design</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-confounding.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Correlation, Confounding, and Causation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./p02-data-quality.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Practical: data quality</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 3. Directions</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-pca.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Principal component analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 4. Groups</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-clustering.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Cluster analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 5. Likelihood</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-likelihood-aic.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Likelihood, information and AIC</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Day 6. Generalised linear models</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-glm-logistic.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Generalised linear models: logistic regression</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 7. Resampling</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-resampling.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Resampling: The Bootstrap and Cross-Validation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 8. Classifiers</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-classifiers-knn-svm.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Evaluating classifiers, KNN and SVM</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 9. Regularisation</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-regularisation.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Regularisation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 10. Trees, forests and boosting</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-trees-forests.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Trees, forests and boosting</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false">
+ <span class="menu-text">Day 11. Gene set enrichment</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-gene-set-enrichment.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Gene set enrichment analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./a-linear-models.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear models: a worked reference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./b-linear-algebra.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear algebra: the geometry of data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./c-linear-algebra-details.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Linear algebra: definitions, proofs and algorithms</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#why-a-straight-line-fails-for-a-binary-outcome" id="toc-why-a-straight-line-fails-for-a-binary-outcome" class="nav-link active" data-scroll-target="#why-a-straight-line-fails-for-a-binary-outcome">Why a straight line fails for a binary outcome</a></li>
+  <li><a href="#the-three-parts-of-a-glm" id="toc-the-three-parts-of-a-glm" class="nav-link" data-scroll-target="#the-three-parts-of-a-glm">The three parts of a GLM</a></li>
+  <li><a href="#logistic-regression" id="toc-logistic-regression" class="nav-link" data-scroll-target="#logistic-regression">Logistic regression</a></li>
+  <li><a href="#fitting-by-maximum-likelihood" id="toc-fitting-by-maximum-likelihood" class="nav-link" data-scroll-target="#fitting-by-maximum-likelihood">Fitting by maximum likelihood</a></li>
+  <li><a href="#testing-and-checking" id="toc-testing-and-checking" class="nav-link" data-scroll-target="#testing-and-checking">Testing and checking</a></li>
+  <li><a href="#the-generative-alternative-linear-discriminant-analysis" id="toc-the-generative-alternative-linear-discriminant-analysis" class="nav-link" data-scroll-target="#the-generative-alternative-linear-discriminant-analysis">The generative alternative: linear discriminant analysis</a></li>
+  <li><a href="#from-logistic-regression-to-neural-networks" id="toc-from-logistic-regression-to-neural-networks" class="nav-link" data-scroll-target="#from-logistic-regression-to-neural-networks">From logistic regression to neural networks</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#reading-in-islr" id="toc-reading-in-islr" class="nav-link" data-scroll-target="#reading-in-islr">Reading in ISLR</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content page-columns page-full" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./06-glm-logistic.html">Day 6. Generalised linear models</a></li><li class="breadcrumb-item"><a href="./06-glm-logistic.html"><span class="chapter-title">Generalised linear models: logistic regression</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-title">Generalised linear models: logistic regression</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+<nav id="TOC-body" role="doc-toc">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#why-a-straight-line-fails-for-a-binary-outcome" id="toc-why-a-straight-line-fails-for-a-binary-outcome">Why a straight line fails for a binary outcome</a></li>
+  <li><a href="#the-three-parts-of-a-glm" id="toc-the-three-parts-of-a-glm">The three parts of a GLM</a></li>
+  <li><a href="#logistic-regression" id="toc-logistic-regression">Logistic regression</a></li>
+  <li><a href="#fitting-by-maximum-likelihood" id="toc-fitting-by-maximum-likelihood">Fitting by maximum likelihood</a></li>
+  <li><a href="#testing-and-checking" id="toc-testing-and-checking">Testing and checking</a></li>
+  <li><a href="#the-generative-alternative-linear-discriminant-analysis" id="toc-the-generative-alternative-linear-discriminant-analysis">The generative alternative: linear discriminant analysis</a></li>
+  <li><a href="#from-logistic-regression-to-neural-networks" id="toc-from-logistic-regression-to-neural-networks">From logistic regression to neural networks</a></li>
+  <li><a href="#summary" id="toc-summary">Summary</a></li>
+  <li><a href="#reading-in-islr" id="toc-reading-in-islr">Reading in ISLR</a></li>
+  </ul>
+</nav>
+
+<div class="no-row-height column-margin column-container"><div class="margin-legend">
+<p><strong>Margin legend</strong></p>
+<p><strong>DEF</strong> — definition <strong>KEY</strong> — key idea to remember <strong>↪</strong> — bridge to another day <strong>⚠</strong> — common pitfall</p>
+</div></div><p>Day 1 ended with a promise: a model for data that are not normal does not have to pretend that they are. It can keep the distribution that generated the data, binomial or Poisson, and model the mean on a suitable scale. Such a model is a <strong>generalised linear model</strong> (GLM), and Day 5 supplied the tool to fit it: maximum likelihood.</p>
+<p>This chapter works out the most important GLM, <strong>logistic regression</strong> for a binary outcome, in three steps. First as a classical statistical model: what the coefficients mean, how they are tested, and how the fit is checked. Then as a classifier, next to its generative twin, linear discriminant analysis. Finally as the smallest possible neural network, because the models behind modern artificial intelligence are, at their core, logistic regressions on features they learn themselves.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="If time is short">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>If time is short
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The sections up to and including <em>Checking the fit</em> form the core of the lecture. The folded <em>Going deeper</em> boxes and the comparison with LDA can be read afterwards. The last section, on neural networks, is meant as general knowledge: it is not needed for the rest of the course, but it shows where the ideas of this course reappear.</p>
+</div>
+</div>
+<section id="why-a-straight-line-fails-for-a-binary-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="why-a-straight-line-fails-for-a-binary-outcome">Why a straight line fails for a binary outcome</h2>
+<p>Suppose tumour status (1 = tumour, 0 = normal) is to be related to the methylation of one CpG site. Nothing stops us from fitting <code>lm(tumour ~ cpg)</code>, and the result even has a meaning: the fitted value estimates the probability of a tumour. But the figure shows two problems.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code for the figure</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">11</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>cpg <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">150</span>, <span class="dv">0</span>, <span class="fl">1.5</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>tum <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="dv">150</span>, <span class="dv">1</span>, <span class="fu">plogis</span>(<span class="sc">-</span><span class="fl">0.3</span> <span class="sc">+</span> <span class="fl">1.8</span> <span class="sc">*</span> cpg))</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>grid <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="fl">4.5</span>, <span class="fl">4.5</span>, <span class="at">length.out =</span> <span class="dv">200</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>f_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(tum <span class="sc">~</span> cpg); f_glm <span class="ot">&lt;-</span> <span class="fu">glm</span>(tum <span class="sc">~</span> cpg, <span class="at">family =</span> binomial)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>) {</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(cpg, <span class="fu">jitter</span>(tum, <span class="fl">0.15</span>), <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="st">"grey30"</span>, <span class="fl">0.4</span>), <span class="at">las =</span> <span class="dv">1</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.35</span>, <span class="fl">1.35</span>), <span class="at">xlab =</span> <span class="st">"methylation of the CpG site (standardised)"</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">ylab =</span> <span class="st">"tumour (1) or normal (0)"</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> <span class="fu">c</span>(<span class="st">"least-squares line"</span>, <span class="st">"logistic regression"</span>)[k])</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>(<span class="at">h =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">lty =</span> <span class="dv">3</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (k <span class="sc">==</span> <span class="dv">1</span>) <span class="fu">abline</span>(f_lm, <span class="at">col =</span> <span class="st">"#D35400"</span>, <span class="at">lwd =</span> <span class="fl">2.5</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span> <span class="fu">lines</span>(grid, <span class="fu">predict</span>(f_glm, <span class="fu">data.frame</span>(<span class="at">cpg =</span> grid), <span class="at">type =</span> <span class="st">"response"</span>), <span class="at">col =</span> <span class="st">"#1F4E79"</span>, <span class="at">lwd =</span> <span class="fl">2.5</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-why-not-lm" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-why-not-lm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-glm-logistic_files/figure-html/fig-why-not-lm-1.png" class="img-fluid figure-img" width="816">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-why-not-lm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.1: Tumour status (jittered vertically) against the methylation of one CpG site. Left: a straight line, fitted by least squares, predicts probabilities below 0 and above 1. Right: the logistic curve stays between 0 and 1 and follows the data.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><strong>The range.</strong> A line runs off to <span class="math inline">\(\pm\infty\)</span>, a probability cannot. Here the line predicts “probabilities” below 0 and above 1.</li>
+<li><strong>The variance.</strong> A 0/1 outcome with probability <span class="math inline">\(p\)</span> has variance <span class="math inline">\(p(1-p)\)</span>: largest at <span class="math inline">\(p = 0.5\)</span> and close to zero near 0 and 1. The constant variance that least squares assumes cannot hold.</li>
+</ul>
+<p>Both problems are about the <em>residual</em>, the theme of Day 1. A GLM solves them by choosing the right distribution for the response and a transformation that maps the line onto the right range.</p>
+<div class="callout callout-style-default callout-caution callout-titled" title="Check yourself">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>Check yourself
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For a 0/1 outcome, what is the largest possible variance, and at which <span class="math inline">\(p\)</span> is it reached? Why does that rule out the assumption of constant variance whenever the probability changes with <span class="math inline">\(x\)</span>?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Answer">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The variance <span class="math inline">\(p(1-p)\)</span> is largest at <span class="math inline">\(p = 0.5\)</span>, where it is <span class="math inline">\(0.25\)</span>. If the probability changes with <span class="math inline">\(x\)</span>, say from <span class="math inline">\(0.1\)</span> to <span class="math inline">\(0.9\)</span>, the variance changes with it, from <span class="math inline">\(0.09\)</span> to <span class="math inline">\(0.25\)</span> and back to <span class="math inline">\(0.09\)</span>. The variance is tied to the mean, so it cannot be constant unless the mean is constant too.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="the-three-parts-of-a-glm" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="the-three-parts-of-a-glm">The three parts of a GLM</h2>
+<p>Every GLM is assembled from the same three parts.</p>
+<ol type="1">
+<li><strong>A distribution for the response</strong>, chosen to match how the data arise: binomial for yes/no or <em>k</em> out of <em>n</em>, Poisson for counts, and so on.</li>
+<li><strong>A linear predictor</strong>, <span class="math inline">\(\eta_i = \beta_0 + \beta_1 x_{i1} + \dots + \beta_p x_{ip} = \mathbf{x}_i^\top\boldsymbol\beta\)</span>, exactly as in a linear model.</li>
+<li><strong>A link function</strong> <span class="math inline">\(g\)</span> that connects the mean of the response to the linear predictor: <span class="math inline">\(g(\mu_i) = \eta_i\)</span>. The link maps the allowed range of the mean (between 0 and 1, or positive) onto the whole real line, where a linear predictor lives.</li>
+</ol>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — A <strong>generalised linear model</strong> is a response distribution, a linear predictor <span class="math inline">\(\eta = \mathbf{x}^\top\boldsymbol\beta\)</span>, and a link <span class="math inline">\(g(\mu) = \eta\)</span>. The linear model is the special case with a normal distribution and the identity link.</p>
+</div></div><p>The same machinery therefore covers many kinds of data. In R only the <code>family</code> argument of <code>glm</code> changes.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Response</th>
+<th style="text-align: left;">Distribution</th>
+<th style="text-align: left;">Usual link</th>
+<th style="text-align: left;">Bioinformatics example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">continuous, roughly symmetric</td>
+<td style="text-align: left;">normal</td>
+<td style="text-align: left;">identity, <span class="math inline">\(\mu = \eta\)</span></td>
+<td style="text-align: left;">log-expression on a microarray</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">yes/no, or <span class="math inline">\(k\)</span> out of <span class="math inline">\(n\)</span></td>
+<td style="text-align: left;">binomial</td>
+<td style="text-align: left;">logit, <span class="math inline">\(\ln\frac{\mu}{1-\mu} = \eta\)</span></td>
+<td style="text-align: left;">tumour or normal; methylated reads out of all reads at a CpG</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">counts without an upper limit</td>
+<td style="text-align: left;">Poisson</td>
+<td style="text-align: left;">log, <span class="math inline">\(\ln\mu = \eta\)</span></td>
+<td style="text-align: left;">mutations per genome; reads per gene</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">positive, right-skewed, continuous</td>
+<td style="text-align: left;">gamma</td>
+<td style="text-align: left;">log, <span class="math inline">\(\ln\mu = \eta\)</span></td>
+<td style="text-align: left;">protein concentration; enzyme activity; survival time of cells</td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glm</span>(tumour <span class="sc">~</span> cpg1 <span class="sc">+</span> cpg2,           <span class="at">family =</span> binomial)             <span class="co"># logistic regression</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glm</span>(mutations <span class="sc">~</span> exposure <span class="sc">+</span> age,     <span class="at">family =</span> poisson)              <span class="co"># Poisson regression</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">glm</span>(concentration <span class="sc">~</span> treatment,      <span class="at">family =</span> <span class="fu">Gamma</span>(<span class="at">link =</span> <span class="st">"log"</span>))  <span class="co"># gamma regression</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>With a log link, a coefficient acts <em>multiplicatively</em> on the mean: <span class="math inline">\(e^{\beta_j}\)</span> is the factor by which the expected count or concentration changes per unit of <span class="math inline">\(x_j\)</span>. The Poisson model ties the variance to the mean (variance = mean); the gamma model ties the <em>standard deviation</em> to the mean (constant coefficient of variation), which suits measurements whose spread grows with their size.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>↪</strong> Read counts from RNA-seq vary more than a Poisson distribution allows (<em>overdispersion</em>). DESeq2 and edgeR therefore fit a <strong>negative binomial</strong> GLM to every gene; <code>MASS::glm.nb</code> does the same for a single response.</p>
+</div></div><p>The rest of this chapter concentrates on the binomial case. Everything said about fitting, testing and checking carries over to the other families.</p>
+<div class="callout callout-style-default callout-caution callout-titled" title="Check yourself">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>Check yourself
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Which family would you choose for (a) the number of colonies on a plate; (b) whether a variant is present in a sample; (c) the fluorescence intensity of a spot, which is always positive and whose spread grows with its mean?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Answer">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="a">
+<li>Poisson, or negative binomial if the counts vary more than their mean; (b) binomial with a logit link; (c) gamma, usually with a log link. A log-transformed normal model is a common alternative for (c), but it models the mean of the log rather than the mean itself.</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="logistic-regression" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="logistic-regression">Logistic regression</h2>
+<section id="the-model" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="the-model">The model</h3>
+<p>A binary outcome has a Bernoulli distribution with probability <span class="math inline">\(p_i\)</span>. The <strong>logit</strong> link connects it to the linear predictor:</p>
+<p><span class="math display">\[
+\ln\frac{p_i}{1-p_i} = \mathbf{x}_i^\top\boldsymbol\beta
+\qquad\Longleftrightarrow\qquad
+p_i = \frac{1}{1 + e^{-\mathbf{x}_i^\top\boldsymbol\beta}} .
+\]</span></p>
+<p>The function on the right, the <strong>logistic</strong> or <strong>sigmoid</strong> function, turns any number into a probability.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>DEF</strong> — <span class="math inline">\(p/(1-p)\)</span> is the <strong>odds</strong>. A coefficient <span class="math inline">\(\beta_j\)</span> is the change in <em>log-odds</em> per unit of <span class="math inline">\(x_j\)</span>, so <span class="math inline">\(e^{\beta_j}\)</span> is an <strong>odds ratio</strong>.</p>
+</div></div><p>As a running example we simulate 400 samples, classified as tumour or normal from the methylation of two CpG sites and one irrelevant site, all standardised.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">400</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">cpg1 =</span> <span class="fu">rnorm</span>(n), <span class="at">cpg2 =</span> <span class="fu">rnorm</span>(n), <span class="at">cpg3 =</span> <span class="fu">rnorm</span>(n))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>eta <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.5</span> <span class="sc">+</span> <span class="fl">1.5</span> <span class="sc">*</span> dat<span class="sc">$</span>cpg1 <span class="sc">-</span> <span class="fl">1.0</span> <span class="sc">*</span> dat<span class="sc">$</span>cpg2</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>p_true <span class="ot">&lt;-</span> <span class="fu">plogis</span>(eta)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>tumour <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, dat<span class="sc">$</span>p_true)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dat<span class="sc">$</span>tumour)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt;   0   1 
+#&gt; 218 182</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fit_glm <span class="ot">&lt;-</span> <span class="fu">glm</span>(tumour <span class="sc">~</span> cpg1 <span class="sc">+</span> cpg2 <span class="sc">+</span> cpg3, <span class="at">data =</span> dat, <span class="at">family =</span> binomial)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">summary</span>(fit_glm)<span class="sc">$</span>coefficients, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;             Estimate Std. Error z value Pr(&gt;|z|)
+#&gt; (Intercept)   -0.290      0.134  -2.170    0.030
+#&gt; cpg1           1.675      0.188   8.908    0.000
+#&gt; cpg2          -1.361      0.172  -7.916    0.000
+#&gt; cpg3          -0.049      0.133  -0.364    0.716</code></pre>
+</div>
+</div>
+<p>The estimates can be compared with the true values of <span class="math inline">\(-0.5\)</span>, <span class="math inline">\(1.5\)</span>, <span class="math inline">\(-1\)</span> and <span class="math inline">\(0\)</span>.</p>
+</section>
+<section id="reading-the-coefficients" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="reading-the-coefficients">Reading the coefficients</h3>
+<p>On the log-odds scale the model is linear, so a coefficient is read as in a linear model: one unit more methylation at site 1 raises the log-odds of a tumour by <span class="math inline">\(\hat\beta_1\)</span>. On the odds scale this becomes a multiplication, by the <strong>odds ratio</strong> <span class="math inline">\(e^{\hat\beta_1}\)</span>. Confidence intervals are computed on the log-odds scale and then transformed.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">cbind</span>(<span class="at">odds_ratio =</span> <span class="fu">exp</span>(<span class="fu">coef</span>(fit_glm)), <span class="fu">exp</span>(<span class="fu">confint</span>(fit_glm))), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;             odds_ratio 2.5 % 97.5 %
+#&gt; (Intercept)      0.748 0.574  0.970
+#&gt; cpg1             5.341 3.764  7.882
+#&gt; cpg2             0.256 0.180  0.354
+#&gt; cpg3             0.953 0.732  1.237</code></pre>
+</div>
+</div>
+<p>Each standard deviation of extra methylation at site 1 multiplies the odds of a tumour by about 5; at site 2 it divides them by about 4. The interval for site 3 contains 1, the value for “no effect”.</p>
+<p>The effect on the <em>probability</em> is less simple, because the curve is steeper in the middle than at the ends. The slope of the logistic curve is <span class="math inline">\(\beta\,p(1-p)\)</span>, so the same coefficient changes the probability a lot when <span class="math inline">\(p\)</span> is near 0.5 and hardly at all when <span class="math inline">\(p\)</span> is near 0 or 1.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code for the figure</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>b0 <span class="ot">&lt;-</span> <span class="dv">0</span>; b1 <span class="ot">&lt;-</span> <span class="fl">1.5</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>xx <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">4</span>, <span class="dv">4</span>, <span class="at">length.out =</span> <span class="dv">300</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(xx, <span class="fu">plogis</span>(b0 <span class="sc">+</span> b1 <span class="sc">*</span> xx), <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lwd =</span> <span class="fl">2.5</span>, <span class="at">col =</span> <span class="st">"#1F4E79"</span>, <span class="at">las =</span> <span class="dv">1</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"x"</span>, <span class="at">ylab =</span> <span class="st">"probability"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (x0 <span class="cf">in</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">2.5</span>, <span class="sc">-</span><span class="fl">0.5</span>, <span class="fl">1.5</span>)) {</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  p0 <span class="ot">&lt;-</span> <span class="fu">plogis</span>(b0 <span class="sc">+</span> b1 <span class="sc">*</span> x0); p1 <span class="ot">&lt;-</span> <span class="fu">plogis</span>(b0 <span class="sc">+</span> b1 <span class="sc">*</span> (x0 <span class="sc">+</span> <span class="dv">1</span>))</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">segments</span>(x0, p0, x0 <span class="sc">+</span> <span class="dv">1</span>, p0, <span class="at">col =</span> <span class="st">"grey40"</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrows</span>(x0 <span class="sc">+</span> <span class="dv">1</span>, p0, x0 <span class="sc">+</span> <span class="dv">1</span>, p1, <span class="at">length =</span> <span class="fl">0.07</span>, <span class="at">col =</span> <span class="st">"#D35400"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">text</span>(x0 <span class="sc">+</span> <span class="dv">1</span>, (p0 <span class="sc">+</span> p1) <span class="sc">/</span> <span class="dv">2</span>, <span class="fu">sprintf</span>(<span class="st">"+%.2f"</span>, p1 <span class="sc">-</span> p0), <span class="at">pos =</span> <span class="dv">4</span>, <span class="at">col =</span> <span class="st">"#D35400"</span>, <span class="at">cex =</span> <span class="fl">0.85</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-slope" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-slope-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-glm-logistic_files/figure-html/fig-slope-1.png" class="img-fluid figure-img" width="576">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-slope-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.2: One unit more of x changes the log-odds by the same amount everywhere, but the probability by different amounts. The arrows show a step of one unit starting from three positions; the change in probability is largest in the middle of the curve.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — The <em>divide-by-four rule</em>: the largest change in probability per unit of <span class="math inline">\(x_j\)</span> is <span class="math inline">\(\beta_j/4\)</span>, reached where <span class="math inline">\(p = 0.5\)</span>.</p>
+</div></div><div class="callout callout-style-default callout-caution callout-titled" title="Check yourself">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>Check yourself
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For site 1, <span class="math inline">\(\hat\beta_1 \approx 1.7\)</span>. What is the odds ratio for one unit of methylation, and what is the largest possible change in the <em>probability</em> of a tumour for one unit?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Answer">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The odds ratio is <span class="math inline">\(e^{1.7} \approx 5.3\)</span>. By the divide-by-four rule, the largest change in probability is about <span class="math inline">\(1.7/4 \approx 0.42\)</span>, reached for a sample that starts at <span class="math inline">\(p = 0.5\)</span>. For a sample whose probability is already 0.95, the same unit adds less than 0.1.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="fitting-by-maximum-likelihood" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="fitting-by-maximum-likelihood">Fitting by maximum likelihood</h2>
+<p>Write <span class="math inline">\(\eta_i = \mathbf{x}_i^\top\boldsymbol\beta\)</span> for the linear predictor. The Bernoulli log-likelihood of Day 5 is</p>
+<p><span class="math display">\[
+\ell(\boldsymbol\beta) = \sum_{i=1}^n \big[y_i\ln p_i + (1-y_i)\ln(1-p_i)\big] = \sum_{i=1}^n \big[y_i\,\eta_i - \ln(1 + e^{\eta_i})\big].
+\]</span></p>
+<p>The derivative of <span class="math inline">\(\ln(1 + e^{\eta})\)</span> with respect to <span class="math inline">\(\eta\)</span> is <span class="math inline">\(e^\eta/(1+e^\eta) = p\)</span>, so by the chain rule the <strong>gradient</strong> is</p>
+<p><span class="math display">\[
+\frac{\partial\ell}{\partial\boldsymbol\beta} = \sum_{i=1}^n (y_i - p_i)\,\mathbf{x}_i = \mathbf{X}^\top(\mathbf{y} - \mathbf{p}).
+\]</span></p>
+<p>This has the same form as the normal equations of Appendix B, <span class="math inline">\(\mathbf{X}^\top(\mathbf{y} - \hat{\mathbf{y}}) = \mathbf{0}\)</span>: at the maximum, the residuals <span class="math inline">\(y_i - p_i\)</span> are orthogonal to every predictor. The difference is that <span class="math inline">\(\mathbf{p}\)</span> depends on <span class="math inline">\(\boldsymbol\beta\)</span> non-linearly, so the equations cannot be solved in closed form.</p>
+<p>Differentiating once more, with <span class="math inline">\(\partial p_i/\partial\eta_i = p_i(1-p_i)\)</span>, gives the matrix of second derivatives, the <strong>Hessian</strong>:</p>
+<p><span class="math display">\[
+\frac{\partial^2\ell}{\partial\boldsymbol\beta\,\partial\boldsymbol\beta^\top} = -\sum_{i=1}^n p_i(1-p_i)\,\mathbf{x}_i\mathbf{x}_i^\top = -\mathbf{X}^\top\mathbf{W}\mathbf{X},
+\qquad \mathbf{W} = \operatorname{diag}\big(p_i(1-p_i)\big).
+\]</span></p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — The weights <span class="math inline">\(p_i(1-p_i)\)</span> are positive, so the Hessian is negative definite and the log-likelihood is <em>concave</em>: it has a single maximum, and any method that climbs will find it.</p>
+</div></div><p><span class="math inline">\(\mathbf{X}^\top\mathbf{W}\mathbf{X}\)</span> is the Fisher information of Day 5, now a matrix. <strong>Newton’s method</strong> approximates <span class="math inline">\(\ell\)</span> at the current <span class="math inline">\(\boldsymbol\beta\)</span> by a quadratic with this gradient and curvature, and jumps to the maximum of that quadratic:</p>
+<p><span class="math display">\[
+\boldsymbol\beta \leftarrow \boldsymbol\beta + (\mathbf{X}^\top\mathbf{W}\mathbf{X})^{-1}\,\mathbf{X}^\top(\mathbf{y} - \mathbf{p}).
+\]</span></p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, dat<span class="sc">$</span>cpg1, dat<span class="sc">$</span>cpg2, dat<span class="sc">$</span>cpg3)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> dat<span class="sc">$</span>tumour</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">ncol</span>(X))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>) {</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">plogis</span>(<span class="fu">drop</span>(X <span class="sc">%*%</span> b))</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  W <span class="ot">&lt;-</span> p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  info <span class="ot">&lt;-</span> <span class="fu">t</span>(X) <span class="sc">%*%</span> (X <span class="sc">*</span> W)            <span class="co"># Fisher information</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  grad <span class="ot">&lt;-</span> <span class="fu">t</span>(X) <span class="sc">%*%</span> (y <span class="sc">-</span> p)            <span class="co"># gradient of the log-likelihood</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  b <span class="ot">&lt;-</span> b <span class="sc">+</span> <span class="fu">solve</span>(info, grad)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"iteration %d: log-likelihood %.4f</span><span class="sc">\n</span><span class="st">"</span>, i,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>              <span class="fu">sum</span>(y <span class="sc">*</span> <span class="fu">log</span>(p) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> y) <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> p))))</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; iteration 1: log-likelihood -277.2589
+#&gt; iteration 2: log-likelihood -187.5926
+#&gt; iteration 3: log-likelihood -176.9953
+#&gt; iteration 4: log-likelihood -176.0904
+#&gt; iteration 5: log-likelihood -176.0797
+#&gt; iteration 6: log-likelihood -176.0797
+#&gt; iteration 7: log-likelihood -176.0797</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">cbind</span>(<span class="at">newton =</span> <span class="fu">drop</span>(b), <span class="at">glm =</span> <span class="fu">coef</span>(fit_glm),</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">se_newton =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">solve</span>(info))),</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">se_glm =</span> <span class="fu">summary</span>(fit_glm)<span class="sc">$</span>coefficients[, <span class="dv">2</span>]), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;             newton    glm se_newton se_glm
+#&gt; (Intercept) -0.290 -0.290     0.134  0.134
+#&gt; cpg1         1.675  1.675     0.188  0.188
+#&gt; cpg2        -1.361 -1.361     0.172  0.172
+#&gt; cpg3        -0.049 -0.049     0.133  0.133</code></pre>
+</div>
+</div>
+<p>A few iterations are enough, and the results agree with <code>glm</code>, including the standard errors, which come from the inverse of the Fisher information.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Going deeper: Newton's method is weighted least squares">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Going deeper: Newton’s method is weighted least squares
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Define the <em>working response</em> <span class="math inline">\(\mathbf{z} = \mathbf{X}\boldsymbol\beta + \mathbf{W}^{-1}(\mathbf{y} - \mathbf{p})\)</span>. Then</p>
+<p><span class="math display">\[
+\boldsymbol\beta + (\mathbf{X}^\top\mathbf{W}\mathbf{X})^{-1}\mathbf{X}^\top(\mathbf{y} - \mathbf{p})
+= (\mathbf{X}^\top\mathbf{W}\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{W}\,\mathbf{z},
+\]</span></p>
+<p>which is the formula for a <em>weighted</em> least-squares regression of <span class="math inline">\(\mathbf{z}\)</span> on <span class="math inline">\(\mathbf{X}\)</span>. Each Newton step is an ordinary regression with weights and a response that are recomputed from the current fit. The algorithm is therefore called <strong>iteratively reweighted least squares</strong> (IRLS), and it is what <code>glm</code> runs, for every family. The line “Number of Fisher Scoring iterations” at the foot of a <code>glm</code> summary counts these steps.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Going deeper: why not plain gradient ascent?">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Going deeper: why not plain gradient ascent?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Appendix C introduces gradient descent for least squares. Here it would climb instead: <span class="math inline">\(\boldsymbol\beta \leftarrow \boldsymbol\beta + \eta\,\mathbf{X}^\top(\mathbf{y} - \mathbf{p})\)</span>. Since <span class="math inline">\(p_i(1-p_i) \le \tfrac14\)</span>, the curvature is never larger than <span class="math inline">\(\lambda_{\max}(\mathbf{X}^\top\mathbf{X})/4\)</span>, and a step size of <span class="math inline">\(\eta = 4/\lambda_{\max}\)</span> is guaranteed to converge.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>eta  <span class="ot">&lt;-</span> <span class="dv">4</span> <span class="sc">/</span> <span class="fu">max</span>(<span class="fu">eigen</span>(<span class="fu">t</span>(X) <span class="sc">%*%</span> X)<span class="sc">$</span>values)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>b_ga <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">ncol</span>(X))</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>trace_ga <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">200</span>) {</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  b_ga <span class="ot">&lt;-</span> b_ga <span class="sc">+</span> eta <span class="sc">*</span> <span class="fu">drop</span>(<span class="fu">t</span>(X) <span class="sc">%*%</span> (y <span class="sc">-</span> <span class="fu">plogis</span>(<span class="fu">drop</span>(X <span class="sc">%*%</span> b_ga))))</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (i <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">7</span>, <span class="dv">50</span>, <span class="dv">200</span>)) trace_ga[[<span class="fu">paste0</span>(<span class="st">"gradient_ascent_"</span>, i)]] <span class="ot">&lt;-</span> b_ga</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>out <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">do.call</span>(rbind, trace_ga), <span class="at">newton_7 =</span> <span class="fu">drop</span>(b))</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(out) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"intercept"</span>, <span class="st">"cpg1"</span>, <span class="st">"cpg2"</span>, <span class="st">"cpg3"</span>)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(out, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;                     intercept  cpg1   cpg2   cpg3
+#&gt; gradient_ascent_7      -0.264 1.534 -1.246 -0.048
+#&gt; gradient_ascent_50     -0.290 1.675 -1.361 -0.049
+#&gt; gradient_ascent_200    -0.290 1.675 -1.361 -0.049
+#&gt; newton_7               -0.290 1.675 -1.361 -0.049</code></pre>
+</div>
+</div>
+<p>Gradient ascent reaches the same answer in the end, but after seven iterations it is still visibly off, where Newton’s method had already converged. Newton’s method uses the curvature to choose both the direction and the length of each step. Its price is solving a <span class="math inline">\(p \times p\)</span> linear system per step, which is why very large models, such as neural networks, are trained by gradient methods after all.</p>
+</div>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> If a predictor separates the two classes perfectly, the likelihood keeps rising as <span class="math inline">\(\beta \to \infty\)</span> and <code>glm</code> warns that fitted probabilities of 0 or 1 occurred. With more genes than samples this is almost guaranteed. Day 9 provides the remedy.</p>
+</div></div></section>
+<section id="testing-and-checking" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="testing-and-checking">Testing and checking</h2>
+<section id="deviance-and-the-likelihood-ratio-test" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="deviance-and-the-likelihood-ratio-test">Deviance and the likelihood-ratio test</h3>
+<p>A GLM has no residual sum of squares. Its place is taken by the <strong>deviance</strong>, twice the gap in log-likelihood between the fitted model and a <em>saturated</em> model that fits every observation perfectly. For 0/1 data the saturated log-likelihood is zero, so the deviance is simply <span class="math inline">\(-2\ell(\hat{\boldsymbol\beta})\)</span>. A <code>glm</code> summary reports two deviances: the <em>null deviance</em> of a model with only an intercept, and the <em>residual deviance</em> of the fitted model.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">residual_deviance =</span> <span class="fu">deviance</span>(fit_glm),</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">minus_2_loglik    =</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">*</span> <span class="fu">as.numeric</span>(<span class="fu">logLik</span>(fit_glm)),</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">null_deviance     =</span> fit_glm<span class="sc">$</span>null.deviance,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">AIC               =</span> <span class="fu">AIC</span>(fit_glm))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; residual_deviance    minus_2_loglik     null_deviance               AIC 
+#&gt;          352.1595          352.1595          551.2734          360.1595</code></pre>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>↪</strong> AIC is the residual deviance plus <span class="math inline">\(2k\)</span>: here <span class="math inline">\(352.2 + 2 \times 4\)</span>. The deviance plays the role of the training error, and Day 5’s correction for optimism is added to it.</p>
+</div></div><p>Two nested models are compared by the drop in deviance. If the smaller model is true, the drop has approximately a <span class="math inline">\(\chi^2\)</span> distribution with as many degrees of freedom as parameters were removed. This is the <strong>likelihood-ratio test</strong>, the GLM counterpart of the <em>F</em>-test for linear models.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>fit_without_cpg3 <span class="ot">&lt;-</span> <span class="fu">glm</span>(tumour <span class="sc">~</span> cpg1 <span class="sc">+</span> cpg2, <span class="at">data =</span> dat, <span class="at">family =</span> binomial)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(fit_without_cpg3, fit_glm, <span class="at">test =</span> <span class="st">"Chisq"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; Analysis of Deviance Table
+#&gt; 
+#&gt; Model 1: tumour ~ cpg1 + cpg2
+#&gt; Model 2: tumour ~ cpg1 + cpg2 + cpg3
+#&gt;   Resid. Df Resid. Dev Df Deviance Pr(&gt;Chi)
+#&gt; 1       397     352.29                     
+#&gt; 2       396     352.16  1  0.13284   0.7155</code></pre>
+</div>
+</div>
+<p>Removing site 3 raises the deviance by only 0.13 (<span class="math inline">\(p = 0.72\)</span>), so the data give no reason to keep it. The <em>z</em>-test in the summary table (the <strong>Wald test</strong>) gives almost the same <em>p</em>-value here; with small samples or large effects the likelihood-ratio test is the more reliable of the two.</p>
+</section>
+<section id="checking-the-fit" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="checking-the-fit">Checking the fit</h3>
+<p>The residuals <span class="math inline">\(y_i - \hat p_i\)</span> of a logistic regression take only two values for each fitted probability, so a plot of residuals against fitted values shows two bands and little else. Two plots are more informative. Both work by <strong>grouping</strong> the samples, so that averages replace single 0s and 1s.</p>
+<ul>
+<li>A <strong>calibration plot</strong> groups the samples by predicted probability and compares the average prediction with the observed fraction of tumours in each group. A well-calibrated model lies on the diagonal.</li>
+<li>A <strong>binned residual plot</strong> groups the samples by one predictor and plots the average residual. A systematic pattern means that the model has the wrong shape in that predictor.</li>
+</ul>
+<p>The second plot is shown on new data. In this example disease is more likely when a gene is <em>either too high or too low</em>, a U-shaped risk, while the model assumes a straight line on the log-odds scale.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code for the figure</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>calib <span class="ot">&lt;-</span> <span class="cf">function</span>(p, y, <span class="at">k =</span> <span class="dv">10</span>) {</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">&lt;-</span> <span class="fu">cut</span>(p, <span class="fu">quantile</span>(p, <span class="dv">0</span><span class="sc">:</span>k <span class="sc">/</span> k), <span class="at">include.lowest =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cbind</span>(<span class="at">predicted =</span> <span class="fu">tapply</span>(p, g, mean), <span class="at">observed =</span> <span class="fu">tapply</span>(y, g, mean))</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>binned_resid <span class="ot">&lt;-</span> <span class="cf">function</span>(x, r, <span class="at">k =</span> <span class="dv">12</span>) {</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">&lt;-</span> <span class="fu">cut</span>(x, <span class="fu">quantile</span>(x, <span class="dv">0</span><span class="sc">:</span>k <span class="sc">/</span> k), <span class="at">include.lowest =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cbind</span>(<span class="at">x =</span> <span class="fu">tapply</span>(x, g, mean), <span class="at">r =</span> <span class="fu">tapply</span>(r, g, mean))</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7</span>)</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>make_u <span class="ot">&lt;-</span> <span class="cf">function</span>(n) {</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  g1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n); g2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(g1, g2, <span class="at">disease =</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fu">plogis</span>(<span class="sc">-</span><span class="dv">3</span> <span class="sc">+</span> <span class="fl">1.5</span> <span class="sc">*</span> (g1<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> g2<span class="sc">^</span><span class="dv">2</span>))))</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>u_train <span class="ot">&lt;-</span> <span class="fu">make_u</span>(<span class="dv">400</span>)</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>u_lin <span class="ot">&lt;-</span> <span class="fu">glm</span>(disease <span class="sc">~</span> g1 <span class="sc">+</span> g2, <span class="at">data =</span> u_train, <span class="at">family =</span> binomial)</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>u_sq  <span class="ot">&lt;-</span> <span class="fu">glm</span>(disease <span class="sc">~</span> g1 <span class="sc">+</span> g2 <span class="sc">+</span> <span class="fu">I</span>(g1<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> <span class="fu">I</span>(g2<span class="sc">^</span><span class="dv">2</span>), <span class="at">data =</span> u_train, <span class="at">family =</span> binomial)</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>cb <span class="ot">&lt;-</span> <span class="fu">calib</span>(<span class="fu">fitted</span>(fit_glm), dat<span class="sc">$</span>tumour)</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cb, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"#1F4E79"</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">asp =</span> <span class="dv">1</span>, <span class="at">las =</span> <span class="dv">1</span>,</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"average predicted probability"</span>, <span class="at">ylab =</span> <span class="st">"observed fraction of tumours"</span>,</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"calibration"</span>)</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>br1 <span class="ot">&lt;-</span> <span class="fu">binned_resid</span>(u_train<span class="sc">$</span>g1, <span class="fu">residuals</span>(u_lin, <span class="at">type =</span> <span class="st">"response"</span>))</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>br2 <span class="ot">&lt;-</span> <span class="fu">binned_resid</span>(u_train<span class="sc">$</span>g1, <span class="fu">residuals</span>(u_sq,  <span class="at">type =</span> <span class="st">"response"</span>))</span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(br1, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"#D35400"</span>, <span class="at">ylim =</span> <span class="fu">range</span>(br1[, <span class="st">"r"</span>], br2[, <span class="st">"r"</span>]) <span class="sc">*</span> <span class="fl">1.1</span>, <span class="at">las =</span> <span class="dv">1</span>,</span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"gene 1"</span>, <span class="at">ylab =</span> <span class="st">"average residual"</span>, <span class="at">main =</span> <span class="st">"binned residuals"</span>)</span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(br2, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">17</span>, <span class="at">col =</span> <span class="st">"#1F4E79"</span>); <span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"top"</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">pch =</span> <span class="fu">c</span>(<span class="dv">19</span>, <span class="dv">17</span>), <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"#D35400"</span>, <span class="st">"#1F4E79"</span>),</span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"straight line in g1, g2"</span>, <span class="st">"with squared terms"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-checks" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-checks-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-glm-logistic_files/figure-html/fig-checks-1.png" class="img-fluid figure-img" width="816">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-checks-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.3: Left: calibration of the CpG model. Samples are grouped into ten groups by predicted probability; the observed fraction of tumours follows the diagonal. Right: binned residuals against gene 1 for a disease whose risk rises when the gene is too high or too low. The straight-line model (orange) leaves a U-shaped pattern in its residuals; adding squared terms (blue) removes it.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>KEY</strong> — “Take the residuals seriously” (Day 1) holds for GLMs too. Grouping turns uninformative 0/1 residuals into averages that show whether the model has the right shape.</p>
+</div></div><div class="callout callout-style-default callout-caution callout-titled" title="Check yourself">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>Check yourself
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A colleague removes a predictor because its Wald <em>p</em>-value is 0.08, and then reports that the remaining model “fits well” because its residual deviance is smaller than that of the null model. What is wrong with each step?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Answer">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>A <em>p</em>-value of 0.08 says that the data cannot rule out a zero coefficient, not that the coefficient is zero; whether to keep the predictor depends on the purpose of the model. And any model with predictors has a smaller deviance than the null model, just as any regression has a smaller RSS than the mean alone. A drop in deviance must be judged against its degrees of freedom (the likelihood-ratio test), and the fit must be checked with calibration and residual plots.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="the-generative-alternative-linear-discriminant-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="the-generative-alternative-linear-discriminant-analysis">The generative alternative: linear discriminant analysis</h2>
+<p>Logistic regression models <span class="math inline">\(P(y \mid \mathbf{x})\)</span> directly, and it is therefore called <strong>discriminative</strong>. <strong>Linear discriminant analysis</strong> (LDA) is <strong>generative</strong>: it models how the measurements <span class="math inline">\(\mathbf{x}\)</span> are distributed <em>within</em> each class, <span class="math inline">\(\mathbf{x} \sim N(\boldsymbol\mu_k, \boldsymbol\Sigma)\)</span> with a covariance matrix shared by the classes, and obtains the class probabilities from Bayes’ theorem. Measured with the ruler <span class="math inline">\(\boldsymbol\Sigma^{-1}\)</span> (the Mahalanobis distance of Appendix B), LDA assigns a sample to the nearest class mean, adjusted for how common each class is. The resulting posterior has exactly the logistic form, so both methods give a linear boundary.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MASS)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>fit_lda <span class="ot">&lt;-</span> <span class="fu">lda</span>(tumour <span class="sc">~</span> cpg1 <span class="sc">+</span> cpg2 <span class="sc">+</span> cpg3, <span class="at">data =</span> dat)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>p_lda   <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_lda)<span class="sc">$</span>posterior[, <span class="st">"1"</span>]</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">same_class =</span> <span class="fu">mean</span>((p_lda <span class="sc">&gt;</span> <span class="fl">0.5</span>) <span class="sc">==</span> (<span class="fu">fitted</span>(fit_glm) <span class="sc">&gt;</span> <span class="fl">0.5</span>)),</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">correlation_of_probabilities =</span> <span class="fu">cor</span>(p_lda, <span class="fu">fitted</span>(fit_glm)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;                   same_class correlation_of_probabilities 
+#&gt;                    0.9975000                    0.9998352</code></pre>
+</div>
+</div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Logistic regression</th>
+<th style="text-align: left;">LDA</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Type</td>
+<td style="text-align: left;">discriminative</td>
+<td style="text-align: left;">generative</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Assumption on <span class="math inline">\(\mathbf{x}\)</span></td>
+<td style="text-align: left;">none</td>
+<td style="text-align: left;">normal, shared covariance</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Fitting</td>
+<td style="text-align: left;">iterative</td>
+<td style="text-align: left;">closed form</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">When the assumption holds</td>
+<td style="text-align: left;">somewhat less efficient</td>
+<td style="text-align: left;">more efficient</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">When it fails</td>
+<td style="text-align: left;">robust</td>
+<td style="text-align: left;">can be misled</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Interpretation</td>
+<td style="text-align: left;">odds ratios, tests</td>
+<td style="text-align: left;">class means and covariance</td>
+</tr>
+</tbody>
+</table>
+<p>Here the two methods agree almost completely, because the predictors are indeed normal. With skewed predictors, outliers or binary predictors, logistic regression is the safer choice.</p>
+</section>
+<section id="from-logistic-regression-to-neural-networks" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="from-logistic-regression-to-neural-networks">From logistic regression to neural networks</h2>
+<p>Logistic regression is also the building block of the neural networks behind modern artificial intelligence. This section shows the connection; it is general knowledge rather than course material.</p>
+<section id="one-neuron-is-a-logistic-regression" class="level3">
+<h3 class="anchored" data-anchor-id="one-neuron-is-a-logistic-regression">One neuron is a logistic regression</h3>
+<p>An artificial <strong>neuron</strong> takes inputs <span class="math inline">\(x_1, \dots, x_p\)</span>, forms a weighted sum plus a constant, and passes the result through an <strong>activation function</strong>. With the sigmoid as activation, that is exactly the logistic model.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code for the figure</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>))</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">4</span>), <span class="at">axes =</span> <span class="cn">FALSE</span>, <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>ys <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">3.3</span>, <span class="dv">2</span>, <span class="fl">0.7</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>) {</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">symbols</span>(<span class="dv">1</span>, ys[k], <span class="at">circles =</span> <span class="fl">0.35</span>, <span class="at">inches =</span> <span class="cn">FALSE</span>, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">bg =</span> <span class="st">"#DCE6F1"</span>, <span class="at">fg =</span> <span class="st">"#1F4E79"</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">text</span>(<span class="dv">1</span>, ys[k], <span class="fu">bquote</span>(x[.(k)]))</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrows</span>(<span class="fl">1.38</span>, ys[k], <span class="fl">4.15</span>, <span class="dv">2</span>, <span class="at">length =</span> <span class="fl">0.08</span>, <span class="at">col =</span> <span class="st">"grey40"</span>)</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">text</span>(<span class="fl">2.2</span>, ys[k] <span class="sc">+</span> (<span class="dv">2</span> <span class="sc">-</span> ys[k]) <span class="sc">*</span> <span class="fl">0.3</span> <span class="sc">+</span> <span class="fu">c</span>(<span class="fl">0.22</span>, <span class="fl">0.22</span>, <span class="sc">-</span><span class="fl">0.3</span>)[k], <span class="fu">bquote</span>(w[.(k)] <span class="sc">==</span> beta[.(k)]), <span class="at">cex =</span> <span class="fl">0.85</span>, <span class="at">col =</span> <span class="st">"grey25"</span>)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="fu">symbols</span>(<span class="fl">4.8</span>, <span class="dv">2</span>, <span class="at">circles =</span> <span class="fl">0.6</span>, <span class="at">inches =</span> <span class="cn">FALSE</span>, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">bg =</span> <span class="st">"white"</span>, <span class="at">fg =</span> <span class="st">"black"</span>)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">4.8</span>, <span class="dv">2</span>, <span class="fu">expression</span>(Sigma <span class="sc">+</span> b), <span class="at">cex =</span> <span class="dv">1</span>)</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">4.8</span>, <span class="fl">1.05</span>, <span class="fu">expression</span>(b <span class="sc">==</span> beta[<span class="dv">0</span>]), <span class="at">cex =</span> <span class="fl">0.85</span>, <span class="at">col =</span> <span class="st">"grey25"</span>)</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="fu">arrows</span>(<span class="fl">5.45</span>, <span class="dv">2</span>, <span class="fl">6.6</span>, <span class="dv">2</span>, <span class="at">length =</span> <span class="fl">0.08</span>)</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="fl">6.65</span>, <span class="fl">1.5</span>, <span class="fl">8.05</span>, <span class="fl">2.5</span>, <span class="at">col =</span> <span class="st">"#F6D7C3"</span>, <span class="at">border =</span> <span class="st">"#D35400"</span>)</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>zz <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">50</span>); <span class="fu">lines</span>(<span class="fl">7.35</span> <span class="sc">+</span> <span class="fl">0.6</span> <span class="sc">*</span> zz, <span class="dv">2</span> <span class="sc">+</span> <span class="fl">0.38</span> <span class="sc">*</span> (<span class="fu">plogis</span>(<span class="dv">5</span> <span class="sc">*</span> zz) <span class="sc">-</span> <span class="fl">0.5</span>) <span class="sc">*</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">7.35</span>, <span class="fl">1.25</span>, <span class="st">"sigmoid"</span>, <span class="at">cex =</span> <span class="fl">0.85</span>)</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a><span class="fu">arrows</span>(<span class="fl">8.1</span>, <span class="dv">2</span>, <span class="fl">9.1</span>, <span class="dv">2</span>, <span class="at">length =</span> <span class="fl">0.08</span>)</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">9.5</span>, <span class="dv">2</span>, <span class="fu">expression</span>(<span class="fu">hat</span>(p)), <span class="at">cex =</span> <span class="fl">1.2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-neuron" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-neuron-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-glm-logistic_files/figure-html/fig-neuron-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-neuron-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.4: A single artificial neuron. The inputs are multiplied by weights and summed with a bias; the sigmoid turns the sum into a probability. In statistical terms: predictors, coefficients, intercept, inverse link.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The vocabulary differs between the two fields, but the objects are the same:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Statistics</th>
+<th style="text-align: left;">Machine learning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">predictor <span class="math inline">\(x_j\)</span></td>
+<td style="text-align: left;">input, feature</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">coefficient <span class="math inline">\(\beta_j\)</span></td>
+<td style="text-align: left;">weight <span class="math inline">\(w_j\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">intercept <span class="math inline">\(\beta_0\)</span></td>
+<td style="text-align: left;">bias <span class="math inline">\(b\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">inverse link (logistic function)</td>
+<td style="text-align: left;">activation (sigmoid)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">negative log-likelihood (Day 5)</td>
+<td style="text-align: left;">cross-entropy loss, log-loss</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">maximum likelihood by Newton/IRLS</td>
+<td style="text-align: left;">training by (stochastic) gradient descent</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ridge penalty (Day 9)</td>
+<td style="text-align: left;">weight decay</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">multinomial logistic regression</td>
+<td style="text-align: left;">softmax output layer</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="a-network-learns-its-own-features" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="a-network-learns-its-own-features">A network learns its own features</h3>
+<p>Logistic regression draws straight boundaries on the log-odds scale. The U-shaped risk of the previous section defeats it, unless someone thinks of adding squared terms. A neural network with a <strong>hidden layer</strong> of neurons first computes new features, each a logistic regression on the inputs, and then fits a logistic regression on those features. The features are not chosen by the analyst; they are learned from the data by maximising the same likelihood.</p>
+<p>R comes with the package <code>nnet</code>, which fits networks with one hidden layer. Below, a network with four hidden neurons is compared with the two logistic regressions, on 2,000 new samples.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nnet)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>u_test <span class="ot">&lt;-</span> <span class="fu">make_u</span>(<span class="dv">2000</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>u_nn <span class="ot">&lt;-</span> <span class="fu">nnet</span>(disease <span class="sc">~</span> g1 <span class="sc">+</span> g2, <span class="at">data =</span> u_train, <span class="at">size =</span> <span class="dv">4</span>, <span class="at">decay =</span> <span class="fl">0.01</span>,</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">entropy =</span> <span class="cn">TRUE</span>, <span class="at">maxit =</span> <span class="dv">1000</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>)   <span class="co"># entropy = TRUE: log-likelihood</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>evaluate <span class="ot">&lt;-</span> <span class="cf">function</span>(p, y)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">accuracy =</span> <span class="fu">mean</span>((p <span class="sc">&gt;</span> <span class="fl">0.5</span>) <span class="sc">==</span> y),</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">deviance_per_sample =</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">*</span> <span class="fu">mean</span>(y <span class="sc">*</span> <span class="fu">log</span>(p) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> y) <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> p)))</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">rbind</span>(</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">straight_line     =</span> <span class="fu">evaluate</span>(<span class="fu">predict</span>(u_lin, u_test, <span class="at">type =</span> <span class="st">"response"</span>), u_test<span class="sc">$</span>disease),</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">squared_terms     =</span> <span class="fu">evaluate</span>(<span class="fu">predict</span>(u_sq,  u_test, <span class="at">type =</span> <span class="st">"response"</span>), u_test<span class="sc">$</span>disease),</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">network_4_neurons =</span> <span class="fu">evaluate</span>(<span class="fu">drop</span>(<span class="fu">predict</span>(u_nn, u_test)), u_test<span class="sc">$</span>disease),</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">true_probability  =</span> <span class="fu">evaluate</span>(<span class="fu">plogis</span>(<span class="sc">-</span><span class="dv">3</span> <span class="sc">+</span> <span class="fl">1.5</span> <span class="sc">*</span> (u_test<span class="sc">$</span>g1<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> u_test<span class="sc">$</span>g2<span class="sc">^</span><span class="dv">2</span>)), u_test<span class="sc">$</span>disease)), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;                   accuracy deviance_per_sample
+#&gt; straight_line        0.582               1.361
+#&gt; squared_terms        0.832               0.778
+#&gt; network_4_neurons    0.829               0.787
+#&gt; true_probability     0.829               0.775</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code for the figure</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>gx <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="at">length.out =</span> <span class="dv">120</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>gr <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">g1 =</span> gx, <span class="at">g2 =</span> gx)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"logistic, straight line"</span> <span class="ot">=</span> <span class="fu">predict</span>(u_lin, gr, <span class="at">type =</span> <span class="st">"response"</span>),</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>              <span class="st">"logistic, squared terms"</span> <span class="ot">=</span> <span class="fu">predict</span>(u_sq, gr, <span class="at">type =</span> <span class="st">"response"</span>),</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>              <span class="st">"network, 4 hidden neurons"</span> <span class="ot">=</span> <span class="fu">drop</span>(<span class="fu">predict</span>(u_nn, gr)))</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>pal <span class="ot">&lt;-</span> <span class="fu">colorRampPalette</span>(<span class="fu">c</span>(<span class="st">"white"</span>, <span class="st">"#B9CCE2"</span>))(<span class="dv">30</span>)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="fl">0.5</span>))</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (nm <span class="cf">in</span> <span class="fu">names</span>(preds)) {</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">image</span>(gx, gx, <span class="fu">matrix</span>(preds[[nm]], <span class="dv">120</span>), <span class="at">col =</span> pal, <span class="at">zlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">asp =</span> <span class="dv">1</span>, <span class="at">las =</span> <span class="dv">1</span>, <span class="at">useRaster =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">xlab =</span> <span class="st">"gene 1"</span>, <span class="at">ylab =</span> <span class="st">"gene 2"</span>, <span class="at">main =</span> nm, <span class="at">cex.main =</span> <span class="fl">0.95</span>)</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">contour</span>(gx, gx, <span class="fu">matrix</span>(preds[[nm]], <span class="dv">120</span>), <span class="at">levels =</span> <span class="fl">0.5</span>, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">drawlabels =</span> <span class="cn">FALSE</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">points</span>(u_train<span class="sc">$</span>g1, u_train<span class="sc">$</span>g2, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.45</span>,</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">col =</span> <span class="fu">ifelse</span>(u_train<span class="sc">$</span>disease <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"#D35400"</span>, <span class="st">"grey40"</span>))</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-boundaries" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-boundaries-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-glm-logistic_files/figure-html/fig-boundaries-1.png" class="img-fluid figure-img" width="864">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-boundaries-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.5: Predicted probability of disease (darker shading: higher) and the 0.5 boundary (black) for the three models, with the training samples (orange: disease, grey: healthy). The straight-line model can only draw a straight boundary. The model with squared terms draws the circle because it was told to. The network finds a similar boundary by itself.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The straight-line model is no better than always predicting “healthy”. The network reaches the same accuracy as the model with the right squared terms, and both come close to the true probabilities. Deep networks stack many such hidden layers, so that later layers build features from the features of earlier ones.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>↪</strong> The weights of all layers are found by gradient descent on the negative log-likelihood. Computing the gradient through the layers is the chain rule, applied as in the derivation of the logistic gradient above; in this context it is called <strong>backpropagation</strong>.</p>
+</div></div></section>
+<section id="many-classes-softmax-and-how-language-models-are-trained" class="level3">
+<h3 class="anchored" data-anchor-id="many-classes-softmax-and-how-language-models-are-trained">Many classes: softmax, and how language models are trained</h3>
+<p>With <span class="math inline">\(K\)</span> classes, logistic regression becomes <strong>multinomial logistic</strong> or <strong>softmax regression</strong>: each class <span class="math inline">\(k\)</span> gets its own linear predictor <span class="math inline">\(\eta_k\)</span>, and</p>
+<p><span class="math display">\[
+P(y = k \mid \mathbf{x}) = \frac{e^{\eta_k}}{\sum_{l=1}^K e^{\eta_l}} .
+\]</span></p>
+<p>For <span class="math inline">\(K = 2\)</span> this is the logistic function again. A classification network ends in exactly such a softmax layer, and it is trained by maximising the multinomial log-likelihood, which machine learning calls minimising the cross-entropy. A large language model is, in this respect, no different: at each position in a text it predicts the next word (more precisely, the next <em>token</em>) with a softmax over a vocabulary of many thousands of tokens, and it is trained by maximum likelihood on enormous amounts of text. Its billions of parameters are fitted by stochastic gradient descent, because Newton’s method would need a Hessian with billions of rows.</p>
+</section>
+<section id="what-is-gained-and-what-is-lost" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="what-is-gained-and-what-is-lost">What is gained and what is lost</h3>
+<p>A neural network gains flexibility: it finds features that nobody specified. It pays for that in three ways that this course has made visible.</p>
+<ul>
+<li><strong>No inference.</strong> There are no odds ratios with confidence intervals and no likelihood-ratio tests. The weights of a hidden layer have no meaning of their own.</li>
+<li><strong>More data.</strong> Flexibility is variance. Day 5 showed that a log-likelihood on the training data is optimistic, and the more parameters a model has, the more data it needs to keep that optimism in check.</li>
+<li><strong>Only prediction.</strong> In the terms of Day 2, logistic regression lives in two worlds: it can test a hypothesis (confirmatory) and it can predict (predictive). A neural network lives only in the second. Its quality is its error on new data, measured by the resampling methods of Day 7.</li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p><strong>⚠</strong> A penalised fit is not maximum likelihood. Some software, including scikit-learn’s <code>LogisticRegression</code> in Python, adds a ridge penalty (weight decay) by default. Its coefficients and standard errors must not be read as those of <code>glm</code>.</p>
+</div></div><div class="callout callout-style-default callout-caution callout-titled" title="Check yourself">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>Check yourself
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A network for classifying tumour types from expression profiles has one hidden layer of 50 neurons and a softmax output layer for 5 tumour types. Which part of the network is a multinomial logistic regression, and what plays the role of its predictors?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Answer">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The output layer is a multinomial logistic regression with 5 classes. Its predictors are not the genes, but the 50 values computed by the hidden layer: features that the network learned from the genes. Training fits the hidden layer and the logistic regression together, by maximising the multinomial log-likelihood.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<ul>
+<li>A GLM consists of a distribution for the response, a linear predictor and a link function. The linear model is the special case with a normal distribution and the identity link; logistic (binomial), Poisson and gamma regression are others.</li>
+<li>In logistic regression a coefficient is a change in log-odds; <span class="math inline">\(e^{\beta}\)</span> is an odds ratio. The effect on the probability depends on where one starts, and is at most <span class="math inline">\(\beta/4\)</span>.</li>
+<li>The model is fitted by maximum likelihood, with Newton’s method in the form of iteratively reweighted least squares. The log-likelihood is concave, so the maximum is unique, unless the classes are perfectly separated.</li>
+<li>The deviance replaces the residual sum of squares. Nested models are compared by the likelihood-ratio test; the fit is checked with calibration and binned residual plots.</li>
+<li>LDA reaches a linear boundary from the other direction, by modelling <span class="math inline">\(\mathbf{x}\)</span> within each class.</li>
+<li>A neuron is a logistic regression; a neural network is a logistic regression on learned features, trained by gradient descent on the same likelihood. It gains flexibility and loses inference.</li>
+</ul>
+</section>
+<section id="reading-in-islr" class="level2">
+<h2 class="anchored" data-anchor-id="reading-in-islr">Reading in ISLR</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Topic</th>
+<th style="text-align: left;">ISLR</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Why not linear regression; logistic regression</td>
+<td style="text-align: left;">§4.2, §4.3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Multinomial logistic regression and softmax</td>
+<td style="text-align: left;">§4.3.5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Linear discriminant analysis</td>
+<td style="text-align: left;">§4.4.1, §4.4.2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Generalised linear models, Poisson regression</td>
+<td style="text-align: left;">§4.6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Neural networks with one and more hidden layers</td>
+<td style="text-align: left;">§10.1, §10.2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Fitting a neural network</td>
+<td style="text-align: left;">§10.7</td>
+</tr>
+</tbody>
+</table>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./05-likelihood-aic.html" class="pagination-link" aria-label="Likelihood, information and AIC">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Likelihood, information and AIC</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./07-resampling.html" class="pagination-link" aria-label="Resampling: The Bootstrap and Cross-Validation">
+        <span class="nav-page-text"><span class="chapter-title">Resampling: The Bootstrap and Cross-Validation</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
