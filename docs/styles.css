@@ -32,6 +32,8 @@ table {
 #quarto-sidebar .sidebar-menu-container .menu-text { font-size: 0.8rem; line-height: 1.15; }
 #quarto-sidebar .sidebar-item { margin-top: 0.15rem; margin-bottom: 0.05rem; }
 #quarto-sidebar #TOC { margin-top: 0.4rem; padding-top: 0.2rem; }
+/* Always show the list itself, also when the page script does not run (some viewers) */
+#quarto-sidebar #TOC ul { display: block; }
 #quarto-sidebar #TOC h2#toc-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.2rem; }
 #quarto-sidebar #TOC ul { font-size: 0.8rem; }
 #quarto-sidebar #TOC ul li a { padding-top: 0.08rem; padding-bottom: 0.08rem; line-height: 1.2; }

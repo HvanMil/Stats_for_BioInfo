@@ -1,6 +1,6 @@
 # Preface {.unnumbered}
 
-This book is the main learning resource for the course *Statistics for Machine Learning*, taken by second-year Bioinformatics students. It accompanies eleven two-hour lectures, each followed by a two-hour practical.
+This book is the main learning resource for the course *Statistics for Machine Learning*, taken by second-year Bioinformatics students. It accompanies, more of less, eleven two-hour lectures, each followed by a two-hour practical.
 
 The aim is that you understand not only *how* a machine-learning method works, but also *why* it works and which statistical assumptions it rests on. A method that you can only run is a method whose failures you cannot recognise.
 
@@ -20,7 +20,7 @@ The aim is that you understand not only *how* a machine-learning method works, b
 | 10 | Trees, random forests and boosting | Forests and boosting on molecular data |
 | 11 | Gene set enrichment analysis | Simulated gene sets: over-representation and GSEA by hand |
 
-The linear algebra the course relies on is reviewed in two appendices: [Appendix B](b-linear-algebra.qmd) builds the geometric intuition with pictures (norms, projections, eigenvectors), and [Appendix C](c-linear-algebra-details.qmd) gives the definitions, proofs and algorithms. Read Appendix B before Day 3.
+The linear algebra the course relies on can be reviewed in two appendices: [Appendix B](b-linear-algebra.qmd) builds the geometric intuition with pictures (norms, projections, eigenvectors), and [Appendix C](c-linear-algebra-details.qmd) gives the definitions, proofs and algorithms. Read Appendix B before Day 3. These appendices are not part of the learning objectives and will therefore not be covered in the exam, unless explicitly stated otherwise. 
 
 The practicals use data that look like bioinformatics data: expression matrices, read counts, variant calls. They contain no gene ontologies or pathway databases, because the object of study is the statistics. Most data sets are simulated, so that the correct answer is known and your analysis can be checked against it.
 
