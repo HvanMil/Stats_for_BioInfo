@@ -10,7 +10,7 @@
 
 ## Where this chapter fits
 
-Day 1 showed that a statistical model is a rough approximation. It explains part of the variation in the data, and the rest ends up in the residuals. This chapter is about the step before the model: collecting data of which you know where the variation comes from. Without that, even a correct analysis gives answers you cannot trust. This holds for machine learning as much as for a classical test. A machine-learning method will usually not warn you that the data were badly collected. It simply learns whatever pattern is there, including the artefacts.
+Day 1 showed that a statistical model is a rough approximation. It explains part of the variation in the data, and the rest ends up in the residuals. This chapter is about the step before the model, collecting data of which you know where the variation comes from. Without that, even a correct analysis gives answers you cannot trust. This holds for machine learning as much as for a classical test. A machine-learning method will usually not warn you that the data were badly collected. It simply learns whatever pattern is there, including the artefacts.
 
 The chapter starts from a warning by Ronald Fisher:
 
@@ -155,7 +155,7 @@ The last three terms together form the residual of Day 1. They do not all behave
 
 Two groups of questions should be answered before the experiment begins.
 
-*Effect and variation in the system itself.* Above all: how large is the **effect** you expect? You need a number. It can come from the literature, from earlier experiments, or, clearly labelled as such, from an educated guess. You also need an estimate of how much the response varies between units. Without these two numbers, you cannot calculate how many samples are needed.
+*Effect and variation in the system itself.* Above all: how large is the effect you expect, and is an effect of that size biologically relevant? You need a number. For the power calculation later in this chapter, the number that matters is the smallest effect that would still be biologically relevant, not the effect you hope to find. It can come from the literature, from earlier experiments, or, clearly labelled as such, from an educated guess. You also need an estimate of how much the response varies between units. Without these two numbers, you cannot calculate how many samples are needed.
 
 *Variance and bias added by doing the experiment.* How much noise does the experiment itself add? Think about the distribution of the random measurement error; systematic error from sensor drift or from outside conditions such as the weather; the variation within each block of the design (which is later modelled as a random effect); and differences between laboratories or analysts. Then think separately about sources of **bias**. The most obvious source is the researcher. Someone who hopes for a particular result can, without noticing, steer the many small choices a study requires: which animals to include, which measurements to repeat, when to stop collecting data.
 
@@ -269,7 +269,7 @@ The four cases have one thing in common. Measurements that share a box, an anima
 
 ### Blocking
 
-Blocking is the fourth lever. It is not an alternative to randomisation but a restricted form of it. Units that share a known nuisance factor are grouped into blocks, and the treatments are randomised *within* each block. This guarantees that every treatment meets the nuisance factor equally often, where complete randomisation achieves this only on average. Within each block, randomisation still protects against everything you do not know. In the analysis the block then becomes a term in the model, so that its variation is removed from the residuals. So the question is not *whether* to randomise, but whether there is a nuisance factor you know in advance. If there is, randomise within blocks of it. If not, randomise over all units. In clinical trials the same idea is called *stratified randomisation*.
+Blocking is the fourth lever. It is not an alternative to randomisation but a restricted form of it. Units that share a known nuisance factor are grouped into blocks, and the treatments are randomised *within* each block. This guarantees that every treatment meets the nuisance factor equally often, where complete randomisation achieves this only on average. Within each block, randomisation still protects against everything you do not know. In the analysis the block then becomes a term in the model, so that its variation is removed from the residuals. '**So the question is not *whether* to randomise, but whether there is a nuisance factor you know in advance**. If there is, randomise within blocks of it. If not, randomise over all units. In clinical trials the same idea is called *stratified randomisation*.
 
 The shaded field shows all three options side by side.
 
