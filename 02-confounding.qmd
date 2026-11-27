@@ -86,6 +86,7 @@ The lesson is not that correlation is useless. It is that **a correlation coeffi
 The most important reason two variables correlate without one causing the other is a **confounder**: a third variable that influences both. This is SSU from the design chapter, now placed at the centre. The structure is worth drawing, because once it has been seen it will be recognised everywhere.
 
 ```{r confound-figure, fig.width = 8, fig.height = 3.4, fig.align='center'}
+#| code-fold: true
 plot(NA, xlim = c(0, 10), ylim = c(0, 5), axes = FALSE, xlab = "", ylab = "")
 
 node <- function(xc, yc, lab, sub, fill) {
@@ -122,7 +123,7 @@ The model a careless analyst would fit — `Y ~ X`, ignoring the confounder — 
 
 ```{r confound-naive}
 naive <- lm(Y ~ X)
-round(summary(naive)$coefficients, 4)
+summary(naive)
 ```
 
 The model reports a large, overwhelmingly "significant" effect of `X` on `Y`. It is entirely an artefact. `X` does nothing to `Y`; the association is the shadow of `Z` falling across both. A p-value of essentially zero here is not evidence of a real effect; it is evidence of how confidently a model will report a relationship that does not exist when a confounder is omitted.
@@ -199,6 +200,7 @@ The within-species slope is negative — the opposite sign, and close to the −
 A picture makes the reversal unmistakable. Each species forms its own downward-sloping cloud, but the clouds are stacked upward and to the right, so a single line through all the points slopes upward.
 
 ```{r simpson-plot, fig.width = 7.5, fig.height = 5, fig.align='center'}
+#| code-fold: true
 plot(resp ~ mass, data = d, col = c("#1D9E75", "#BA7517", "#7F77DD")[species],
      pch = 19, xlab = "Body mass", ylab = "Response",
      main = "Simpson's paradox: within-species down, pooled up")

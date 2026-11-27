@@ -568,6 +568,8 @@ Figure&nbsp;3.1: Two spurious correlations, from the collection by Tyler Vigen (
 <h2 class="anchored" data-anchor-id="confounding-the-common-cause">Confounding: the common cause</h2>
 <p>The most important reason two variables correlate without one causing the other is a <strong>confounder</strong>: a third variable that influences both. This is SSU from the design chapter, now placed at the centre. The structure is worth drawing, because once it has been seen it will be recognised everywhere.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">5</span>), <span class="at">axes =</span> <span class="cn">FALSE</span>, <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>node <span class="ot">&lt;-</span> <span class="cf">function</span>(xc, yc, lab, sub, fill) {</span>
@@ -586,6 +588,7 @@ Figure&nbsp;3.1: Two spurious correlations, from the collection by Tyler Vigen (
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(<span class="fl">3.6</span>, <span class="fl">1.3</span>, <span class="fl">6.4</span>, <span class="fl">1.3</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"grey55"</span>)        <span class="co"># X ~ Y</span></span>
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">5</span>, <span class="fl">1.72</span>, <span class="st">"observed correlation"</span>, <span class="at">cex =</span> <span class="fl">0.85</span>, <span class="at">col =</span> <span class="st">"grey40"</span>)</span>
 <span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">5</span>, <span class="fl">0.95</span>, <span class="st">"(not a direct cause)"</span>, <span class="at">cex =</span> <span class="fl">0.85</span>, <span class="at">col =</span> <span class="st">"grey40"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -606,11 +609,26 @@ Figure&nbsp;3.1: Two spurious correlations, from the collection by Tyler Vigen (
 <p>The model a careless analyst would fit — <code>Y ~ X</code>, ignoring the confounder — is now fitted and the coefficient for <code>X</code> read off.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>naive <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y <span class="sc">~</span> X)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">summary</span>(naive)<span class="sc">$</span>coefficients, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(naive)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>#&gt;             Estimate Std. Error t value Pr(&gt;|t|)
-#&gt; (Intercept)  -0.0486     0.1227 -0.3962   0.6924
-#&gt; X             1.2042     0.0569 21.1800   0.0000</code></pre>
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = Y ~ X)
+#&gt; 
+#&gt; Residuals:
+#&gt;     Min      1Q  Median      3Q     Max 
+#&gt; -4.5777 -1.0966  0.1251  1.0708  4.4363 
+#&gt; 
+#&gt; Coefficients:
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept) -0.04862    0.12273  -0.396    0.692    
+#&gt; X            1.20419    0.05686  21.180   &lt;2e-16 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 1.735 on 198 degrees of freedom
+#&gt; Multiple R-squared:  0.6938, Adjusted R-squared:  0.6922 
+#&gt; F-statistic: 448.6 on 1 and 198 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
 <p>The model reports a large, overwhelmingly “significant” effect of <code>X</code> on <code>Y</code>. It is entirely an artefact. <code>X</code> does nothing to <code>Y</code>; the association is the shadow of <code>Z</code> falling across both. A p-value of essentially zero here is not evidence of a real effect; it is evidence of how confidently a model will report a relationship that does not exist when a confounder is omitted.</p>
@@ -685,6 +703,8 @@ Figure&nbsp;3.1: Two spurious correlations, from the collection by Tyler Vigen (
 <p>The within-species slope is negative — the opposite sign, and close to the −1.2 that was simulated. Both numbers are correct; they answer different questions. The pooled slope answers “if a heavier animal is selected from this whole collection, is its response higher?” — and the answer is yes, because heavier animals tend to belong to the larger species, which have higher baselines. The within-species slope answers “if this animal were heavier <em>for its species</em>, would its response be higher?” — and the answer is no. The confounder has reversed the sign.</p>
 <p>A picture makes the reversal unmistakable. Each species forms its own downward-sloping cloud, but the clouds are stacked upward and to the right, so a single line through all the points slopes upward.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(resp <span class="sc">~</span> mass, <span class="at">data =</span> d, <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"#1D9E75"</span>, <span class="st">"#BA7517"</span>, <span class="st">"#7F77DD"</span>)[species],</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">xlab =</span> <span class="st">"Body mass"</span>, <span class="at">ylab =</span> <span class="st">"Response"</span>,</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Simpson's paradox: within-species down, pooled up"</span>)</span>
@@ -703,6 +723,7 @@ Figure&nbsp;3.1: Two spurious correlations, from the collection by Tyler Vigen (
 <span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"Species A"</span>, <span class="st">"Species B"</span>, <span class="st">"Species C"</span>, <span class="st">"Pooled (ignores species)"</span>),</span>
 <span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"#1D9E75"</span>, <span class="st">"#BA7517"</span>, <span class="st">"#7F77DD"</span>, <span class="st">"black"</span>),</span>
 <span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">lwd =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">3</span>), <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
